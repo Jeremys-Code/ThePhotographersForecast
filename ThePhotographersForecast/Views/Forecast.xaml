@@ -1,0 +1,121 @@
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:foldable="clr-namespace:Microsoft.Maui.Controls.Foldable;assembly=Microsoft.Maui.Controls.Foldable"
+             xmlns:vm="clr-namespace:ThePhotographersForecast.ViewModels"
+             xmlns:service="clr-namespace:ThePhotographersForecast.Services"
+             xmlns:sensors="clr-namespace:Microsoft.Maui.Devices.Sensors;assembly=Microsoft.Maui.Essentials"
+             x:Class="ThePhotographersForecast.Views.Forecast"
+             xmlns:model="clr-namespace:ThePhotographersForecast.Models"
+             BackgroundImageSource="backbay.jpg">
+    <ContentPage.Resources>
+        <service:TimeConverter x:Key="TimeConverter" />
+        <service:HttpClientConverter x:Key="HttpClientConverter" />
+    </ContentPage.Resources>
+    <VerticalStackLayout Padding="10">
+    <Label
+               Text="Your Location" 
+               
+               FontFamily="ManFont"
+               
+               HorizontalOptions="Center"
+               Margin="0,20,0,10"/>
+        <Label x:Name="LocationLabel" Text="{Binding PlaceName}" FontFamily="ManFont" HorizontalOptions="Center" Margin="0,0,0,10"/>
+        <Label x:Name="LocalTimeLabel" Text="{Binding CurrentTime, StringFormat='{0:F}'}" FontFamily="ManFont" HorizontalOptions="Center" Margin="0,0,0,10"/>
+
+        <!-- Main Forecast Display for the Selected Day -->
+        <CollectionView x:Name="DailyForecastView"  RemainingItemsThreshold="7" ItemsSource="{Binding DailyForecasts}" SelectedItem="{Binding SelectedDailyForecast}" SelectionMode="Single" SelectionChangedCommand="{Binding SelectionChangedCommand}">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="model:GfsDailyForecast">
+                    <Border Grid.Row="1"
+               BackgroundColor="#4CFFFFFF" 
+               Stroke="White"
+                StrokeShape="RoundRectangle"
+               StrokeThickness="12"
+               Padding="20"
+               Margin="10"
+               VerticalOptions="Center">
+                        <StackLayout>
+                            <!-- Assumes SelectDailyForecast has these properties -->
+                            <Label Text="{Binding Name}"
+                       
+                       FontAttributes="Bold"
+                       
+                       HorizontalOptions="Center"/>
+                            <Label Text="{Binding StartTime, StringFormat='from: {0:h tt}'}"
+                       
+                       
+                       HorizontalOptions="Center"/>
+
+                            <Label Text="{Binding EndTime, StringFormat='to {0:h tt}'}"
+                       
+                       
+                       HorizontalOptions="Center"/>
+                            <Image Source="{Binding DailyIcon, Converter={StaticResource HttpClientConverter}}"
+                       WidthRequest="100"
+                       HeightRequest="100"
+                       HorizontalOptions="Center"
+                       Margin="0,10"/>
+                            <Label Text="{Binding ChanceOfPrecipitation}"
+                       
+                       FontAttributes="Bold"
+                       
+                       HorizontalOptions="Center"/>
+                            <Label Text="{Binding WindSpeedDirection}"
+       
+       FontAttributes="Bold"
+       
+       HorizontalOptions="Center"/>
+
+                            <Label Text="{Binding DetailForecast}"
+                       
+                       
+                       HorizontalOptions="Center"
+                       Margin="0,0,0,10"/>
+                        </StackLayout>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+        
+
+        <!-- Carousel for navigating between days -->
+        <CarouselView Grid.Row="2"
+                      ItemsSource="{Binding SelectedPhotoDay.HourlyForecasts}"
+                      CurrentItem="{Binding SelectedHourlyForecast}"
+                      PeekAreaInsets="50" 
+                      VerticalOptions="End"
+                      Margin="0,10,0,20">
+            <CarouselView.ItemTemplate>
+                <DataTemplate x:DataType="model:GfsHourlyForecast">
+                    <Border BackgroundColor="#4CFFFFFF"
+                           Stroke="White"
+                           StrokeShape="RoundRectangle"
+                           StrokeThickness="12"
+                           Shadow="True"
+                           WidthRequest="120"
+                           HeightRequest="150"
+                           Padding="10"
+                           Margin="5">
+                        <StackLayout HorizontalOptions="Center" VerticalOptions="Center">
+                            <Label Text="{Binding ShortForecast}"
+                                   
+                                   FontAttributes="Bold"
+                                   HorizontalOptions="Center"/>
+                            <Image Source="{Binding HourlyIcon, Converter={StaticResource HttpClientConverter}}"
+                                   WidthRequest="50"
+                                   HeightRequest="50"
+                                   Margin="0,5"/>
+                            <Label Text="{Binding Temperature, StringFormat='Temp: {0}°F'}"
+                                   
+                                   FontAttributes="Bold"
+                                   
+                                   HorizontalOptions="Center"/>
+                        </StackLayout>
+                    </Border>
+                </DataTemplate>
+            </CarouselView.ItemTemplate>
+        </CarouselView>
+
+    </VerticalStackLayout>
+</ContentPage>

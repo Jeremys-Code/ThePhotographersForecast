@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   version="1.1"
+   width="80"
+   height="50"
+   viewBox="0 0 80 50"
+   id="svg6"
+   sodipodi:docname="lowtemp.svg"
+   inkscape:version="1.4.2 (f4327f4, 2025-05-13)"
+   inkscape:export-filename="lowtemp.svg"
+   inkscape:export-xdpi="300"
+   inkscape:export-ydpi="300"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="5.4625"
+     inkscape:cx="40"
+     inkscape:cy="21.967963"
+     inkscape:window-width="1600"
+     inkscape:window-height="930"
+     inkscape:window-x="-6"
+     inkscape:window-y="-6"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg6" />
+  <defs
+     id="defs2">
+    <linearGradient
+       x1="18.973665"
+       y1="-11.858541"
+       x2="82.219215"
+       y2="-11.858541"
+       id="drawio-svg-_gpqigT7uc66WiLbHlaT-gradient-light-dark_ffffff_var_--ge-dark-color_121212_-1-light-dark_99ccff_ff0000_-1-e-0"
+       gradientTransform="matrix(0,0.79056944,1.2649111,0,14.999999,-15)"
+       gradientUnits="userSpaceOnUse">
+      <stop
+         offset="0"
+         stop-color="#ffffff"
+         stop-opacity="1"
+         style="stop-color:#0957d2;stop-opacity:1;"
+         id="stop3" />
+      <stop
+         offset="1"
+         stop-color="#99CCFF"
+         stop-opacity="1"
+         style="stop-color:#48b8ff;stop-opacity:1;"
+         id="stop2" />
+    </linearGradient>
+  </defs>
+  <path
+     d="m 0,0 v 29.72 0 L 40,50 80,29.72 v 0 V 0 Z"
+     fill-opacity="0.9"
+     fill="url(#drawio-svg-_gpqigT7uc66WiLbHlaT-gradient-light-dark_ffffff_var_--ge-dark-color_121212_-1-light-dark_99ccff_ff0000_-1-e-0)"
+     stroke="none"
+     pointer-events="all"
+     style="fill:url(#drawio-svg-_gpqigT7uc66WiLbHlaT-gradient-light-dark_ffffff_var_--ge-dark-color_121212_-1-light-dark_99ccff_ff0000_-1-e-0);stroke-width:1"
+     id="path2" />
+</svg>

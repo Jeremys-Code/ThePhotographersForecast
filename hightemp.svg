@@ -1,0 +1,111 @@
+<svg
+   version="1.1"
+   width="80"
+   height="50"
+   viewBox="0 0 80 50"
+   id="svg6"
+   sodipodi:docname="hightemp.svg"
+   inkscape:version="1.4.2 (f4327f4, 2025-05-13)"
+   inkscape:export-filename="hightemp.png"
+   inkscape:export-xdpi="300"
+   inkscape:export-ydpi="300"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="2.365625"
+     inkscape:cx="54.531044"
+     inkscape:cy="112.02114"
+     inkscape:window-width="1600"
+     inkscape:window-height="930"
+     inkscape:window-x="-6"
+     inkscape:window-y="-6"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg6" />
+  <defs
+     id="defs2">
+    <linearGradient
+       id="linearGradient18"
+       inkscape:collect="always">
+      <stop
+         style="stop-color:#ff2a2a;stop-opacity:0.984073;"
+         offset="0"
+         id="stop18" />
+      <stop
+         style="stop-color:#ff2a2a;stop-opacity:0;"
+         offset="1"
+         id="stop19" />
+    </linearGradient>
+    <linearGradient
+       x1="18.973665"
+       y1="-11.858541"
+       x2="82.219215"
+       y2="-11.858541"
+       id="drawio-svg-_gpqigT7uc66WiLbHlaT-gradient-light-dark_ffffff_var_--ge-dark-color_121212_-1-light-dark_99ccff_ff0000_-1-e-0"
+       gradientTransform="matrix(0,-0.79056944,1.2649111,0,15,65.000002)"
+       gradientUnits="userSpaceOnUse">
+      <stop
+         offset="0"
+         stop-color="#ffffff"
+         stop-opacity="1"
+         style="stop-color:#ff0000;stop-opacity:0.3137255;"
+         id="stop3" />
+      <stop
+         offset="1"
+         stop-color="#99CCFF"
+         stop-opacity="1"
+         style="stop-color:#f30000;stop-opacity:1;"
+         id="stop2" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient18"
+       id="linearGradient19"
+       x1="113.71202"
+       y1="118.36196"
+       x2="141.1889"
+       y2="118.36196"
+       gradientUnits="userSpaceOnUse" />
+  </defs>
+  <path
+     d="m 0,50 v -29.72 0 L 40,0 80,20.28 v 0 V 50 Z"
+     fill-opacity="0.9"
+     fill="url(#drawio-svg-_gpqigT7uc66WiLbHlaT-gradient-light-dark_ffffff_var_--ge-dark-color_121212_-1-light-dark_99ccff_ff0000_-1-e-0)"
+     stroke="none"
+     pointer-events="all"
+     style="fill:url(#drawio-svg-_gpqigT7uc66WiLbHlaT-gradient-light-dark_ffffff_var_--ge-dark-color_121212_-1-light-dark_99ccff_ff0000_-1-e-0);stroke:none;stroke-width:1.94498;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1;paint-order:markers fill stroke"
+     id="path2"
+     inkscape:export-filename="high.png"
+     inkscape:export-xdpi="300"
+     inkscape:export-ydpi="300" />
+  <text
+     xml:space="preserve"
+     style="font-weight:300;font-size:13.3333px;line-height:0px;font-family:Jost;-inkscape-font-specification:'Jost Light';text-align:center;letter-spacing:0.5px;word-spacing:0px;writing-mode:lr-tb;direction:ltr;text-anchor:middle;display:inline;mix-blend-mode:overlay;fill:#ff2a2a;fill-opacity:1;fill-rule:evenodd;stroke:#ff2a2a;stroke-width:0;stroke-dasharray:none;stroke-opacity:0"
+     x="39.700001"
+     y="25.220173"
+     id="text4"><tspan
+       sodipodi:role="line"
+       id="tspan4"
+       x="39.950001"
+       y="25.220173"
+       style="text-align:center;letter-spacing:0.5px;text-anchor:middle;fill:#ff2a2a;fill-opacity:0.844648;stroke:#ff2a2a;stroke-width:0;stroke-dasharray:none;stroke-opacity:0"><tspan
+   style="fill:#ff2a2a;stroke:#ff2a2a;stroke-width:0;stroke-dasharray:none;stroke-opacity:0"
+   id="tspan18">High </tspan>Temp</tspan></text>
+  <rect
+     style="fill:url(#linearGradient19);fill-opacity:0.984073;fill-rule:evenodd;stroke:#ff2a2a;stroke-width:0;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:0;paint-order:markers fill stroke"
+     id="rect18"
+     width="27.476883"
+     height="38.044914"
+     x="113.71202"
+     y="99.3395" />
+</svg>

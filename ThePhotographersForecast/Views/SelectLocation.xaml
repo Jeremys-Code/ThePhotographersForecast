@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:vm="clr-namespace:ThePhotographersForecast.ViewModels"
+             xmlns:model="clr-namespace:ThePhotographersForecast.Models"
+             x:Class="ThePhotographersForecast.Views.SelectLocation"
+             x:DataType="vm:SelectLocationViewModel"
+             BackgroundImageSource="commonwealthmall.jpg"
+             Title="Select Location">
+    <VerticalStackLayout>
+        <Border Style="{StaticResource ContentBorder}" HorizontalOptions="Fill" ZIndex="99" VerticalOptions="Fill" IsVisible="{Binding IsWorking}">
+            <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
+                <Label Text="{Binding ProgressMessage}" HorizontalTextAlignment="Center"   Margin="4,20" LineHeight="2.5"  />
+                <Line Stroke="Black" StrokeThickness="12" StrokeLineCap="Round" Margin="10"/>
+                <ActivityIndicator x:Name="ProgressIndicator"  
+                           Grid.RowSpan="3"
+                           Grid.ColumnSpan="3"
+           WidthRequest="100" 
+           HeightRequest="100" 
+           IsEnabled="{Binding IsWorking}"
+           IsVisible="{Binding IsWorking}"
+           IsRunning="{Binding IsWorking}"
+           Style="{StaticResource WaitingSpinner}"
+           ZIndex="100"
+           VerticalOptions="Fill"
+           HorizontalOptions="Fill"/>
+            </VerticalStackLayout>
+        </Border>
+        <toolkit:DockLayout toolkit:DockLayout.DockPosition="Top" x:Name="Header">
+            <FlexLayout AlignItems="Start" Wrap="Wrap" AlignContent="SpaceAround" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" x:Name="ForecastPageHeader"  HorizontalOptions="Center" Margin="4,4,4,4">
+                <Label x:Name="Name" Text="The Photographer's Forecast" Margin="4,0,4,0"   FontFamily="ManFont" HorizontalTextAlignment="Center" HorizontalOptions="Center"/>
+                <Image Source="initials.png" WidthRequest="75" HeightRequest="75" HorizontalOptions="Center"/>
+                <VerticalStackLayout HorizontalOptions="Center" Margin="4,0,4,0">
+                    <Label Text="Your Photographer's Forecast"  HorizontalTextAlignment="Center"  FontFamily="ManFont" />
+                    
+                    <Line StrokeThickness="2"  StrokeLineCap="Round" HorizontalOptions="Center" X2="200" Stroke="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource White}}" />
+                    <Label Text="Current Time" FontFamily="ManFont"   HorizontalTextAlignment="Center"/>
+                    <FlexLayout Direction="Row" Wrap="Wrap" JustifyContent="Center">
+                        <Grid Margin="4,0,4,0">
+                            <Label Text="{Binding CurrentTime}" FlexLayout.Grow="2"   Margin="0,8,0,0" FontFamily="Jost"/>
+                            <Label Text="{Binding PlaceName}"  FlexLayout.Grow="2"  Margin="0,0,0,8" HorizontalTextAlignment="Center" FontFamily="Jost" LineBreakMode="WordWrap"/>
+                        </Grid>
+                    </FlexLayout>
+                </VerticalStackLayout>
+            </FlexLayout>
+        </toolkit:DockLayout>
+        <toolkit:DockLayout toolkit:DockLayout.DockPosition="Left" x:Name="LeftGutter">
+
+        </toolkit:DockLayout>
+        <toolkit:DockLayout toolkit:DockLayout.DockPosition="None"  x:Name="MainContent">
+            <FlexLayout  Direction="Row" AlignContent="SpaceAround" AlignItems="Start" Position="Relative" Wrap="Wrap" JustifyContent="SpaceAround">
+                <Label LineBreakMode="WordWrap"  FlexLayout.Basis="100%" Text="All we need is the location of the photo shoot. We have two options, you can either..."/>
+                <toolkit:Expander x:Name="GpsExpander" FlexLayout.Basis="50%" Direction="Down">
+                    <toolkit:Expander.Header>
+                        <Border Style="{StaticResource ContentBorder}" Padding="4">
+                            <Label Text="click here to use your device's current location" HorizontalTextAlignment="Center"/>
+                        </Border>
+                    </toolkit:Expander.Header>
+                    <Grid>
+                       <VerticalStackLayout Margin="4,0,4,0">
+                                <Label LineBreakMode="WordWrap"  HorizontalTextAlignment="Center" MaximumWidthRequest="300" Style="{StaticResource ContentBorderLabelStyle}" Text="If your outdoor photo shoot is in your current area, you have the option to use your device's current location."/>
+                                <Button Text="Device Location" Style="{StaticResource ButtonStyle}" Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SelectLocationViewModel}}, Path=UseGpsCommand}"/>
+                       </VerticalStackLayout>
+                    </Grid>
+                </toolkit:Expander>
+                <toolkit:Expander FlexLayout.Basis="50%" Direction="Down">
+                    <toolkit:Expander.Header>
+                        <Border Style="{StaticResource ContentBorder}" Padding="4">
+                            <Label Text="or you can enter the location."/>
+                        </Border>
+                    </toolkit:Expander.Header>
+                    <VerticalStackLayout FlexLayout.Basis="50%">
+                        <Label LineBreakMode="WordWrap" VerticalTextAlignment="Center" HorizontalTextAlignment="Start" Text="Start entering the city name. 
+                                   After entering fourth character, you will see a list of suggested location. If your see the location you want, select it from the list. If you 
+                                   don't see the location at first, keep typing, there are a lot of PieTown's out there."/>
+                        <Entry x:Name="InputLocation" Placeholder="Please enter the city and state..." TextChanged="InputLocation_TextChanged"/>
+                        <CollectionView ZIndex="99" Background="{StaticResource DayTwilight}" IsVisible="{Binding ShowSuggestions}" ItemsSource="{Binding Suggestions}" SelectionMode="Single" SelectedItem="{Binding SelectedLocation}">
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate>
+                                    <Label Text="{Binding DisplayName}" x:DataType="model:PhotoLocation" HorizontalTextAlignment="Start" LineBreakMode="WordWrap"  FontFamily="Jost">
+                                        <Label.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SelectLocationViewModel}}, Path=SuggestionTappedCommand}" CommandParameter="{Binding Source={RelativeSource AncestorType={x:Type vm:SelectLocationViewModel}}, Path=SelectedLocation}" />
+                                        </Label.GestureRecognizers>
+                                    </Label>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                    </VerticalStackLayout>
+                </toolkit:Expander>
+            </FlexLayout>
+        </toolkit:DockLayout>
+
+        <toolkit:DockLayout toolkit:DockLayout.DockPosition="Right" FlexLayout.Basis="10%" x:Name="RightGutter">
+
+        </toolkit:DockLayout>
+        <toolkit:DockLayout toolkit:DockLayout.DockPosition="Bottom" x:Name="Footer" MaximumHeightRequest="40">
+            <Label Text=" Values"/>
+            <HorizontalStackLayout>
+                <Label Text="Latitude: "/>
+                <Label Text="{Binding Latitude}"/>
+            </HorizontalStackLayout>
+            <HorizontalStackLayout>
+                <Label Text="Longitude: "/>
+                <Label Text="{Binding Longitude}"/>
+            </HorizontalStackLayout>
+        </toolkit:DockLayout>
+    </VerticalStackLayout>
+</ContentPage>
