@@ -7,54 +7,57 @@ namespace ThePhotographersForecast.ViewModels
 {
     public partial class ForecastViewModel : ObservableObject
     {
-        //public event PropertyChangedEventHandler? PropertyChanged;
-        //protected void OnPropertyChanged(string name) =>
-        //    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         [ObservableProperty]
-        private bool isWorking;
+        public partial bool IsWorking { get; set; } = false;
         [ObservableProperty]
-        private PhotoDayModel photoDays = new PhotoDayModel();
+        public partial PhotoDay[] PhotoDays { get; set; } = Array.Empty<PhotoDay>();
         [ObservableProperty]
-        private PhotoDay selectedPhotoDay = new PhotoDay();
+        public partial PhotoDay SelectedPhotoDay { get; set; } = new PhotoDay();
         [ObservableProperty]
-        private PhotoHour[] photoHours;
+        public partial PhotoHour[] PhotoHours { get; set; } = Array.Empty<PhotoHour>();
         [ObservableProperty]
-        private PhotoHour selectedPhotoHour;
+        public partial PhotoHour SelectedPhotoHour { get; set; } = new PhotoHour();
         [ObservableProperty]
-        private GfsDailyForecast[] dailyForecasts;
+        public partial GfsDailyForecast[] DailyForecasts { get; set; } = Array.Empty<GfsDailyForecast>();
         [ObservableProperty]
-        private GfsDailyForecast selectedDailyForecast;
+        public partial GfsDailyForecast SelectedDailyForecast { get; set; } = new GfsDailyForecast();
         [ObservableProperty]
-        private GfsHourlyForecast[] hourlyForecasts;
-        [ObservableProperty]
-        private GfsHourlyForecast selectedHourlyForecast;
-        [ObservableProperty]
-        private string placeName;
-        [ObservableProperty]
-        private System.Timers.Timer _timer;
-        [ObservableProperty]
-        private string currentTime;
+        public partial GfsHourlyForecast[] HourlyForecasts { get; set; } = Array.Empty<GfsHourlyForecast>();
 
-        private readonly SelectLocationViewModel _slvm;
-        public ForecastViewModel(SelectLocationViewModel slvm)
+        [ObservableProperty]
+        public partial GfsHourlyForecast SelectedHourlyForecast { get; set; } = new GfsHourlyForecast();
+        [ObservableProperty]
+        public partial string PlaceName { get; set; } = string.Empty;
+        [ObservableProperty]
+        public partial System.Timers.Timer _timer { get; set; }
+        [ObservableProperty]
+        public partial string CurrentTime { get; set; } = string.Empty;
+
+        private SelectLocationViewModel _slvm;
+        private PhotoLocation _location;
+        public ForecastViewModel(SelectLocationViewModel slvm, PhotoLocation location)
         {
             _slvm = slvm;
-            PhotoDays = new PhotoDayModel();
-            PhotoDays = _slvm.PhotoDays;
-            SelectedPhotoDay = PhotoDays.PhotoDays[0];
+            _location = location;
+            PhotoDays = new PhotoDay[_slvm.PhotoDays.Length];
+            for (int a = 0; a < _slvm.PhotoDays.Length; a++)
+            {
+                PhotoDays[a] = _slvm.PhotoDays[a];
+            }
+            SelectedPhotoDay = PhotoDays.First();
             HourlyForecasts = SelectedPhotoDay.HourlyForecasts;
-            SelectedHourlyForecast = SelectedPhotoDay.HourlyForecasts[0];
+            SelectedHourlyForecast = SelectedPhotoDay.HourlyForecasts.First();
             DailyForecasts = SelectedPhotoDay.DailyForecasts;
-            SelectedDailyForecast = SelectedPhotoDay.DailyForecasts[0];
+            SelectedDailyForecast = SelectedPhotoDay.DailyForecasts.First();
 
             IsWorking = false;
             PlaceName = ServiceHelper.GetService<Models.PhotoLocation>().DisplayName;
 
-            currentTime = DateTime.UtcNow.AddHours(ServiceHelper.GetService<Models.PhotoLocation>().TimeZoneOffset).ToString("F");
+            CurrentTime = DateTime.UtcNow.AddHours(_location.TimeZoneOffset).ToString("F");
             _timer = new System.Timers.Timer(1000); // 1 second interval
             _timer.Elapsed += OnTimerElapsed;
             _timer.Start();
-
+            _location = location;
         }
 
         private bool IsAvailable()

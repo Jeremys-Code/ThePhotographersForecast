@@ -9,7 +9,7 @@ namespace ThePhotographersForecast.Services
         public static async Task<T?> GetJsonDataAsync<T>(string url)
         {
             var request = new HttpRequestMessage(HttpMethod.Get, url);
-            request.Headers.UserAgent.Add(new System.Net.Http.Headers.ProductInfoHeaderValue("The_Photographers_Forecast", "1.0"));
+            request.Headers.UserAgent.Add(new System.Net.Http.Headers.ProductInfoHeaderValue("ThePhotographersForecast", "1.0"));
             await Task.Delay(800);
             var response = await _http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
             if (!response.IsSuccessStatusCode)

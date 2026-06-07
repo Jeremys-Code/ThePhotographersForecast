@@ -72,11 +72,14 @@
 	  <Compile Remove="Models\ForecastEventModel.cs" />
 	  <Compile Remove="Services\INavigationService.cs" />
 	  <Compile Remove="Validations\WeatherPayloadValidation.cs" />
+	  <Compile Remove="ViewModels\CalendarViewModel.cs" />
 	  <Compile Remove="ViewModels\CombineViewModels.cs" />
+	  <Compile Remove="Views\Calendar.xaml.cs" />
 	  <Compile Remove="Views\TimeLine.xaml.cs" />
 	</ItemGroup>
 
 	<ItemGroup>
+	  <MauiXaml Remove="Views\Calendar.xaml" />
 	  <MauiXaml Remove="Views\TimeLine.xaml" />
 	</ItemGroup>
 
@@ -90,30 +93,16 @@
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <Compile Update="Views\SelectLocation.xaml.cs">
-	    <DependentUpon>SelectLocation.xaml</DependentUpon>
-	  </Compile>
-		<Compile Update="Views\Calendar.xaml.cs">
-	    <DependentUpon>Calendar.xaml</DependentUpon>
-	  </Compile>
-	  <Compile Update="Views\Forecast.xaml.cs">
-	    <DependentUpon>Forecast.xaml</DependentUpon>
-	  </Compile>
-		<Compile Update="Views\PhotoTimeTrack.xaml.cs">
-	    <DependentUpon>PhotoTimeTrack.xaml</DependentUpon>
-	  </Compile>
 
-	</ItemGroup>
 
 	<ItemGroup>
+	  <MauiXaml Update="MainPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Views\PhotoTimeTrack.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Views\SelectLocation.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </MauiXaml>
-		<MauiXaml Update="Views\Calendar.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Views\Forecast.xaml">

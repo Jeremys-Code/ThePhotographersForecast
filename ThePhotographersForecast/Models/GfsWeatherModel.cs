@@ -117,6 +117,12 @@ namespace ThePhotographersForecast.Models
         private string shortForecast;
         [ObservableProperty]
         private string detailForecast;
+        [ObservableProperty]
+        private bool isHigh = false;
+        [ObservableProperty]
+        private bool isLow = false;
+        [ObservableProperty]
+        private string hourlyIconPath;
 
     }
 }

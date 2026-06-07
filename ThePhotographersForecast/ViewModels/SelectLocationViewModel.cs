@@ -9,68 +9,53 @@ namespace ThePhotographersForecast.ViewModels
     public partial class SelectLocationViewModel : ObservableObject
     {
         [ObservableProperty]
-        private GfsWeatherModel gfsData = new GfsWeatherModel();
+        public partial GfsWeatherModel GfsData { get; set; } = new GfsWeatherModel();
         [ObservableProperty]
-        private EventModel eventsModel = new EventModel();
+        public partial EventModel EventsModel { get; set; } = new EventModel();
         [ObservableProperty]
-        private double latitude;
+        public partial List<PhotoLocation> Suggestions { get; set; } = new List<PhotoLocation>();
         [ObservableProperty]
-        private double longitude;
+        public partial bool ShowSuggestions { get; set; } = false;
         [ObservableProperty]
-        private string location = string.Empty;
+        public partial bool IsWorking { get; set; } = false;
         [ObservableProperty]
-        private List<PhotoLocation> suggestions = new List<PhotoLocation>();
+        public partial string ProgressMessage { get; set; } = string.Empty;
         [ObservableProperty]
-        private bool showSuggestions = false;
+        public partial int ForecastCount { get; set; } = 0;
         [ObservableProperty]
-        private bool isWorking = false;
+        public partial int HourlyCount { get; set; } = 0;
         [ObservableProperty]
-        private string progressMessage = string.Empty;
+        public partial int EventCount { get; set; } = 0;
         [ObservableProperty]
-        private int forecastCount;
+        public partial DateTime PhotoStartDate { get; set; }
         [ObservableProperty]
-        private int hourlyCount;
+        public partial DateTime PhotoEndDate { get; set; }
         [ObservableProperty]
-        private int eventCount;
+        public partial int NumberOfPhotoDays { get; set; }
         [ObservableProperty]
-        private PhotoLocation selectedLocation;
+        public partial PhotoDay[] PhotoDays { get; set; } = Array.Empty<PhotoDay>();
         [ObservableProperty]
-        private DateTime photoStartDate;
-        [ObservableProperty]
-        private DateTime photoEndDate;
-        [ObservableProperty]
-        private int numberOfPhotoDays;
-        [ObservableProperty]
-        private PhotoDayModel photoDays = new PhotoDayModel();
-        [ObservableProperty]
-        private bool isComplete = false;
-        [ObservableProperty]
-        private ObservableCollection<DaySchedule> schedules = new ObservableCollection<DaySchedule>();
-        [ObservableProperty]
-        private ObservableCollection<DateTime> calendarDays = new ObservableCollection<DateTime>();
+        public partial bool IsComplete { get; set; } = false;
 
 
-        private HttpClient _client;
-        private readonly GetGfsData _gfs;
-        private readonly GetTimesOfDayData _gtodd;
-        private readonly GetPhotoDay _gpd;
-        private readonly GetDaySchedules _schedules;
+        private GetGfsData _gfs;
+        private GetTimesOfDayData _gtodd;
+        private GetPhotoDay _gpd;
+        private PhotoLocation _location;
         public Command<PhotoLocation> SuggestionTappedCommand { get; }
         public Command UseGpsCommand { get; }
 
-        //public event PropertyChangedEventHandler? PropertyChanged;
-        //protected void OnPropertyChanged(string name) =>
-        //    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-
-        public SelectLocationViewModel(GetGfsData gfs, GetTimesOfDayData gtodd, GetPhotoDay gpd, GetDaySchedules schedules)
+        public SelectLocationViewModel(GetGfsData gfs, GetTimesOfDayData gtodd, GetPhotoDay gpd, PhotoLocation location)
         {
+
             _gfs = gfs;
             _gtodd = gtodd;
             _gpd = gpd;
-            _schedules = schedules;
-            _client = new HttpClient();
+            _location = location;
+
             SuggestionTappedCommand = new Command<PhotoLocation>(async (parameter) => await SuggestionTapped(parameter));
             UseGpsCommand = new Command(async () => await UseGps());
+
         }
 
         partial void OnForecastCountChanging(int value)
@@ -86,7 +71,7 @@ namespace ThePhotographersForecast.ViewModels
         {
             ProgressMessage = $"Receiving {value} day events.";
         }
-
+        // Call Weather Service
         private async Task<GfsWeatherModel> GetWeatherDataAsync(double latitude, double longitude)
         {
             try
@@ -103,8 +88,9 @@ namespace ThePhotographersForecast.ViewModels
             {
                 Debug.WriteLine("Error getting the weather data. Exception: " + ex.Message);
             }
-            return null;
+            return new GfsWeatherModel();
         }
+        // Call Event Service
         private async Task<EventModel> GetEventDataAsync(double latitude, double longitude)
         {
 
@@ -121,94 +107,103 @@ namespace ThePhotographersForecast.ViewModels
             {
                 ProgressMessage = $"Error getting event data. Please try again. {ex}";
             }
-            return null;
+            return new EventModel();
         }
-
-        private async Task GoToCalendarAsync()
+        // Organize data into date buckets
+        private async Task<PhotoDay[]> CreatePhotoDaysAsync()
         {
             if (GfsData != null && ForecastCount > 0 && EventCount > 0 && HourlyCount > 0 && GfsData.DailyForecasts.Length == ForecastCount && EventsModel.EventTimes.Count == EventCount && GfsData.HourlyForecasts.Length == HourlyCount)
             {
-                List<DateTime> dates = new List<DateTime>();
+                List<DateTime> startDates = new List<DateTime>();
                 var dailyStartDate = GfsData.DailyForecasts.Min(s => s.StartTime);
                 var hourlyStartDate = GfsData.HourlyForecasts.Min(n => n.StartTime);
                 var eventStartDate = EventsModel.EventTimes.Min(e => e.WeatherHour);
-                dates.AddRange(dailyStartDate, hourlyStartDate, eventStartDate);
-                PhotoStartDate = dates.Max();
-                List<DateTime> dates2 = new List<DateTime>();
-                ;
+                startDates.AddRange(dailyStartDate, hourlyStartDate, eventStartDate);
+                PhotoStartDate = startDates.Max();
+
+                List<DateTime> endDates = new List<DateTime>();
                 var dailyEndDate = GfsData.DailyForecasts.Max(m => m.EndTime);
                 var hourlyEndDate = GfsData.HourlyForecasts.Max(m => m.EndTime);
                 var eventEndDate = EventsModel.EventTimes.Max(e => e.WeatherHour);
-                dates2.AddRange(dailyEndDate, hourlyEndDate, eventEndDate);
-                PhotoEndDate = dates2.Min();
+                endDates.AddRange(dailyEndDate, hourlyEndDate, eventEndDate);
+                PhotoEndDate = endDates.Min();
 
                 NumberOfPhotoDays = PhotoEndDate.Date.Subtract(PhotoStartDate.Date).Days + 1;
+
                 try
                 {
-                    var results = await GetPhotoDay.CreatePhotoDayAsync();
-                    if (results != null)
+                    var results = await _gpd.BuildPhotoDayAsync();
+                    if (results.Length == NumberOfPhotoDays)
                     {
-                        PhotoDays = results;
-                        if (PhotoDays.PhotoDays.Length > 0 && PhotoDays.PhotoDays.Length == NumberOfPhotoDays)
-                        {
-                            ProgressMessage = "All data received.";
-                            IsWorking = false;
-                            await Shell.Current.DisplayAlertAsync("Success", "All data received. You can now view the timeline.", "OK");
-
-                        }
-
-                        var data = _schedules.GetSchedules();
-                        if (data != null)
-                        {
-                            CalendarDays = new ObservableCollection<DateTime>(data.Select(s => s.PhotoDate).ToArray());
-                            var sorted = data.OrderBy(x => x.PhotoDate).ToArray();
-                            Schedules = new ObservableCollection<DaySchedule>(sorted);
-                            if (Schedules.Count > 0)
-                            {
-                                await Shell.Current.DisplayAlertAsync("PhotoSchedule", "Finished.", "OK");
-                            }
-                        }
+                        return results;
+                    }
+                    else
+                    {
+                        throw new NullReferenceException("No results returned from Get Photo Days.");
                     }
                 }
-                catch (Exception ex)
+                catch (ArithmeticException ae)
                 {
-                    ProgressMessage = $"Error creating photo days. Please try again. {ex}";
+                    Debug.WriteLine(ae.Message);
                 }
-                await NavigationService.NavigateToPhotoTimeTrackAsync();
-                return;
+                catch (NullReferenceException nr)
+                {
+                    Debug.WriteLine(nr.Message);
+                }
             }
-            else
+
+            var emptyPhotoDay = new PhotoDay
             {
-                ProgressMessage = "Error receiving data. Please try again.";
+                IsEmpty = true
+            };
+
+            var emptyPhotoDays = new PhotoDay[0];
+            emptyPhotoDays[0] = emptyPhotoDay;
+            return emptyPhotoDays;
+
+        }
+
+        private async Task<bool> GetDataAsync(double latitude, double longitude)
+        {
+            var weatherData = await GetWeatherDataAsync(latitude, longitude);
+            if (weatherData != null)
+            {
+                GfsData = weatherData;
             }
+            var eventData = await GetEventDataAsync(latitude, longitude);
+            if (eventData != null)
+            {
+                EventsModel = eventData;
+            }
+            var daysResult = await CreatePhotoDaysAsync();
+            if (daysResult != null && daysResult.Count() > 0)
+            {
+                PhotoDays = daysResult.ToArray();
+
+                if (daysResult.Length > 0)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         private async Task SuggestionTapped(PhotoLocation parameter)
         {
-            SelectedLocation = parameter;
+            _location = parameter;
             IsWorking = true;
             ProgressMessage = "Getting location info...";
 
             Suggestions.Clear();
             ShowSuggestions = false;
-            ServiceHelper.GetService<PhotoLocation>().Latitude = parameter.Latitude;
-            ServiceHelper.GetService<PhotoLocation>().Longitude = parameter.Longitude;
-            var weatherData = await GetWeatherDataAsync(parameter.Latitude, parameter.Longitude);
-            if (weatherData != null)
+            IsComplete = await GetDataAsync(_location.Latitude, _location.Longitude);
+            if (IsComplete)
             {
-                GfsData = weatherData;
+                await NavigationService.NavigateToPhotoTimeTrackAsync();
+                return;
             }
-            var eventData = await GetEventDataAsync(parameter.Latitude, parameter.Longitude);
-            if (eventData != null)
-            {
-                EventsModel = eventData;
-            }
-
-            await GoToCalendarAsync();
             return;
         }
-
-
 
         private async Task UseGps()
         {
@@ -218,26 +213,16 @@ namespace ThePhotographersForecast.ViewModels
             var location = await CurrentLocation.VerifyPermissionAsync();
             if (location != null)
             {
-                ServiceHelper.GetService<PhotoLocation>().Latitude = location.Value.lat;
-                ServiceHelper.GetService<PhotoLocation>().Longitude = location.Value.lon;
-                var weatherData = await GetWeatherDataAsync(location.Value.lat, location.Value.lon);
-                if (weatherData != null)
-                {
-                    GfsData = weatherData;
-                }
-                var eventData = await GetEventDataAsync(location.Value.lat, location.Value.lon);
-                if (eventData != null)
-                {
-                    EventsModel = eventData;
-                }
-
-                await GoToCalendarAsync();
-                return;
+                _location.Latitude = location.Value.lat;
+                _location.Longitude = location.Value.lon;
             }
-            else
+            IsComplete = await GetDataAsync(_location.Latitude, _location.Longitude);
+            if (IsComplete)
             {
+                await NavigationService.NavigateToPhotoTimeTrackAsync();
                 return;
             }
+            return;
         }
     }
 }

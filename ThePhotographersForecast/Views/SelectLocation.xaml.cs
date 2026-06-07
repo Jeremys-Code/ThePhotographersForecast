@@ -1,4 +1,6 @@
 using ThePhotographersForecast.Data;
+using ThePhotographersForecast.Models;
+using ThePhotographersForecast.Services;
 using ThePhotographersForecast.ViewModels;
 
 namespace ThePhotographersForecast.Views;
@@ -38,21 +40,10 @@ public partial class SelectLocation : ContentPage
             string apiString = String.Concat($@"https://geocoding-api.open-meteo.com/v1/search?name=", input, @"&count=10&language=en&format=json&countryCode=US");
             var response = await Services.JsonDataService.GetJsonDataAsync<GeocodeResult.Rootobject>(apiString);
 
-            //var request = new HttpRequestMessage(HttpMethod.Get, apiString);
-            //request.Headers.UserAgent.Add(new System.Net.Http.Headers.ProductInfoHeaderValue(@"airmail@bostonfromabove.com", "4.2"));
-            //var response = await _ccs.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
-            //if (!response.IsSuccessStatusCode)
-            //{
-            //    return;
-            //}
-
-            //  data = await response.Content.ReadFromJsonAsync<Data.GeocodeResult.Rootobject>();
-            //}
             _vm.Suggestions.Clear();
             _vm.ShowSuggestions = false;
             if (response != null)
             {
-
                 for (int i = 0; i < response.results.Length; i++)
                 {
                     var result = response.results[i];
@@ -75,7 +66,6 @@ public partial class SelectLocation : ContentPage
     }
     private void SelectedLocation()
     {
-
-        InputLocation.Text = "";
+        InputLocation.Text = ServiceHelper.GetService<PhotoLocation>().DisplayName;
     }
 }

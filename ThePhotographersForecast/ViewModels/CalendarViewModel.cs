@@ -28,7 +28,7 @@ namespace ThePhotographersForecast.ViewModels
         [ObservableProperty]
         private string currentTime;
         [ObservableProperty]
-        private PhotoDayModel photoDays;
+        private PhotoDay[] photoDays;
         [ObservableProperty]
         private GfsDailyForecast[] selectedDayDailyForecasts;
         [ObservableProperty]
@@ -81,17 +81,17 @@ namespace ThePhotographersForecast.ViewModels
             }
             if (_slvm.GfsData.DailyForecasts.Length == _slvm.ForecastCount &&
                _slvm.EventsModel.EventTimes.Count == _slvm.EventCount &&
-               _slvm.PhotoDays.PhotoDays.Length == _slvm.NumberOfPhotoDays)
+               _slvm.PhotoDays.Length == _slvm.NumberOfPhotoDays)
             {
 
                 CurrentDate = _slvm.PhotoStartDate;
-                if (_slvm.PhotoDays.PhotoDays.Length == PhotoDays.PhotoDays.Length)
+                if (_slvm.PhotoDays.Length == PhotoDays.Length)
                 {
                     IsWorking = true;
                 }
-                int index = _slvm.PhotoDays.PhotoDays.Length;
+                int index = _slvm.PhotoDays.Length;
                 Days = new PhotoDay[index];
-                _slvm.PhotoDays.PhotoDays.CopyTo(Days);
+                _slvm.PhotoDays.CopyTo(Days);
 
                 SelectedDay = Days[0];
                 SelectedDayDailyForecasts = SelectedDay.DailyForecasts;

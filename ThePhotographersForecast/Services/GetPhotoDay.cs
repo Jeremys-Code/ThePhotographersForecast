@@ -1,37 +1,43 @@
 ﻿using CommunityToolkit.Maui.Core.Extensions;
+using CommunityToolkit.Mvvm.ComponentModel;
 using ThePhotographersForecast.Models;
 using ThePhotographersForecast.ViewModels;
 
 namespace ThePhotographersForecast.Services
 {
-    public partial class GetPhotoDay
+    public partial class GetPhotoDay : ObservableObject
     {
-        public static async Task<PhotoDayModel> CreatePhotoDayAsync()
+        [ObservableProperty]
+        private PhotoDay[] photoDays;
+        public GetPhotoDay()
         {
-            PhotoDayModel photoDaysModel = new PhotoDayModel();
+            var nbrDays = ServiceHelper.GetService<SelectLocationViewModel>().NumberOfPhotoDays;
+            if (nbrDays == 0)
+            {
+                var day = new PhotoDay { IsEmpty = true };
+                PhotoDays[0] = day;
+            }
+
+            PhotoDays = new PhotoDay[nbrDays];
+        }
+        public async Task<PhotoDay[]> BuildPhotoDayAsync()
+        {
+
             if (ServiceHelper.GetService<SelectLocationViewModel>().GfsData.DailyForecasts.Length == ServiceHelper.GetService<SelectLocationViewModel>().ForecastCount && ServiceHelper.GetService<SelectLocationViewModel>().EventsModel.EventTimes.Count == ServiceHelper.GetService<SelectLocationViewModel>().EventCount)
             {
 
-                if (ServiceHelper.GetService<CalendarViewModel>().IsWorking == false)
-                {
-                    MainThread.BeginInvokeOnMainThread(() =>
-                    {
-                        ServiceHelper.GetService<CalendarViewModel>().IsWorking = true;
-                    });
-                }
+                //if (ServiceHelper.GetService<CalendarViewModel>().IsWorking == false)
+                //{
+                //    MainThread.BeginInvokeOnMainThread(() =>
+                //    {
+                //        ServiceHelper.GetService<CalendarViewModel>().IsWorking = true;
+                //    });
+                //}
 
 
                 var start = ServiceHelper.GetService<SelectLocationViewModel>().PhotoStartDate;
-                var nbrDays = ServiceHelper.GetService<SelectLocationViewModel>().NumberOfPhotoDays;
-                if (nbrDays == 0)
-                {
 
-                    await AppShell.Current.DisplayAlertAsync("Error", $"There are no photo days.", "OK");
-                    return photoDaysModel;
-                }
-                photoDaysModel = new PhotoDayModel();
-                photoDaysModel.PhotoDays = new PhotoDay[nbrDays];
-                await Parallel.ForAsync(0, nbrDays, async (d, cancellationToken) =>
+                await Parallel.ForAsync(0, PhotoDays.Length, async (d, cancellationToken) =>
                 {
                     var photoDate = start.AddDays(d);
 
@@ -44,10 +50,18 @@ namespace ThePhotographersForecast.Services
                     photoDay.IsFlipped = false;
                     var dailyForecast = ServiceHelper.GetService<SelectLocationViewModel>().GfsData.DailyForecasts.Where(w => w.StartTime.Date == start.Date).OrderBy(d => d.StartTime).ToArray();
                     photoDay.DailyForecasts = new GfsDailyForecast[dailyForecast.Length];
-                    dailyForecast.CopyTo(photoDay.DailyForecasts);
+                    for (int a = 0; a < dailyForecast.Length; a++)
+                    {
+                        photoDay.DailyForecasts[a] = dailyForecast[a];
+                    }
+
+
                     var hourlyForecast = ServiceHelper.GetService<SelectLocationViewModel>().GfsData.HourlyForecasts.Where(w => w.StartTime.Date == start.Date).OrderBy(d => d.StartTime).ToArray();
                     photoDay.HourlyForecasts = new GfsHourlyForecast[hourlyForecast.Length];
-                    hourlyForecast.CopyTo(photoDay.HourlyForecasts);
+                    for (int b = 0; b < hourlyForecast.Length; b++)
+                    {
+                        photoDay.HourlyForecasts[b] = hourlyForecast[b];
+                    }
 
                     //photoModel.PhotoDays[d]. = new GfsDailyForecast[dailyForecast.Length];
                     //Array.Copy(dailyForecast, photoModel.PhotoDays[d].DailyForecasts, dailyForecast.Length);
@@ -70,21 +84,23 @@ namespace ThePhotographersForecast.Services
                              Events = eventData.Where(e => e.WeatherHour == hourlyForecasts[h].StartTime).OrderBy(x => x.OrderTime).ToObservableCollection()
                          };
                      });
-                    photoDaysModel.PhotoDays[d] = photoDay;
+                    PhotoDays[d] = photoDay;
                 });
 
 
-                MainThread.BeginInvokeOnMainThread(() =>
-                {
-                    ServiceHelper.GetService<CalendarViewModel>().IsWorking = false;
-                });
+                //MainThread.BeginInvokeOnMainThread(() =>
+                //{
+                //    ServiceHelper.GetService<CalendarViewModel>().IsWorking = false;
+                //});
 
-                return photoDaysModel;
+                return PhotoDays;
 
             }
             else
             {
-                return new PhotoDayModel();
+                var day = new PhotoDay { IsEmpty = true };
+                PhotoDays[0] = day;
+                return PhotoDays;
             }
 
             string FromTimesOfDay(int hour)

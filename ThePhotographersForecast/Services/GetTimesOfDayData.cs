@@ -1,5 +1,4 @@
-﻿using CommunityToolkit.Maui.Core.Extensions;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Net.Http.Json;
 using ThePhotographersForecast.Data;
@@ -10,20 +9,15 @@ namespace ThePhotographersForecast.Services
 {
     public class GetTimesOfDayData
     {
-        private readonly IHttpClientFactory _factory;
-        private TimeData.Rootobject json;
+        private readonly HttpClient _client;
         public GetTimesOfDayData(IHttpClientFactory factory)
         {
-            _factory = factory ?? throw new ArgumentNullException(nameof(factory));
-            json = new TimeData.Rootobject();
+            _client = factory.CreateClient("photographer") ?? new HttpClient();
+
         }
         public async Task<EventModel> GetDaysAsync(double latitude, double longitude)
         {
-            var _client = _factory.CreateClient("eventsApi");
-            DateTime TruncateDt(DateTime dt)
-            {
-                return new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, 0, 0);
-            }
+            var json = new TimeData.Rootobject();
             EventModel eventModel = new();
             List<EventTime> timesOfTheDayList = new List<EventTime>();
             var startDate = DateTime.Now.ToString("yyyy-MM-dd");
@@ -32,7 +26,8 @@ namespace ThePhotographersForecast.Services
             try
             {
                 var request = new HttpRequestMessage(HttpMethod.Get, apiEventString);
-                request.Headers.UserAgent.Add(new System.Net.Http.Headers.ProductInfoHeaderValue("PfApp", "3.0"));
+                //request.Headers.UserAgent.Add(new System.Net.Http.Headers.ProductInfoHeaderValue("PfApp", "3.0"));
+                _client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
                 var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
                 if (response.IsSuccessStatusCode)
                 {
@@ -233,6 +228,11 @@ namespace ThePhotographersForecast.Services
             ServiceHelper.GetService<SelectLocationViewModel>().EventCount = eventModel.EventTimes.Count;
             ServiceHelper.GetService<SelectLocationViewModel>().EventsModel = eventModel;
             return eventModel;
+        }
+
+        private static DateTime TruncateDt(DateTime dt)
+        {
+            return new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, 0, 0);
         }
     }
 

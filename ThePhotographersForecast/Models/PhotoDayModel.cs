@@ -9,14 +9,13 @@ namespace ThePhotographersForecast.Models
         [ObservableProperty]
         private PhotoDay[] photoDays;
     }
-
+    // A PhotoDay organizes daily and hourly weather with event data by date.
     public partial class PhotoDay : ObservableObject
     {
         [ObservableProperty]
         private int day;
         [ObservableProperty]
         private DateTime date;
-
         [ObservableProperty]
         private bool _isToday;
         [ObservableProperty]

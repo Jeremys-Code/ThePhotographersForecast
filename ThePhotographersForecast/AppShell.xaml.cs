@@ -1,19 +1,20 @@
-﻿using ThePhotographersForecast.Services;
+﻿using ThePhotographersForecast.Views;
 
 namespace ThePhotographersForecast
 {
     public partial class AppShell : Shell
     {
-        // private readonly INavigationService _navigationService;
+
         public AppShell()
         {
             InitializeComponent();
-            //   _navigationService.NavigateToSelectLocationAsync();
+
         }
-        //protected override async void OnAppearing()
-        //{
-        //    base.OnAppearing();
-        //    await _navigationService.NavigateToSelectLocationAsync();
-        //}
+
+        protected async override void OnAppearing()
+        {
+            base.OnAppearing();
+            await Services.NavigationService.NavigateToSelectLocationAsync();
+        }
     }
 }

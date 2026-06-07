@@ -2,12 +2,11 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="ThePhotographersForecast.Views.PhotoTimeTrack"
-             x:Name="Root"
                 xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:m="clr-namespace:ThePhotographersForecast.Models;assembly=ThePhotographersForecast"
              xmlns:vm="clr-namespace:ThePhotographersForecast.ViewModels;assembly=ThePhotographersForecast"
              xmlns:svc="clr-namespace:ThePhotographersForecast.Services;assembly=ThePhotographersForecast"
-             xmlns:local="clr-namespace:ThePhotographersForecast.Views"
+             xmlns:view="clr-namespace:ThePhotographersForecast.Views"
              x:DataType="vm:PhotoTimeTrackViewModel"
              Title="PhotoTimeTrack">
     <ContentPage.Resources>
@@ -47,10 +46,13 @@
                         <Label Text="{Binding LocationTime}"   FontFamily="Jost"/>
                     </Grid>
                 <CollectionView x:Name="AvailablePhotoDays" ItemSizingStrategy="MeasureAllItems" ItemsSource="{Binding CalendarDays}" SelectionMode="Single" SelectedItem="{Binding SelectedCalendarDay}" SelectionChangedCommand="{Binding OnSelectedCalendarDayChangedCommand}" SelectionChangedCommandParameter="{Binding SelectedCalendarDay}">
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout Orientation="Horizontal" />
+                    </CollectionView.ItemsLayout>
                     <CollectionView.ItemTemplate>
                         <DataTemplate>
-                            <Border StrokeShape="RoundRectangle 12" Stroke="{StaticResource HunterGreenBorder}"  BackgroundColor="{StaticResource SailOnBlue}" Margin="5" Padding="5" StrokeThickness="4">
-                                <Label x:Name="DayLabel" Text="{Binding SelectedCalendarDay, StringFormat='{0:DDDD, MMMM dd}'}" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" FontFamily="Jost" />
+                            <Border StrokeShape="RoundRectangle 12" Stroke="{StaticResource HunterGreenBorder}"  BackgroundColor="{StaticResource SailOnBlue}" Margin="5" Padding="5" StrokeThickness="4" WidthRequest="120" HeightRequest="120">
+                                <Label x:Name="DayLabel" Text="{Binding ., StringFormat='{}{0:dddd, MMMM dd}'}" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" FontFamily="Jost" FontSize="10" />
                             </Border>
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
@@ -58,7 +60,7 @@
             </StackLayout>
         </Border>
         <ScrollView Orientation="Vertical">
-        <!--<local:PhotoTimeCarousel B />-->
+        <!--<view:PhotoTimeCarousel  />-->
         <CarouselView x:Name="PhotoTimeSchedule"
                       ItemsSource="{Binding Schedules}"
                       CurrentItem="{Binding SelectedDaySchedule}">
@@ -83,7 +85,7 @@
                                                 </HorizontalStackLayout>
                                                 <Label x:Name="ItemTitle" Text="{Binding Name}" HorizontalTextAlignment="Center" HorizontalOptions="Center" FontAttributes="Italic" FontFamily="Jost" />
                                                 <!-- If you have a temperature property on the schedule, change this binding to that property. Otherwise it will remain empty. -->
-                                                <!--<Image Source="{Binding ForecastIcon, Converter='{StaticResources HttpClientConverter}'}" Aspect="AspectFill" HeightRequest="50" WidthRequest="50" Margin="5"/>-->
+                                                <Image Source="{Binding ForecastIcon}" HorizontalOptions="Center" Aspect="AspectFill" HeightRequest="50" WidthRequest="50" Margin="5"/>
                                                 <Label x:Name="HourlySummary" Text="{Binding ForecastDetail}" HorizontalOptions="Center" FontFamily="Jost" LineBreakMode="WordWrap"/>
                                                 <CarouselView x:Name="EventCarousel" ItemsSource="{Binding Events}" CurrentItem="{Binding SelectedEvent}">
                                                     <CarouselView.ItemTemplate>

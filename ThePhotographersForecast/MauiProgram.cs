@@ -1,8 +1,6 @@
 ﻿using CommunityToolkit.Maui;
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.Foldable;
-using Microsoft.Maui.Handlers;
-using System.Collections.ObjectModel;
 using System.Net.Http.Headers;
 using ThePhotographersForecast.Models;
 using ThePhotographersForecast.Services;
@@ -26,102 +24,60 @@ namespace ThePhotographersForecast
 
                 });
             builder.UseFoldable();
+
             // GLOBAL User-Agent for all image downloads
             // Override HttpClient used by UriImageSourceService
-            builder.Services.AddHttpClient<IImageSourceService<UriImageSource>, UriImageSourceService>()
-                    .ConfigureHttpClient(client =>
-                    {
-                        client.DefaultRequestHeaders.UserAgent.Add(
-                            new System.Net.Http.Headers.ProductInfoHeaderValue("ThePhotographersForecast", "1.0")
-                        );
-                    });
-
-            //Registered ViewModels
-            builder.Services.AddSingleton<ViewModels.ForecastViewModel>();
-
-
-            builder.Services.AddSingleton<Models.PhotoLocation>(sp =>
+            //IHttpClientBuilder httpClientBuilder = builder.Services.AddHttpClient<IImageSourceService<UriImageSource>, UriImageSourceService>()
+            //        .ConfigureHttpClient(client =>
+            //        {
+            //            client.DefaultRequestHeaders.UserAgent.Add(
+            //                new System.Net.Http.Headers.ProductInfoHeaderValue("ThePhotographersForecast", "1.0")
+            //            );
+            //        });
+            builder.Services.AddHttpClient("photographer", c =>
             {
-                return new Models.PhotoLocation();
+                c.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("ThePhotographersForecast", "1.0"));
+                c.Timeout = TimeSpan.FromSeconds(10);
             });
 
+            // Register Single Instance Models
+            builder.Services.AddSingleton<Models.PhotoLocation>();
+
+            // Register Services
+            builder.Services.AddSingleton<ImageCacheService>();
+            builder.Services.AddSingleton<GetGfsData>();
+            builder.Services.AddSingleton<GetTimesOfDayData>();
             builder.Services.AddSingleton<GetPhotoDay>();
             builder.Services.AddSingleton<GetDaySchedules>();
-            builder.Services.AddHttpClient("nws", c =>
-            {
-                c.DefaultRequestHeaders.UserAgent.Add(new System.Net.Http.Headers.ProductInfoHeaderValue("ThePhotographersForecast", "1.0"));
-                c.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/geo+json"));
-            });
-            builder.Services.AddSingleton<GetGfsData>();
 
-            builder.Services.AddHttpClient("eventsApi", client =>
-             {
-                 client.DefaultRequestHeaders.UserAgent.Add(new System.Net.Http.Headers.ProductInfoHeaderValue("ThePhotographersForecast", "1.0"));
-                 client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
-             });
-            builder.Services.AddSingleton<GetTimesOfDayData>();
-
-
-            builder.Services.AddSingleton<SelectLocationViewModel>(sp =>
+            // Register the View Models
+            builder.Services.AddSingleton<ViewModels.SelectLocationViewModel>(sp =>
             {
                 var gfs = sp.GetRequiredService<GetGfsData>();
-                var getTimesOfDayData = sp.GetRequiredService<GetTimesOfDayData>();
-                var photoday = sp.GetRequiredService<GetPhotoDay>();
-                var gds = sp.GetRequiredService<GetDaySchedules>();
+                var gtodd = sp.GetRequiredService<GetTimesOfDayData>();
+                var gpd = sp.GetRequiredService<GetPhotoDay>();
+                var sl = sp.GetRequiredService<Models.PhotoLocation>();
 
-                return new SelectLocationViewModel(gfs, getTimesOfDayData, photoday, gds);
+                return new ViewModels.SelectLocationViewModel(gfs, gtodd, gpd, sl);
             });
 
             builder.Services.AddSingleton<ViewModels.PhotoTimeTrackViewModel>(sp =>
             {
                 var slvm = sp.GetRequiredService<SelectLocationViewModel>();
-                return new PhotoTimeTrackViewModel(slvm);
+                var gds = sp.GetRequiredService<GetDaySchedules>();
+                var location = sp.GetRequiredService<PhotoLocation>();
+                return new PhotoTimeTrackViewModel(slvm, gds, location);
             });
-            builder.Services.AddSingleton<ViewModels.CalendarViewModel>(sp =>
+
+            builder.Services.AddSingleton<ViewModels.ForecastViewModel>(sp =>
             {
                 var slvm = sp.GetRequiredService<SelectLocationViewModel>();
-                return new CalendarViewModel(slvm);
+                var location = sp.GetRequiredService<PhotoLocation>();
+                return new ForecastViewModel(slvm, location);
             });
-
-
-
-            //builder.Services.AddSingleton<Models.GfsWeatherModel>(sp =>
-            //{
-            //    var selectedLocation = sp.GetRequiredService<Models.PhotoLocation>();
-            //    var gfsWeatherModel = Services.GetGfsData.GetWeatherAsync(selectedLocation.Latitude, selectedLocation.Longitude);
-            //    return gfsWeatherModel.Result;
-            //});
-            //builder.Services.AddSingleton<Models.EventModel>(sp =>
-            //{
-            //    var selectedLocation = sp.GetRequiredService<Models.PhotoLocation>();
-            //    var eventTimes = Services.GetTimesOfDayData.GetDaysAsync(selectedLocation.Latitude, selectedLocation.Longitude);
-            //    return eventTimes.Result;
-            //});
-            //builder.Services.AddSingleton<ViewModels.CombineViewModels>(sp =>
-            //{
-            //    var selectLocationVM = sp.GetRequiredService<ViewModels.SelectLocationViewModel>();
-            //    var forecastVM = sp.GetRequiredService<ViewModels.ForecastViewModel>();
-            //    return new ViewModels.CombineViewModels(selectLocationVM, forecastVM);
-            //});
-            //builder.Services.AddSingleton<Views.SelectLocation>(rc =>
-            //{
-            //    var vm = rc.GetRequiredService<ViewModels.SelectLocationViewModel>();
-            //    return new Views.SelectLocation(vm);
-            //});
-            //builder.Services.AddSingleton<Views.ShortForecast>(rc =>
-            //{
-            //    var slvm = rc.GetRequiredService<ViewModels.SelectLocationViewModel>();
-            //    var vm = rc.GetRequiredService<ViewModels.ForecastViewModel>();
-            //    return new Views.ShortForecast(vm, slvm);
-            //});
-
-            //builder.Services.AddSingleton<Services.NavigationService>(sp =>
-            //{
-            //    Services.NavigationService navigationService = new Services.NavigationService();
-            //    return navigationService;
-            //});
-
-
+            // Register the Views
+            builder.Services.AddSingletonWithShellRoute<Views.SelectLocation, ViewModels.SelectLocationViewModel>("//Home");
+            builder.Services.AddSingletonWithShellRoute<Views.PhotoTimeTrack, ViewModels.PhotoTimeTrackViewModel>("//Home/PhotoTimeTrack");
 
 #if DEBUG
             builder.Logging.AddDebug();

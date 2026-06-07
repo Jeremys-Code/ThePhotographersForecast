@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ThePhotographersForecast.Services
 {
-    public class HttpClientConverter : IValueConverter
+    public class HttpClientConverter
     {
         private static readonly HttpClient _httpClient = new HttpClient();
 
@@ -44,22 +44,22 @@ namespace ThePhotographersForecast.Services
                 // Build request with required headers for weather.gov
                 var request = new HttpRequestMessage(HttpMethod.Get, url);
                 // Use a descriptive User-Agent per weather.gov policy
-                request.Headers.UserAgent.ParseAdd("PhotographersDay/3.0 (+https://example.com)");
+                _httpClient.DefaultRequestHeaders.UserAgent.Add(new System.Net.Http.Headers.ProductInfoHeaderValue("ThePhotographersForecast", "1.0"));
 
                 var response = _httpClient.SendAsync(request).GetAwaiter().GetResult();
                 if (!response.IsSuccessStatusCode)
-                    return null;
+                    return ImageSource.FromFile("unknown.png");
 
                 var bytes = response.Content.ReadAsByteArrayAsync().GetAwaiter().GetResult();
                 if (bytes == null || bytes.Length == 0)
-                    return null;
+                    return ImageSource.FromFile("unknown.png");
 
                 // Return an ImageSource created from an in-memory stream so it survives after disposal
                 return ImageSource.FromStream(() => new MemoryStream(bytes));
             }
             catch (Exception)
             {
-                return null;
+                return ImageSource.FromFile("unknown.png");
             }
         }
     }

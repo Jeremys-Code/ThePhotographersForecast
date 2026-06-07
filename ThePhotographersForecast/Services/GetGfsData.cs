@@ -12,28 +12,30 @@ namespace ThePhotographersForecast.Services;
 public partial class GetGfsData : ObservableObject
 {
     [ObservableProperty]
-    private GfsWeatherModel gfsDataService;
+    public partial GfsWeatherModel GfsDataService { get; set; } = new GfsWeatherModel();
 
-    public static GridDailyData DailyForecasts { get; set; } = new GridDailyData();
-    public static GridHourlyData HourlyForecasts { get; set; } = new GridHourlyData();
-
-    private readonly IHttpClientFactory _factory;
-    public GetGfsData(IHttpClientFactory factory)
+    private readonly ImageCacheService _cacheService;
+    private readonly HttpClient _client;
+    private PhotoLocation _location;
+    public GetGfsData(IHttpClientFactory factory, ImageCacheService cacheService, PhotoLocation location)
     {
-        _factory = factory ?? throw new ArgumentNullException(nameof(factory));
+        _cacheService = cacheService;
+        _client = factory.CreateClient("photographer") ?? new HttpClient();
+        _client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/geo+json"));
 
         GfsDataService = new GfsWeatherModel();
+        _location = location;
     }
     public async Task<GfsWeatherModel> GetWeatherAsync(double latitude, double longitude)
     {
-        var _client = _factory.CreateClient("nws");
+
         try
         {
             var data = new CoordinatesToGridData.Rootobject();
             string apiString = $@"https://api.weather.gov/points/{latitude},{longitude}";
             // var data = await Services.JsonDataService.GetJsonDataAsync<CoordinatesToGridData.Rootobject>(apiString);
             var request = new HttpRequestMessage(HttpMethod.Get, apiString);
-            request.Headers.UserAgent.Add(new System.Net.Http.Headers.ProductInfoHeaderValue("PhotographersDay", "3.0"));
+            //request.Headers.UserAgent.Add(new System.Net.Http.Headers.ProductInfoHeaderValue("PhotographersDay", "3.0"));
             var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
             if (response.IsSuccessStatusCode)
             {
@@ -45,11 +47,11 @@ public partial class GetGfsData : ObservableObject
             {
                 var gfsData = data.properties;
 
-                ServiceHelper.GetService<PhotoLocation>().City = gfsData.relativeLocation.properties.city;
-                ServiceHelper.GetService<PhotoLocation>().State = gfsData.relativeLocation.properties.state;
-                ServiceHelper.GetService<PhotoLocation>().TimeZone = gfsData.timeZone;
-                ServiceHelper.GetService<PhotoLocation>().Latitude = latitude;
-                ServiceHelper.GetService<PhotoLocation>().Longitude = longitude;
+                _location.City = gfsData.relativeLocation.properties.city;
+                _location.State = gfsData.relativeLocation.properties.state;
+                _location.TimeZone = gfsData.timeZone;
+                _location.Latitude = latitude;
+                _location.Longitude = longitude;
 
 
                 GridDailyData.RootObject dailyForecast = new GridDailyData.RootObject();
@@ -102,6 +104,7 @@ public partial class GetGfsData : ObservableObject
 
                     await Parallel.ForAsync(0, pd, async (d, ct) =>
                     {
+                        var iconUrl = hourlyForecast.properties.periods[d].icon;
                         GfsDataService.HourlyForecasts[d] = new GfsHourlyForecast
                         {
                             Number = hourlyForecast.properties.periods[d].number,
@@ -115,10 +118,11 @@ public partial class GetGfsData : ObservableObject
                             Dewpoint = hourlyForecast.properties.periods[d].dewpoint.unitCode == "wmoUnit:degC" ? $"{Math.Round((hourlyForecast.properties.periods[d].dewpoint.value * 1.8) + 32, 0)}°F" : "N/A",
                             DewpointUnit = hourlyForecast.properties.periods[d].dewpoint.unitCode == "wmoUnit:degC" ? "°F" : "°C",
                             Humidity = $"{hourlyForecast.properties.periods[d].relativeHumidity.value}%",
-                            HourlyIcon = hourlyForecast.properties.periods[d].icon,
+                            HourlyIcon = iconUrl,
                             WindDirection = hourlyForecast.properties.periods[d].windDirection,
                             WindSpeed = hourlyForecast.properties.periods[d].windSpeed,
                             ShortForecast = hourlyForecast.properties.periods[d].shortForecast,
+                            HourlyIconPath = await _cacheService.GetCachedFileAsync(iconUrl)
 
                         };
                     });
@@ -152,26 +156,22 @@ public partial class GetGfsData : ObservableObject
 
 
                              GfsDataService.HourlyForecasts[h].DetailForecast =
-                                        $"Good {FromTimesOfDay(hf.StartTime.Hour)}. Expect at {hf.StartTime:h tt}, {hf.ShortForecast.ToLowerInvariant()} during " +
+                                        $"Good {FromTimesOfDay(hf.StartTime.Hour)}. The forecast at {hf.StartTime:h tt} is {hf.ShortForecast.ToLowerInvariant()} through out " +
                                         $"the {FromTimesOfDay(hf.StartTime.Hour)}. The temperature will be {hf.Temperature}°{hf.TemperatureUnit}. Winds blowing " +
                                         $"from the {GetWindDirection(hf.WindDirection).ToLowerInvariant()} at {hf.WindSpeed}. The great outdoors feels {feelLike} " +
-                                        $"{Environment.NewLine}Relative Humidity: {hf.Humidity} Dewpoint:{hf.Dewpoint}" +
-                                        $"{Environment.NewLine} Chance Of Precipitation: {hf.ChanceOfPrecipitation}%";
+                                        $"Relative Humidity: {hf.Humidity} Dewpoint:{hf.Dewpoint}" +
+                                        $"Chance Of Precipitation: {hf.ChanceOfPrecipitation}%";
                          }
 
                      });
-                    //if (GfsDataService.HourlyForecasts.Length == pd)
-                    //{
-                    //    if (GfsDataService.DailyForecasts.Length > 1)
-                    //        await Parallel.ForAsync(0, GfsDataService.DailyForecasts.Length, async (h, ct) =>
-                    //        {
-                    // 1. Get the local bounds for the current daily forecast index
+
+                    // Get the daily highs and lows and assign to the hour of occurence.
                     var startTime = GfsDataService.HourlyForecasts.Min(h => h.StartTime);
                     var current = startTime;
                     var endTime = GfsDataService.HourlyForecasts.Max(h => h.EndTime);
                     var dayCount = endTime.Date.Subtract(startTime.Date).Days + 1;
                     GfsDataService.HourlyTimeTemps = new GfsHourlyTimeTemp[dayCount];
-                    for (int i = 0; i < dayCount; i++)
+                    for (int i = 0; i <= dayCount; i++)
                     {
                         var endOfDay = current.Date.AddDays(1).AddHours(-1);
                         var highLowRange = GfsDataService.HourlyForecasts.AsEnumerable()
@@ -195,35 +195,51 @@ public partial class GetGfsData : ObservableObject
 
                         current = current.Date.AddDays(1);
                     }
+                    foreach (var highLow in GfsDataService.HourlyTimeTemps)
+                    {
+                        var high = highLow.High.Time;
+                        var low = highLow.Low.Time;
+                        for (int l = 0; l < GfsDataService.HourlyForecasts.Length; l++)
+                        {
+                            if (GfsDataService.HourlyForecasts[l].StartTime == high)
+                            {
+                                GfsDataService.HourlyForecasts[l].IsHigh = true;
+                            }
+                            ;
+                            if (GfsDataService.HourlyForecasts[l].StartTime == low)
+                            {
+                                GfsDataService.HourlyForecasts[l].IsLow = true;
+                            }
+                            ;
+                        }
+                        //if (GfsDataService.DailyForecasts[h].IsDaytime)
+                        //{
+                        //    //3. Filter the hourly temps for the maximum temperature
+                        //    var highestHourlyRecord = GfsDataService.HourlyForecasts
+                        //        .Where(t => t.StartTime >= startTime && t.EndTime <= endTime)
+                        //        .OrderByDescending(t => t.Temperature).FirstOrDefault(new GfsHourlyForecast { Temperature = 0, StartTime = startTime });
+                        //    GfsDataService.DailyForecasts[h].DailyHighTemp = highestHourlyRecord.Temperature;
+                        //    GfsDataService.DailyForecasts[h].DailyHighTime = highestHourlyRecord.StartTime;
+                        //}
+                        //else if (!GfsDataService.DailyForecasts[h].IsDaytime)
+                        //{
+                        //    // 2. Filter the hourly temps once and find the record with the minimum temperature
+                        //    var lowestHourlyRecord = GfsDataService.HourlyForecasts
+                        //        .Where(t => t.StartTime >= startTime && t.EndTime <= endTime)
+                        //        .OrderBy(t => t.Temperature).FirstOrDefault(new GfsHourlyForecast { Temperature = 0, StartTime = startTime });
+                        //    GfsDataService.DailyForecasts[h].DailyLowTemp = lowestHourlyRecord.Temperature;
+                        //    GfsDataService.DailyForecasts[h].DailyLowTime = lowestHourlyRecord.StartTime;
+                        //}
 
 
-                    //if (GfsDataService.DailyForecasts[h].IsDaytime)
-                    //{
-                    //    //3. Filter the hourly temps for the maximum temperature
-                    //    var highestHourlyRecord = GfsDataService.HourlyForecasts
-                    //        .Where(t => t.StartTime >= startTime && t.EndTime <= endTime)
-                    //        .OrderByDescending(t => t.Temperature).FirstOrDefault(new GfsHourlyForecast { Temperature = 0, StartTime = startTime });
-                    //    GfsDataService.DailyForecasts[h].DailyHighTemp = highestHourlyRecord.Temperature;
-                    //    GfsDataService.DailyForecasts[h].DailyHighTime = highestHourlyRecord.StartTime;
-                    //}
-                    //else if (!GfsDataService.DailyForecasts[h].IsDaytime)
-                    //{
-                    //    // 2. Filter the hourly temps once and find the record with the minimum temperature
-                    //    var lowestHourlyRecord = GfsDataService.HourlyForecasts
-                    //        .Where(t => t.StartTime >= startTime && t.EndTime <= endTime)
-                    //        .OrderBy(t => t.Temperature).FirstOrDefault(new GfsHourlyForecast { Temperature = 0, StartTime = startTime });
-                    //    GfsDataService.DailyForecasts[h].DailyLowTemp = lowestHourlyRecord.Temperature;
-                    //    GfsDataService.DailyForecasts[h].DailyLowTime = lowestHourlyRecord.StartTime;
-                    //}
-
-
-                    //    // 3. Format and assign the string safely if a record was found
-                    //    if (lowestHourlyRecord != null)
-                    //    GfsDataService.DailyForecasts[h].DailyLow = $"{lowestHourlyRecord.Temperature}°{lowestHourlyRecord.TemperatureUnit} at {lowestHourlyRecord.StartTime:h tt}";
-                    //if (highestHourlyRecord != null)
-                    //    GfsDataService.DailyForecasts[h].DailyHigh = $"{highestHourlyRecord.Temperature}°{highestHourlyRecord.TemperatureUnit} at {highestHourlyRecord.StartTime:h tt}";
-                    //      });
-                    // }
+                        //    // 3. Format and assign the string safely if a record was found
+                        //    if (lowestHourlyRecord != null)
+                        //    GfsDataService.DailyForecasts[h].DailyLow = $"{lowestHourlyRecord.Temperature}°{lowestHourlyRecord.TemperatureUnit} at {lowestHourlyRecord.StartTime:h tt}";
+                        //if (highestHourlyRecord != null)
+                        //    GfsDataService.DailyForecasts[h].DailyHigh = $"{highestHourlyRecord.Temperature}°{highestHourlyRecord.TemperatureUnit} at {highestHourlyRecord.StartTime:h tt}";
+                        //      });
+                        // }
+                    }
                 }
             }
         }
@@ -235,67 +251,65 @@ public partial class GetGfsData : ObservableObject
         return GfsDataService;
     }
 
-    public string GetWindDirection(string windDirection)
+    public static string GetWindDirection(string windDirection)
     {
         string direction = string.Empty;
         switch (windDirection.ToLowerInvariant())
         {
             case "n":
-                direction = "North";
-                break;
+                return "North";
+
             case "nne":
-                direction = "North-Northeast";
-                break;
+                return "North-Northeast";
+
             case "ne":
-                direction = "Northeast";
-                break;
+                return "Northeast";
+
             case "ene":
-                direction = "East-Northeast";
-                break;
+                return "East-Northeast";
+
             case "e":
-                direction = "East";
-                break;
+                return "East";
+
             case "ese":
-                direction = "East-Southeast";
-                break;
+                return "East-Southeast";
+
             case "s":
-                direction = "South";
-                break;
+                return "South";
+
             case "ssw":
-                direction = "South-Southwest";
-                break;
+                return "South-Southwest";
+
             case "sw":
-                direction = "Southwest";
-                break;
+                return "Southwest";
+
             case "wsw":
-                direction = "West-Southwest";
-                break;
+                return "West-Southwest";
+
             case "w":
-                direction = "West";
-                break;
+                return "West";
             case "wnw":
-                direction = "West-Northwest";
-                break;
+                return "West-Northwest";
             case "nw":
-                direction = "Northwest";
-                break;
+                return "Northwest";
             case "nnw":
-                direction = "North-Northwest";
-                break;
+                return "North-Northwest";
+
             case "sse":
-                direction = "South-Southeast";
-                break;
+                return "South-Southeast";
             default:
-                direction = "Unknown";
-                break;
+                return "Unknown";
+
         }
-        return direction;
+
     }
     public string FromTimesOfDay(int hour)
     {
         switch (hour)
         {
-            case int h when (0 <= h && h < 12):
+            case int h when (0 <= h && h < 3):
+                return "night";
+            case int h when (3 <= h && h < 12):
                 return "morning";
             case int h when (12 <= h && h < 18):
                 return "afternoon";

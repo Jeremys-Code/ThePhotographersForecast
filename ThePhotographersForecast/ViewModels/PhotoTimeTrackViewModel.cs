@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Timers;
 using ThePhotographersForecast.Models;
 using ThePhotographersForecast.Services;
@@ -9,56 +9,60 @@ namespace ThePhotographersForecast.ViewModels
 {
     public partial class PhotoTimeTrackViewModel : ObservableObject
     {
+
         [ObservableProperty]
-        private System.Timers.Timer _timer;
+        public partial System.Timers.Timer _timer { get; set; }
         [ObservableProperty]
-        private string locationTime;
+        public partial string LocationTime { get; set; }
         [ObservableProperty]
-        private PhotoLocation selectedLocation = new PhotoLocation();
+        public partial PhotoLocation SelectedLocation { get; set; } = new PhotoLocation();
         [ObservableProperty]
-        private DateTime selectedPhotoDate = new DateTime();
+        public partial DateTime SelectedPhotoDate { set; get; } = new DateTime();
         [ObservableProperty]
-        private ObservableCollection<EventTime> events = new ObservableCollection<EventTime>();
+        public partial ObservableCollection<EventTime> Events { get; set; } = new ObservableCollection<EventTime>();
         [ObservableProperty]
-        private EventTime selectedEvent = new EventTime();
+        public partial EventTime SelectedEvent { get; set; } = new EventTime();
         [ObservableProperty]
-        private PhotoSchedule[] hourSchedules;
+        public partial PhotoSchedule[] HourSchedules { get; set; } = Array.Empty<PhotoSchedule>();
         [ObservableProperty]
-        private PhotoSchedule selectedHourSchedule = new PhotoSchedule();
+        public partial PhotoSchedule SelectedHourSchedule { get; set; } = new PhotoSchedule();
         [ObservableProperty]
-        private ObservableCollection<DaySchedule> schedules = new ObservableCollection<DaySchedule>();
+        public partial ObservableCollection<DaySchedule> Schedules { get; set; } = new ObservableCollection<DaySchedule>();
         [ObservableProperty]
-        private DaySchedule selectedDaySchedule = new DaySchedule();
+        public partial DaySchedule SelectedDaySchedule { get; set; } = new DaySchedule();
         [ObservableProperty]
-        private ObservableCollection<DateTime> calendarDays = new ObservableCollection<DateTime>();
+        public partial DateTime[] CalendarDays { get; set; } = Array.Empty<DateTime>();
         [ObservableProperty]
-        private DateTime selectedCalendarDay;
+        public partial DateTime SelectedCalendarDay { get; set; }
         [ObservableProperty]
-        private bool isWorking = false;
+        public partial bool IsWorking { get; set; } = false;
         [ObservableProperty]
-        private string progressMessage;
-        public RelayCommand<DateTime> OnSelectedCalendarDayChangedCommand { get; }
+        public partial string ProgressMessage { get; set; } = string.Empty;
+        public Command<DateTime> OnSelectedCalendarDayChangedCommand =>
+                                new Command<DateTime>(p => OnSelectedCalendarDayChanged(p));
 
         private SelectLocationViewModel _slvm;
-
-        public PhotoTimeTrackViewModel(SelectLocationViewModel slvm)
+        private GetDaySchedules _gds;
+        private PhotoLocation _location;
+        public PhotoTimeTrackViewModel(SelectLocationViewModel slvm, GetDaySchedules gds, PhotoLocation location)
         {
             _slvm = slvm;
-            OnSelectedCalendarDayChangedCommand = new RelayCommand<DateTime>(param => { OnSelectedCalendarDayChanged(param); });
+            _gds = gds;
+            _location = location;
+            var results = CreateScheduleAsync().GetAwaiter().GetResult();
+
             MainThread.BeginInvokeOnMainThread(() =>
             {
                 IsWorking = true;
-                if (_slvm.CalendarDays != null)
+
+                if (CalendarDays != null && Schedules != null)
                 {
-                    CalendarDays = calendarDays;
                     SelectedCalendarDay = CalendarDays.First();
-                }
-                if (_slvm.Schedules != null)
-                {
-                    Schedules = _slvm.Schedules;
+                    var daySchedule = Schedules.Where(s => s.PhotoDate == SelectedCalendarDay).First<DaySchedule>();
+                    SelectedDaySchedule = daySchedule;
                     SelectedLocation = ServiceHelper.GetService<PhotoLocation>();
-                    SelectedDaySchedule = Schedules.First(c => c.PhotoDate == SelectedCalendarDay);
-                    SelectedPhotoDate = SelectedDaySchedule.PhotoDate;
+                    DateTime photoDate = SelectedDaySchedule.PhotoDate;
+                    SelectedPhotoDate = photoDate;
                     HourSchedules = SelectedDaySchedule.PhotoSchedules;
                     SelectedHourSchedule = HourSchedules.First();
                     Events = SelectedHourSchedule.Events;
@@ -86,24 +90,64 @@ namespace ThePhotographersForecast.ViewModels
             //    }
             //});
 
-            LocationTime = DateTime.UtcNow.AddHours(ServiceHelper.GetService<PhotoLocation>().TimeZoneOffset).ToString("F");
+            LocationTime = DateTime.UtcNow.AddHours(_location.TimeZoneOffset).ToString("F");
             _timer = new System.Timers.Timer(1000); // 1 second interval
             _timer.Elapsed += OnTimerElapsed;
             _timer.Start();
 
         }
+        // Organizes the data into Day Scedules
+        private async Task<bool> CreateScheduleAsync()
+        {
+            try
+            {
+                var data = _gds.GetSchedules();
+                if (data.Count() == _slvm.NumberOfPhotoDays)
+                {
+                    CalendarDays = new DateTime[_slvm.NumberOfPhotoDays];
+                    var scheduleDates = data.Select(s => s.PhotoDate).OrderBy(x => x).ToArray();
+                    for (int p = 0; p < scheduleDates.Length; p++)
+                    {
+                        CalendarDays[p] = scheduleDates[p];
+                    }
+                    var sorted = data.OrderBy(x => x.PhotoDate).ToArray();
+                    Schedules = new ObservableCollection<DaySchedule>(sorted);
+                    if (Schedules.Count == CalendarDays.Length)
+                    {
+                        return true;
+                    }
+                }
+                else
+                {
+                    throw new ArithmeticException("The Photo Days do not equal the correct number of days");
+                }
+            }
+            catch (ArithmeticException ae)
+            {
+                Debug.WriteLine(ae.Message);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error creating photo days. Please try again. {ex}");
+            }
+            return false;
+        }
 
         partial void OnSelectedCalendarDayChanged(DateTime value)
         {
-            SelectedDaySchedule = Schedules.Where(c => c.PhotoDate == value).First();
-            SelectedPhotoDate = SelectedDaySchedule.PhotoDate;
+            var daySchedule = Schedules.Where(s => s.PhotoDate == value).First<DaySchedule>();
+
+            SelectedDaySchedule = daySchedule;
+            SelectedLocation = ServiceHelper.GetService<PhotoLocation>();
+            DateTime photoDate = SelectedDaySchedule.PhotoDate;
+            SelectedPhotoDate = photoDate;
             HourSchedules = SelectedDaySchedule.PhotoSchedules;
             SelectedHourSchedule = HourSchedules.First();
             Events = SelectedHourSchedule.Events;
             SelectedEvent = Events.First();
         }
 
-        private void OnTimerElapsed(object sender, ElapsedEventArgs e)
+        private void OnTimerElapsed(object? sender, ElapsedEventArgs e)
         {
             LocationTime = DateTime.UtcNow.AddHours(ServiceHelper.GetService<PhotoLocation>().TimeZoneOffset).ToString("F");
         }
