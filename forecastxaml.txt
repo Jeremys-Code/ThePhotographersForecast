@@ -1,0 +1,670 @@
+                         <!--<Grid x:Name="ForecastColumn" Grid.Column="1" Margin="4,0,4,0">
+                             <Grid.RowDefinitions>
+                                 <RowDefinition Height="Auto"/>
+                                 <RowDefinition Height="Auto"/>
+                                 <RowDefinition Height="Auto"/>
+                             </Grid.RowDefinitions>
+                             <CollectionView Grid.Row="0" x:Name="ForecastCollection" ItemSizingStrategy="MeasureAllItems" ItemsSource="{Binding EventDays[0]}"  VerticalScrollBarVisibility="Never">
+                                 <CollectionView.ItemsLayout>
+                                     <GridItemsLayout Orientation="Vertical" Span="1"/>
+                                 </CollectionView.ItemsLayout>
+                                 <CollectionView.ItemTemplate>
+                                     <DataTemplate>
+                                         <Grid>
+                                             <Grid.RowDefinitions>
+                                                 <RowDefinition Height="Auto" />
+                                                 <RowDefinition Height="Auto" />
+                                                 <RowDefinition Height="Auto" />
+                                                 <RowDefinition Height="*"/>
+                                                 <RowDefinition Height="Auto"/>
+                                             </Grid.RowDefinitions>
+                                             <Grid.ColumnDefinitions>
+                                                 <ColumnDefinition Width="Auto" />
+                                                 <ColumnDefinition Width="*" />
+                                             </Grid.ColumnDefinitions>
+                                             <VerticalStackLayout Grid.Row="0" Grid.ColumnSpan="2" Margin="10">
+                                                 <Label TextColor="#E3D092" Text="{Binding  EventName}" FontSize="22" FontAutoScalingEnabled="True" FontAttributes="Bold" FontFamily="ManFont" />
+                                             </VerticalStackLayout>
+                                             <HorizontalStackLayout Grid.Row="1" Grid.ColumnSpan="2">
+                                                 <Label x:Name="StartTimeLabel" Text="Start:" TextColor="#E3D092" HorizontalTextAlignment="Start" FontAutoScalingEnabled="True" FontAttributes="Bold"  FontFamily="NotoSans" FontSize="12" Margin="2,0"/>
+                                                 <Label Text="{Binding EventStart, StringFormat='{}{0:h:mm tt}'}" HorizontalTextAlignment="Start" FontAutoScalingEnabled="True" FontFamily="NotoSans" TextColor="#E3D092" FontSize="12" Margin="2,0"/>
+                                                 -->
+                         <!--<Label FontSize="12" FontFamily="ManFont" FontAutoScalingEnabled="True" FontAttributes="Italic" Margin="4,0" TextColor="#E3D092">
+                                                     <Label.Triggers>
+                                                         <DataTrigger TargetType="Label" Binding="{Binding EventEnd,StringFormat='End: {}{0:hh:mm tt}'}" Value="{x:Null}">
+                                                             <Setter Property="IsVisible" Value="False" />
+                                                         </DataTrigger>
+                                                     </Label.Triggers>
+                                                 </Label>-->
+                         <!--
+                                                 <Label x:Name="EndTimeLabel" Text="End:" HorizontalTextAlignment="Start" FontAttributes="Bold" TextColor="#E3D092" FontAutoScalingEnabled="True" FontFamily="NotoSans" FontSize="12" Margin="2,0">
+                                                     <Label.Triggers>
+                                                         <DataTrigger TargetType="Label" Binding="{Binding EventEnd}" Value="{x:Null}">
+                                                             <Setter Property="IsVisible" Value="False" />
+                                                         </DataTrigger>
+                                                     </Label.Triggers>
+                                                 </Label>
+                                                 <Label x:Name="EndTime" Text="{Binding EndTime, StringFormat='{}{0:h:mm tt}'}" HorizontalTextAlignment="Start" TextColor="#E3D092" FontAutoScalingEnabled="True" FontFamily="NotoSans" FontSize="12" Margin="2,0">
+                                                     <Label.Triggers>
+                                                         <DataTrigger TargetType="Label" Binding="{Binding EndTime}" Value="{x:Null}">
+                                                             <Setter Property="IsVisible" Value="False" />
+                                                         </DataTrigger>
+                                                     </Label.Triggers>
+                                                 </Label>
+                                             </HorizontalStackLayout>
+                                             
+                                                 <Label Text="Forecast:" Grid.Row="2" Grid.Column="0" FontSize="14" HorizontalTextAlignment="Start" VerticalTextAlignment="Center" TextColor="#E3D092" FontAttributes="Italic" FontFamily="ManFont" />
+                                                 <VerticalStackLayout Grid.Column="0" Grid.Row="3">
+                                                     <Label Text="{Binding FullDescription}" FontFamily="NotoSans" FontAutoScalingEnabled="True" FontSize="12" Margin="4,0" TextColor="#E3D092" />
+                                                 </VerticalStackLayout>
+                                                 <Image x:Name="SmWeatherIcon" Grid.Column="1" Grid.RowSpan="2" Grid.Row="2" WidthRequest="60" HeightRequest="60" Margin="4"  HorizontalOptions="Center" VerticalOptions="Center" Aspect="AspectFit" Source="{Binding HourlyForecast.Icon,Converter={StaticResource HttpClientConverter}}" />
+                                            
+                                         </Grid>
+                                     </DataTemplate>
+                                 </CollectionView.ItemTemplate>
+                             </CollectionView>
+                             <CollectionView Grid.Row="1" x:Name="DailyForecastCollection" ItemSizingStrategy="MeasureAllItems" ItemsSource="{Binding GfsForecastCollection}"  VerticalScrollBarVisibility="Never">
+                                 <CollectionView.ItemsLayout>
+                                     <GridItemsLayout Orientation="Vertical" Span="1"/>
+                                 </CollectionView.ItemsLayout>
+                                 <CollectionView.ItemTemplate>
+                                     <DataTemplate>
+                                         <Grid>
+                                             <Grid.RowDefinitions>
+                                                 <RowDefinition Height="Auto" />
+                                                 <RowDefinition Height="Auto" />
+                                                 <RowDefinition Height="Auto" />
+                                                 <RowDefinition Height="*"/>
+                                                 <RowDefinition Height="Auto"/>
+                                             </Grid.RowDefinitions>
+                                             <Grid.ColumnDefinitions>
+                                                 <ColumnDefinition Width="Auto" />
+                                                 <ColumnDefinition Width="*" />
+                                             </Grid.ColumnDefinitions>
+                                             <VerticalStackLayout Grid.Row="0" Grid.ColumnSpan="2" Margin="10">
+                                                 <Label TextColor="#E3D092" Text="{Binding  EventName}" FontSize="22" FontAutoScalingEnabled="True" FontAttributes="Bold" FontFamily="ManFont" />
+                                             </VerticalStackLayout>
+                                             <HorizontalStackLayout Grid.Row="1" Grid.ColumnSpan="2">
+                                                 <Label x:Name="StartTimeLabel" Text="Start:" TextColor="#E3D092" HorizontalTextAlignment="Start" FontAutoScalingEnabled="True" FontAttributes="Bold"  FontFamily="NotoSans" FontSize="12" Margin="2,0"/>
+                                                 <Label Text="{Binding EventStart, StringFormat='{}{0:h:mm tt}'}" HorizontalTextAlignment="Start" FontAutoScalingEnabled="True" FontFamily="NotoSans" TextColor="#E3D092" FontSize="12" Margin="2,0"/>
+                                                 -->
+                         <!--<Label FontSize="12" FontFamily="ManFont" FontAutoScalingEnabled="True" FontAttributes="Italic" Margin="4,0" TextColor="#E3D092">
+                       <Label.Triggers>
+                           <DataTrigger TargetType="Label" Binding="{Binding EventEnd,StringFormat='End: {}{0:hh:mm tt}'}" Value="{x:Null}">
+                               <Setter Property="IsVisible" Value="False" />
+                           </DataTrigger>
+                       </Label.Triggers>
+                   </Label>-->
+                         <!--
+                                                 <Label x:Name="EndTimeLabel" Text="End:" HorizontalTextAlignment="Start" FontAttributes="Bold" TextColor="#E3D092" FontAutoScalingEnabled="True" FontFamily="NotoSans" FontSize="12" Margin="2,0">
+                                                     <Label.Triggers>
+                                                         <DataTrigger TargetType="Label" Binding="{Binding EventEnd}" Value="{x:Null}">
+                                                             <Setter Property="IsVisible" Value="False" />
+                                                         </DataTrigger>
+                                                     </Label.Triggers>
+                                                 </Label>
+                                                 <Label x:Name="EndTime" Text="{Binding EventEnd, StringFormat='{}{0:h:mm tt}'}" HorizontalTextAlignment="Start" TextColor="#E3D092" FontAutoScalingEnabled="True" FontFamily="NotoSans" FontSize="12" Margin="2,0">
+                                                     <Label.Triggers>
+                                                         <DataTrigger TargetType="Label" Binding="{Binding EventEnd}" Value="{x:Null}">
+                                                             <Setter Property="IsVisible" Value="False" />
+                                                         </DataTrigger>
+                                                     </Label.Triggers>
+                                                 </Label>
+                                             </HorizontalStackLayout>
+
+                                             <Label Text="Forecast:" Grid.Row="2" Grid.Column="0" FontSize="14" HorizontalTextAlignment="Start" VerticalTextAlignment="Center" TextColor="#E3D092" FontAttributes="Italic" FontFamily="ManFont" />
+                                             <VerticalStackLayout Grid.Column="0" Grid.Row="3">
+                                                 <Label Text="{Binding DetailForecast}" FontFamily="NotoSans" FontAutoScalingEnabled="True" FontSize="12" Margin="4,0" TextColor="#E3D092" />
+                                             </VerticalStackLayout>
+                                             <Image x:Name="SmWeatherIcon" Grid.Column="1" Grid.RowSpan="2" Grid.Row="2" WidthRequest="60" HeightRequest="60" Margin="4"  HorizontalOptions="Center" VerticalOptions="Center" Aspect="AspectFit" Source="{Binding Icon,Converter={StaticResource HttpClientConverter}}" />
+
+                                         </Grid>
+                                     </DataTemplate>
+                                 </CollectionView.ItemTemplate>
+                             </CollectionView>
+                             <CollectionView Grid.Row="2" x:Name="EventDaysCollection" ItemSizingStrategy="MeasureAllItems" ItemsSource="{Binding EventDays[2]}"  VerticalScrollBarVisibility="Never">
+                                 <CollectionView.ItemsLayout>
+                                     <GridItemsLayout Orientation="Vertical" Span="1"/>
+                                 </CollectionView.ItemsLayout>
+                                 <CollectionView.ItemTemplate>
+                                     <DataTemplate>
+                                         <Grid>
+                                             <Grid.RowDefinitions>
+                                                 <RowDefinition Height="Auto" />
+                                                 <RowDefinition Height="Auto" />
+                                                 <RowDefinition Height="Auto" />
+                                                 <RowDefinition Height="*"/>
+                                                 <RowDefinition Height="Auto"/>
+                                             </Grid.RowDefinitions>
+                                             <Grid.ColumnDefinitions>
+                                                 <ColumnDefinition Width="Auto" />
+                                                 <ColumnDefinition Width="*" />
+                                             </Grid.ColumnDefinitions>
+                                             <VerticalStackLayout Grid.Row="0" Grid.ColumnSpan="2" Margin="10">
+                                                 <Label TextColor="#E3D092" Text="{Binding  EventName}" FontSize="22" FontAutoScalingEnabled="True" FontAttributes="Bold" FontFamily="ManFont" />
+                                             </VerticalStackLayout>
+                                             <HorizontalStackLayout Grid.Row="1" Grid.ColumnSpan="2">
+                                                 <Label x:Name="StartTimeLabel" Text="Start:" TextColor="#E3D092" HorizontalTextAlignment="Start" FontAutoScalingEnabled="True" FontAttributes="Bold"  FontFamily="NotoSans" FontSize="12" Margin="2,0"/>
+                                                 <Label Text="{Binding EventStart, StringFormat='{}{0:h:mm tt}'}" HorizontalTextAlignment="Start" FontAutoScalingEnabled="True" FontFamily="NotoSans" TextColor="#E3D092" FontSize="12" Margin="2,0"/>
+                                                 -->
+                         <!--<Label FontSize="12" FontFamily="ManFont" FontAutoScalingEnabled="True" FontAttributes="Italic" Margin="4,0" TextColor="#E3D092">
+                       <Label.Triggers>
+                           <DataTrigger TargetType="Label" Binding="{Binding EventEnd,StringFormat='End: {}{0:hh:mm tt}'}" Value="{x:Null}">
+                               <Setter Property="IsVisible" Value="False" />
+                           </DataTrigger>
+                       </Label.Triggers>
+                   </Label>-->
+                         <!--
+                                                 <Label x:Name="EndTimeLabel" Text="End:" HorizontalTextAlignment="Start" FontAttributes="Bold" TextColor="#E3D092" FontAutoScalingEnabled="True" FontFamily="NotoSans" FontSize="12" Margin="2,0">
+                                                     <Label.Triggers>
+                                                         <DataTrigger TargetType="Label" Binding="{Binding EventEnd}" Value="{x:Null}">
+                                                             <Setter Property="IsVisible" Value="False" />
+                                                         </DataTrigger>
+                                                     </Label.Triggers>
+                                                 </Label>
+                                                 <Label x:Name="EndTime" Text="{Binding EventEnd, StringFormat='{}{0:h:mm tt}'}" HorizontalTextAlignment="Start" TextColor="#E3D092" FontAutoScalingEnabled="True" FontFamily="NotoSans" FontSize="12" Margin="2,0">
+                                                     <Label.Triggers>
+                                                         <DataTrigger TargetType="Label" Binding="{Binding EventEnd}" Value="{x:Null}">
+                                                             <Setter Property="IsVisible" Value="False" />
+                                                         </DataTrigger>
+                                                     </Label.Triggers>
+                                                 </Label>
+                                             </HorizontalStackLayout>
+
+                                             <Label Text="Forecast:" Grid.Row="2" Grid.Column="0" FontSize="14" HorizontalTextAlignment="Start" VerticalTextAlignment="Center" TextColor="#E3D092" FontAttributes="Italic" FontFamily="ManFont" />
+                                             <VerticalStackLayout Grid.Column="0" Grid.Row="3">
+                                                 <Label Text="{Binding FullDescription}" FontFamily="NotoSans" FontAutoScalingEnabled="True" FontSize="12" Margin="4,0" TextColor="#E3D092" />
+                                             </VerticalStackLayout>
+                                             <Image x:Name="SmWeatherIcon" Grid.Column="1" Grid.RowSpan="2" Grid.Row="2" WidthRequest="60" HeightRequest="60" Margin="4"  HorizontalOptions="Center" VerticalOptions="Center" Aspect="AspectFit" Source="{Binding Icon,Converter={StaticResource HttpClientConverter}}" />
+
+                                         </Grid>
+                                     </DataTemplate>
+                                 </CollectionView.ItemTemplate>
+                             </CollectionView>
+
+                         </Grid>
+                         
+                     </Grid>
+                 </DataTemplate>
+             </CollectionView.ItemTemplate>
+         </CollectionView>
+     </Border>-->
+   
+   
+   
+   /// More reference xaml for forecast page
+   
+   <AbsoluteLayout ZIndex="2" x:Name="ProgressUpdate" IsVisible="{Binding IsWorking}"  HorizontalOptions="Fill" VerticalOptions="Fill" BackgroundColor="{AppThemeBinding Dark={StaticResource White75}, Light={StaticResource Black75}}">
+            <Border 
+               
+               Background="{AppThemeBinding Dark={StaticResource Black}, Light={StaticResource White}}">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="12" />
+                </Border.StrokeShape>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height = "Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Label Text="Photographer's Forecast Progress" FontFamily="ManFont" FontSize="32" Grid.Row="0" HorizontalOptions="Center" Margin="4"/>
+
+
+                    <Label x:Name="ProgressInfo" Grid.Row="2" Text="{Binding Message}" TextColor="{AppThemeBinding Dark={StaticResource White}, Light={StaticResource Black}}"
+                   HorizontalOptions="Center" Margin="4"/>
+                </Grid>
+            </Border>
+        </AbsoluteLayout>
+        <ActivityIndicator x:Name="ProgressIndicator"  
+                   Grid.Row="0"
+                           Grid.RowSpan="3"
+                           Grid.Column="0"
+                           Grid.ColumnSpan="2"
+           WidthRequest="100" 
+           HeightRequest="100" 
+           IsEnabled="{Binding IsWorking}"
+           IsVisible="{Binding IsWorking}"
+           IsRunning="{Binding IsWorking}"
+           Style="{StaticResource WaitingSpinner}"
+           ZIndex="2"
+           VerticalOptions="Center"
+           HorizontalOptions="Center"/>
+        
+        <Border x:Name="ForecastBorder" Style="{StaticResource Key=ContentBorder}" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" >
+            <CollectionView x:Name="CarouselItems" ItemSizingStrategy="MeasureAllItems"  ItemsSource="{Binding PhotoDays}" HorizontalScrollBarVisibility="Never"
+                      
+                           
+                          Margin="10">
+                <CollectionView.ItemsLayout>
+                    <GridItemsLayout Orientation="Horizontal"/>
+                </CollectionView.ItemsLayout>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid x:Name="CollectionColumn">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid Grid.Column="0" Margin="4,0,4,0" WidthRequest="200">
+
+                                <VerticalStackLayout x:Name="DateInfoColumn">
+                                    <Label Text="Forecast" TextColor="#FFD075" FontSize="20" HorizontalTextAlignment="Center" Margin="4,0,4,0" FontFamily="ManFont"/>
+                                    <Label Text="{Binding Name}" HorizontalOptions="Center"/>
+                                    <Image Source="{Binding DailyImageSource}" Aspect="AspectFill" HeightRequest="84" WidthRequest="84" HorizontalOptions="Center" />
+                                    <Label Text="Summary:" HorizontalOptions="Start"/>
+                                    <Label Text="{Binding DailyForecast}"/>
+                                    <Label Text="Moon Phase:" HorizontalOptions="Start"/>
+                                    <Label Text="{Binding AstroData.MoonPhase}"/>
+                                </VerticalStackLayout>
+                            </Grid>
+                            <Grid Grid.Column="1" Margin="4,0" WidthRequest="200">
+                                <CarouselView ItemsSource="{Binding SelectedPhotoDayEvents}" 
+                                              
+                                            >
+                                    <CarouselView.ItemsLayout>
+                                        <LinearItemsLayout Orientation="Vertical"/>
+                                    </CarouselView.ItemsLayout>
+                                    <CarouselView.ItemTemplate>
+                                        <DataTemplate>
+                                           <Grid WidthRequest="200">
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <RowDefinition Height="Auto"/>
+                                                </Grid.RowDefinitions>
+                                                <Label Grid.Row="0" x:DataType="model:EventTime" Text="{Binding EventName}" HorizontalOptions="Center"/>
+                                                <HorizontalStackLayout Grid.Row="1">
+                                               <Label x:DataType="model:EventTime" Text="{Binding AstroTime, StringFormat='Time: {}{0:h:mm tt}'}" HorizontalOptions="Center"/>
+                                                    <Label x:DataType="model:EventTime" Text="{Binding OtherTime, TargetNullValue='', StringFormat='Until: {}{0:h:mm tt}'}" HorizontalOptions="Center"/>
+
+                                                </HorizontalStackLayout>
+                                                <Label Grid.Row="2" x:DataType="model:Hourly" Text="{Binding Name}" HorizontalOptions="Center"/>
+                                                <Image Grid.Row="3" x:DataType="model:Hourly" Source="{Binding HourlyImageSource}" Aspect="AspectFill" HeightRequest="48" WidthRequest="48" HorizontalOptions="Center"/>
+                                                <VerticalStackLayout Grid.Row="4" HorizontalOptions="Start"> 
+                                               <Label Text="Summary:" />
+                                                <Label x:DataType="model:Hourly" Text="{Binding HourlyForecast}" WidthRequest="180" LineBreakMode="WordWrap" />
+                                                </VerticalStackLayout>
+                                                </Grid>
+                                        </DataTemplate>
+                                    </CarouselView.ItemTemplate>
+                                </CarouselView>
+                            </Grid>
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </Border>
+        <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2">
+            <VerticalStackLayout x:Name="ForecastPageFooter" Grid.Row="2" Margin="20">
+                <Label x:Name="Message" Text="A helpful app brought to you by Boston from Above" FontSize="16" HorizontalOptions="Center" HorizontalTextAlignment="Center"/>
+            </VerticalStackLayout>
+        </Grid>
+    </ScrollView>
+</ContentPage>
+
+                                        
+                                        <!--<HorizontalStackLayout HorizontalOptions="Center">
+
+                                            <Label Text="{Binding SelectedPhotoDay.Date, StringFormat='for {0:D}'}" FontAttributes="Italic" TextColor="#FFD075" FontSize="12" Margin="4,0,4,0" FontFamily="NotoSans"/>
+                                        </HorizontalStackLayout>
+                                        <Image x:Name="WeatherIcon" WidthRequest="86" HeightRequest="86" Margin="8"  HorizontalOptions="Center" VerticalOptions="Center" Aspect="AspectFit" Source="{Binding SelectedPhotoDaySelectedDaily.DailyImageSource}" />
+                                        <Label Text="{Binding SelectedPhotoDaySelectedDaily.DailyForecast}" FontSize="12" TextColor="#FFD075" Margin="4,0,4,0" FontFamily="NotoSans" WidthRequest="250" LineBreakMode="WordWrap"/>
+                                        <HorizontalStackLayout HorizontalOptions="Center">
+                                            <CollectionView ItemsSource="{Binding SelectedPhotoDayHourlies}" SelectedItem="{Binding SelectedPhotoDaySelectedHourly}" HorizontalOptions="Center" VerticalOptions="Center" Margin="4,0,4,0">
+                                                <CollectionView.ItemsLayout>
+                                                    <GridItemsLayout Orientation="Horizontal" Span="1"/>
+                                                </CollectionView.ItemsLayout>
+                                                <CollectionView.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <HorizontalStackLayout>
+                                                            <Label Text="{Binding SelectedPhotoDaySelectedHourly.TimeOfDay, StringFormat='{0} Summary'}" FontSize="10" TextColor="#FFD075" Margin="4,0,4,0" FontFamily="NotoSans" HorizontalOptions="Center"/>
+                                                            <Label Text="{Binding SelectedPhotoDaySelectedHourly.StartTime, Converter={StaticResource TimeConverter}}" FontSize="10" TextColor="#FFD075" Margin="4,0,4,0" FontFamily="NotoSans" HorizontalOptions="Center"/>
+                                                            <Label Text="{Binding SelectedPhotoDaySelectedHourly.EndTime, Converter={StaticResource TimeConverter}}" FontSize="10" TextColor="#FFD075" Margin="4,0,4,0" FontFamily="NotoSans" HorizontalOptions="Center"/>
+                                                            <Label Text="{Binding SelectedPhotoDaySelectedHourly.HourlyForecast}" LineBreakMode="WordWrap" />
+                                                            <CollectionView ItemsSource="{Binding SelectedPhotoDaySelectedHourlyEvents}" SelectedItem="{Binding SelectedPhotoDaySelectedHourlySelectedEvent}" HorizontalOptions="Center" VerticalOptions="Center" Margin="4,0,4,0">
+                                                                <CollectionView.ItemsLayout>
+                                                                    <GridItemsLayout Orientation="Vertical" Span="1"/>
+                                                                </CollectionView.ItemsLayout>
+                                                                <CollectionView.ItemTemplate>
+                                                                    <DataTemplate>
+                                                                        <HorizontalStackLayout>
+                                                                            <Label Text="{Binding SelectedPhotoDaySelectedHourlySelectedEvent.EventName}" FontSize="10" TextColor="#FFD075" Margin="4,0,4,0" FontFamily="NotoSans" HorizontalOptions="Center"/>
+                                                                            <Label Text="{Binding SelectedPhotoDaySelectedHourlySelectedEvent.AstroTime, Converter={StaticResource TimeConverter}}" FontSize="10" TextColor="#FFD075" Margin="4,0,4,0" FontFamily="NotoSans" HorizontalOptions="Center"/>
+                                                                            <Label Text="{Binding SelectedPhotoDaySelectedHourlySelectedEvent.OtherTime, Converter={StaticResource TimeConverter}}" FontSize="10" TextColor="#FFD075" Margin="4,0,4,0" FontFamily="NotoSans" HorizontalOptions="Center"/>
+                                                                        </HorizontalStackLayout>
+                                                                    </DataTemplate>
+                                                                </CollectionView.ItemTemplate>
+                                                            </CollectionView>
+                                                        </HorizontalStackLayout>
+                                                    </DataTemplate>
+                                                </CollectionView.ItemTemplate>
+                                            </CollectionView>
+                                        </HorizontalStackLayout>
+
+
+                                    </VerticalStackLayout>
+                                </ScrollView>
+                            </Grid>
+                            <Grid x:Name="ForecastColumn" Grid.Column="1" Margin="4,0,4,0">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <CollectionView Grid.Row="0" x:Name="DailyForecastCollection" ItemSizingStrategy="MeasureAllItems" ItemsSource="{Binding EventDays[0]}"  VerticalScrollBarVisibility="Never">
+                                    <CollectionView.ItemsLayout>
+                                        <GridItemsLayout Orientation="Vertical" Span="1"/>
+                                    </CollectionView.ItemsLayout>
+                                    <CollectionView.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="*"/>
+                                                    <RowDefinition Height="Auto"/>
+                                                </Grid.RowDefinitions>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <VerticalStackLayout Grid.Row="0" Grid.ColumnSpan="2" Margin="10">
+                                                    <Label TextColor="#E3D092" Text="{Binding SelectedPhotoDaySelectedDaily.Name}" FontSize="22" FontAutoScalingEnabled="True" FontAttributes="Bold" FontFamily="ManFont" />
+                                                </VerticalStackLayout>
+                                                <HorizontalStackLayout Grid.Row="1" Grid.ColumnSpan="2">
+                                                    <Label x:Name="StartTimeLabel" Text="Start:" TextColor="#E3D092" HorizontalTextAlignment="Start" FontAutoScalingEnabled="True" FontAttributes="Bold"  FontFamily="NotoSans" FontSize="12" Margin="2,0"/>
+                                                    <Label Text="{Binding SelectedPhotoDaySelectedHourlySelectedEvent.AstroTime, StringFormat='{}{0:h:mm tt}'}" HorizontalTextAlignment="Start" FontAutoScalingEnabled="True" FontFamily="NotoSans" TextColor="#E3D092" FontSize="12" Margin="2,0"/>
+                                                    <Label FontSize="12" FontFamily="ManFont" FontAutoScalingEnabled="True" FontAttributes="Italic" Margin="4,0" TextColor="#E3D092">
+                                                        <Label.Triggers>
+                                                            <DataTrigger TargetType="Label" Binding="{Binding EventEnd,StringFormat='End: {}{0:hh:mm tt}'}" Value="{x:Null}">
+                                                                <Setter Property="IsVisible" Value="False" />
+                                                            </DataTrigger>
+                                                        </Label.Triggers>
+                                                    </Label>
+                                                    <Label x:Name="EndTimeLabel" Text="End:" HorizontalTextAlignment="Start" FontAttributes="Bold" TextColor="#E3D092" FontAutoScalingEnabled="True" FontFamily="NotoSans" FontSize="12" Margin="2,0">
+                                                        <Label.Triggers>
+                                                            <DataTrigger TargetType="Label" Binding="{Binding SelectedPhotoDaySelectedHourlySelectedEvent.OtherTime}" Value="{x:Null}">
+                                                                <Setter Property="IsVisible" Value="False" />
+                                                            </DataTrigger>
+                                                        </Label.Triggers>
+                                                    </Label>
+                                                    <Label x:Name="EndTime" Text="{Binding SelectedPhotoDaySelectedHourlySelectedEvent.OtherTime, StringFormat='{}{0:h:mm tt}'}" HorizontalTextAlignment="Start" TextColor="#E3D092" FontAutoScalingEnabled="True" FontFamily="NotoSans" FontSize="12" Margin="2,0">
+                                                        <Label.Triggers>
+                                                            <DataTrigger TargetType="Label" Binding="{Binding SelectedPhotoDaySelectedHourlySelectedEvent.OtherTime}" Value="{x:Null}">
+                                                                <Setter Property="IsVisible" Value="False" />
+                                                            </DataTrigger>
+                                                        </Label.Triggers>
+                                                    </Label>
+                                                </HorizontalStackLayout>
+
+                                                <Label Text="Forecast:" Grid.Row="2" Grid.Column="0" FontSize="14" HorizontalTextAlignment="Start" VerticalTextAlignment="Center" TextColor="#E3D092" FontAttributes="Italic" FontFamily="ManFont" />
+                                                <VerticalStackLayout Grid.Column="0" Grid.Row="3">
+                                                    <Label Text="{Binding SelectedPhotoDaySelectedHourly.HourlyForecast}" FontFamily="NotoSans" FontAutoScalingEnabled="True" FontSize="12" Margin="4,0" TextColor="#E3D092" />
+                                                </VerticalStackLayout>
+                                                <Image x:Name="SmWeatherIcon" Grid.Column="1" Grid.RowSpan="2" Grid.Row="2" WidthRequest="60" HeightRequest="60" Margin="4"  HorizontalOptions="Center" VerticalOptions="Center" Aspect="AspectFit" Source="{Binding SelectedPhotoDaySelectedHourly.HourlyImageSource}" />
+
+                                            </Grid>
+                                        </DataTemplate>
+                                    </CollectionView.ItemTemplate>
+                                </CollectionView>
+                                <CollectionView Grid.Row="1" x:Name="PhotoDaysCollection" ItemSizingStrategy="MeasureAllItems" ItemsSource="{Binding PhotoDays}" SelectedItem="{Binding SelectedPhotoDay}"  VerticalScrollBarVisibility="Never">
+                                    <CollectionView.ItemsLayout>
+                                        <GridItemsLayout Orientation="Vertical" Span="1"/>
+                                    </CollectionView.ItemsLayout>
+                                    <CollectionView.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="*"/>
+                                                    <RowDefinition Height="Auto"/>
+                                                </Grid.RowDefinitions>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <VerticalStackLayout Grid.Row="0" Grid.ColumnSpan="2" Margin="10">
+                                                    <Label TextColor="#E3D092" Text="{Binding  SelectedPhotoDaySelectedHourlySelectedEvent.EventName}" FontSize="22" FontAutoScalingEnabled="True" FontAttributes="Bold" FontFamily="ManFont" />
+                                                </VerticalStackLayout>
+                                                <HorizontalStackLayout Grid.Row="1" Grid.ColumnSpan="2">
+                                                    <Label x:Name="StartTimeLabel" Text="Start:" TextColor="#E3D092" HorizontalTextAlignment="Start" FontAutoScalingEnabled="True" FontAttributes="Bold"  FontFamily="NotoSans" FontSize="12" Margin="2,0"/>
+                                                    <Label Text="{Binding SelectedPhotoDaySelectedHourlySelectedEvent.AstroTime, StringFormat='{}{0:h:mm tt}'}" HorizontalTextAlignment="Start" FontAutoScalingEnabled="True" FontFamily="NotoSans" TextColor="#E3D092" FontSize="12" Margin="2,0"/>
+                                                    <Label FontSize="12" FontFamily="ManFont" FontAutoScalingEnabled="True" FontAttributes="Italic" Margin="4,0" TextColor="#E3D092">
+                          <Label.Triggers>
+                              <DataTrigger TargetType="Label" Binding="{Binding EventEnd,StringFormat='End: {}{0:hh:mm tt}'}" Value="{x:Null}">
+                                  <Setter Property="IsVisible" Value="False" />
+                              </DataTrigger>
+                          </Label.Triggers>
+                      </Label>
+                                                    <Label x:Name="EndTimeLabel" Text="End:" HorizontalTextAlignment="Start" FontAttributes="Bold" TextColor="#E3D092" FontAutoScalingEnabled="True" FontFamily="NotoSans" FontSize="12" Margin="2,0">
+                                                        <Label.Triggers>
+                                                            <DataTrigger TargetType="Label" Binding="{Binding SelectedPhotoDaySelectedHourlySelectedEvent.OtherTime}" Value="{x:Null}">
+                                                                <Setter Property="IsVisible" Value="False" />
+                                                            </DataTrigger>
+                                                        </Label.Triggers>
+                                                    </Label>
+                                                    <Label x:Name="EndTime" Text="{Binding SelectedPhotoDaySelectedHourlySelectedEvent.OtherTime, StringFormat='{}{0:h:mm tt}'}" HorizontalTextAlignment="Start" TextColor="#E3D092" FontAutoScalingEnabled="True" FontFamily="NotoSans" FontSize="12" Margin="2,0">
+                                                        <Label.Triggers>
+                                                            <DataTrigger TargetType="Label" Binding="{Binding SelectedPhotoDaySelectedHourlySelectedEvent.OtherTime}" Value="{x:Null}">
+                                                                <Setter Property="IsVisible" Value="False" />
+                                                            </DataTrigger>
+                                                        </Label.Triggers>
+                                                    </Label>
+                                                </HorizontalStackLayout>
+
+                                                <Label Text="Forecast:" Grid.Row="2" Grid.Column="0" FontSize="14" HorizontalTextAlignment="Start" VerticalTextAlignment="Center" TextColor="#E3D092" FontAttributes="Italic" FontFamily="ManFont" />
+                                                <VerticalStackLayout Grid.Column="0" Grid.Row="3">
+                                                    <Label Text="{Binding FullDescription}" FontFamily="NotoSans" FontAutoScalingEnabled="True" FontSize="12" Margin="4,0" TextColor="#E3D092" />
+                                                </VerticalStackLayout>
+                                                <Image x:Name="SmWeatherIcon" Grid.Column="1" Grid.RowSpan="2" Grid.Row="2" WidthRequest="60" HeightRequest="60" Margin="4"  HorizontalOptions="Center" VerticalOptions="Center" Aspect="AspectFit" Source="{Binding WeatherDetails.Icon,Converter={StaticResource HttpClientConverter}}" />
+
+                                            </Grid>
+                                        </DataTemplate>
+                                    </CollectionView.ItemTemplate>
+                                </CollectionView>
+                                <CollectionView Grid.Row="2" x:Name="ForecastCollection" ItemSizingStrategy="MeasureAllItems" ItemsSource="{Binding EventDays[2]}"  VerticalScrollBarVisibility="Never">
+                                    <CollectionView.ItemsLayout>
+                                        <GridItemsLayout Orientation="Vertical" Span="1"/>
+                                    </CollectionView.ItemsLayout>
+                                    <CollectionView.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="*"/>
+                                                    <RowDefinition Height="Auto"/>
+                                                </Grid.RowDefinitions>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <VerticalStackLayout Grid.Row="0" Grid.ColumnSpan="2" Margin="10">
+                                                    <Label TextColor="#E3D092" Text="{Binding  EventName}" FontSize="22" FontAutoScalingEnabled="True" FontAttributes="Bold" FontFamily="ManFont" />
+                                                </VerticalStackLayout>
+                                                <HorizontalStackLayout Grid.Row="1" Grid.ColumnSpan="2">
+                                                    <Label x:Name="StartTimeLabel" Text="Start:" TextColor="#E3D092" HorizontalTextAlignment="Start" FontAutoScalingEnabled="True" FontAttributes="Bold"  FontFamily="NotoSans" FontSize="12" Margin="2,0"/>
+                                                    <Label Text="{Binding EventStart, StringFormat='{}{0:h:mm tt}'}" HorizontalTextAlignment="Start" FontAutoScalingEnabled="True" FontFamily="NotoSans" TextColor="#E3D092" FontSize="12" Margin="2,0"/>
+                                                    <Label FontSize="12" FontFamily="ManFont" FontAutoScalingEnabled="True" FontAttributes="Italic" Margin="4,0" TextColor="#E3D092">
+                          <Label.Triggers>
+                              <DataTrigger TargetType="Label" Binding="{Binding EventEnd,StringFormat='End: {}{0:hh:mm tt}'}" Value="{x:Null}">
+                                  <Setter Property="IsVisible" Value="False" />
+                              </DataTrigger>
+                          </Label.Triggers>
+                      </Label>
+                                                    <Label x:Name="EndTimeLabel" Text="End:" HorizontalTextAlignment="Start" FontAttributes="Bold" TextColor="#E3D092" FontAutoScalingEnabled="True" FontFamily="NotoSans" FontSize="12" Margin="2,0">
+                                                        <Label.Triggers>
+                                                            <DataTrigger TargetType="Label" Binding="{Binding EventEnd}" Value="{x:Null}">
+                                                                <Setter Property="IsVisible" Value="False" />
+                                                            </DataTrigger>
+                                                        </Label.Triggers>
+                                                    </Label>
+                                                    <Label x:Name="EndTime" Text="{Binding EventEnd, StringFormat='{}{0:h:mm tt}'}" HorizontalTextAlignment="Start" TextColor="#E3D092" FontAutoScalingEnabled="True" FontFamily="NotoSans" FontSize="12" Margin="2,0">
+                                                        <Label.Triggers>
+                                                            <DataTrigger TargetType="Label" Binding="{Binding EventEnd}" Value="{x:Null}">
+                                                                <Setter Property="IsVisible" Value="False" />
+                                                            </DataTrigger>
+                                                        </Label.Triggers>
+                                                    </Label>
+                                                </HorizontalStackLayout>
+
+                                                <Label Text="Forecast:" Grid.Row="2" Grid.Column="0" FontSize="14" HorizontalTextAlignment="Start" VerticalTextAlignment="Center" TextColor="#E3D092" FontAttributes="Italic" FontFamily="ManFont" />
+                                                <VerticalStackLayout Grid.Column="0" Grid.Row="3">
+                                                    <Label Text="{Binding FullDescription}" FontFamily="NotoSans" FontAutoScalingEnabled="True" FontSize="12" Margin="4,0" TextColor="#E3D092" />
+                                                </VerticalStackLayout>
+                                                <Image x:Name="SmWeatherIcon" Grid.Column="1" Grid.RowSpan="2" Grid.Row="2" WidthRequest="60" HeightRequest="60" Margin="4"  HorizontalOptions="Center" VerticalOptions="Center" Aspect="AspectFit" Source="{Binding WeatherDetails.Icon,Converter={StaticResource HttpClientConverter}}" />
+
+                                            </Grid>
+                                        </DataTemplate>
+                                    </CollectionView.ItemTemplate>
+                                </CollectionView>
+
+                            </Grid>
+
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </Border>
+        <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2">
+            <VerticalStackLayout x:Name="ForecastPageFooter" Grid.Row="2" Margin="20">
+                <Label x:Name="Message" Text="A helpful app brought to you by Boston from Above" FontSize="16" HorizontalOptions="Center" HorizontalTextAlignment="Center"/>
+            </VerticalStackLayout>
+        </Grid>
+    </Grid>
+</ContentPage> -->
+
+
+
+///// GetGfsData HourTemp Code
+    //      }
+
+       //     SS.HourlyCollection.OrderBy(h => h.StartTime).GroupBy(d => new { d.StartTime.Date, d.TimeOfDay }).ToObservableCollection();
+
+
+       // Load the temporry List into the GfsDataServiceHourlyTimeTemp
+       // gfsDataService.HourlyTimeTemps = new ObservableCollection<GfsHourlyTimeTemp>(timeTemp);
+
+
+       //if (gfsDataService.DailyForecasts[h].IsDaytime)
+       //{
+       //    //3. Filter the hourly temps for the maximum temperature
+       //    var highestHourlyRecord = gfsDataService.HourlyForecasts
+       //        .Where(t => t.AstroTime >= startTime && t.OtherTime <= endTime)
+       //        .OrderByDescending(t => t.Temperature).FirstOrDefault(new GfsHourlyForecast { Temperature = 0, AstroTime = startTime });
+       //    gfsDataService.DailyForecasts[h].DailyHighTemp = highestHourlyRecord.Temperature;
+       //    gfsDataService.DailyForecasts[h].DailyHighTime = highestHourlyRecord.AstroTime;
+       //}
+       //else if (!gfsDataService.DailyForecasts[h].IsDaytime)
+       //{
+       //    // 2. Filter the hourly temps once and find the record with the minimum temperature
+       //    var lowestHourlyRecord = gfsDataService.HourlyForecasts
+       //        .Where(t => t.AstroTime >= startTime && t.OtherTime <= endTime)
+       //        .OrderBy(t => t.Temperature).FirstOrDefault(new GfsHourlyForecast { Temperature = 0, AstroTime = startTime });
+       //    gfsDataService.DailyForecasts[h].DailyLowTemp = lowestHourlyRecord.Temperature;
+       //    gfsDataService.DailyForecasts[h].DailyLowTime = lowestHourlyRecord.AstroTime;
+       //}
+
+
+       //    // 3. Format and assign the string safely if a record was found
+       //    if (lowestHourlyRecord != null)
+       //    gfsDataService.DailyForecasts[h].DailyLow = $"{lowestHourlyRecord.Temperature}°{lowestHourlyRecord.TemperatureUnit} at {lowestHourlyRecord.AstroTime:h tt}";
+       //if (highestHourlyRecord != null)
+       //    gfsDataService.DailyForecasts[h].DailyHigh = $"{highestHourlyRecord.Temperature}°{highestHourlyRecord.TemperatureUnit} at {highestHourlyRecord.AstroTime:h tt}";
+       //      });
+       // }
+       //  }
+	   
+	   
+	   //      }
+//}
+
+
+//                //    GridDetailData.Rootobject details = new GridDetailData.Rootobject();
+//                //    using (var httpClient = new HttpClient())
+//                //    {
+//                //        var request = new HttpRequestMessage(HttpMethod.Get, gfs.ForecastGridDataUrl);
+//                //        request.Headers.UserAgent.Add(new System.Net.Http.Headers.ProductInfoHeaderValue("PfApp", "3.0"));
+//                //        var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+//                //        if (response.IsSuccessStatusCode)
+//                //        {
+//                //            details = await response.Content.ReadFromJsonAsync<GridDetailData.Rootobject>() ?? new GridDetailData.Rootobject();
+//                //        }
+
+//                //    }
+
+//                //    if (details != null)
+//                //    {
+//                //        for (int q = 0; q < gfs.HourlyForecasts.Length; q++)
+//                //        {
+//                //            // 1. Find the matching data point first to avoid multiple parses
+//                //            var windChill = details.properties.windChill.values
+//                //            .FirstOrDefault(t => DateTime.Parse(t.validTime.Split('/')[0]) == DateTime.Parse(gfs.HourlyForecasts[q].AstroTime.ToString("o")));
+
+//                //            // 2. Perform the transformation and assignment
+//                //            gfs.HourlyForecasts[q].WindChill = windChill?.value != null
+//                //                ? $"{Math.Round(((double)windChill.value * 1.8) + 32, 0)}°F"
+//                //                : "N/A";
+
+//                //            // 1. Find the matching data point first to avoid multiple parses
+//                //            var windGusts = details.properties.windGust.values
+//                //            .FirstOrDefault(t => DateTime.Parse(t.validTime.Split('/')[0]) == DateTime.Parse(gfs.HourlyForecasts[q].AstroTime.ToString("o")));
+
+//                //            // 2. Perform the transformation and assignment
+//                //            gfs.HourlyForecasts[q].WindGust = windGusts?.value != null
+//                //                ? $"{Math.Round(((double)windGusts.value * 0.621371), 2)} mph"
+//                //                : "N/A";
+
+//                //            // 1. Find the matching data point first to avoid multiple parses
+//                //            var heatIndex = details.properties.heatIndex.values
+//                //            .FirstOrDefault(t => DateTime.Parse(t.validTime.Split('/')[0]) == DateTime.Parse(gfs.HourlyForecasts[q].AstroTime.ToString("o")));
+
+//                //            // 2. Perform the transformation and assignment
+//                //            gfs.HourlyForecasts[q].HeatIndex = heatIndex?.value != null
+//                //                ? $"{Math.Round(((double)heatIndex.value * 1.8) + 32, 0)}°F"
+//                //                : "N/A";
+//                //            var apparentTemp = details.properties.apparentTemperature.values
+//                //                .FirstOrDefault(t => DateTime.Parse(t.validTime.Split('/')[0]) == DateTime.Parse(gfs.HourlyForecasts[q].AstroTime.ToString("o")));
+//                //            gfs.HourlyForecasts[q].ApparentTemperature = apparentTemp?.value != null
+//                //                ? $"{Math.Round(((double)apparentTemp.value * 1.8) + 32, 0)}°F"
+//                //                : "N/A";
+//                //            var skyCover = details.properties.skyCover.values
+//                //                .FirstOrDefault(t => DateTime.Parse(t.validTime.Split('/')[0]) == DateTime.Parse(gfs.HourlyForecasts[q].AstroTime.ToString("o")));
+//                //            gfs.HourlyForecasts[q].SkyCover = skyCover?.value != null
+//                //                ? $"{skyCover.value}%"
+//                //                : "N/A";
+//                //            var wBGT = details.properties.wetBulbGlobeTemperature.values
+//                //                .FirstOrDefault(t => DateTime.Parse(t.validTime.Split('/')[0]) == DateTime.Parse(gfs.HourlyForecasts[q].AstroTime.ToString("o")));
+//                //            gfs.HourlyForecasts[q].WetBulbGlobeTemperature = wBGT?.value != null
+//                //                ? $"{Math.Round(((double)wBGT.value * 1.8) + 32, 0)}°F"
+//                //                : "N/A";
+//                //            var quantitativePrecipitation = details.properties.quantitativePrecipitation.values
+//                //                .FirstOrDefault(t => DateTime.Parse(t.validTime.Split('/')[0]) == DateTime.Parse(gfs.HourlyForecasts[q].AstroTime.ToString("o")));
+//                //            gfs.HourlyForecasts[q].QuantitativePrecipitation = quantitativePrecipitation?.value != null
+//                //            ? $"{(double)quantitativePrecipitation.value / 25.4} inches"
+//                //            : "N/A";
+//                //            var weatherValues = details.properties.weather.values
+//                //                .FirstOrDefault(t => DateTime.Parse(t.validTime.Split('/')[0]) == DateTime.Parse(gfs.HourlyForecasts[q].AstroTime.ToString("o")));
+//                //            gfs.HourlyForecasts[q].Weather = weatherValues?.value != null
+//                //                ? new GfsDetailForecastWeather
+//                //                {
+//                //                    Coverage = weatherValues.value[0].coverage,
+//                //                    Intensity = weatherValues.value[0].intensity,
+//                //                    Weather = weatherValues.value[0].weather,
+//                //                    Attributes = weatherValues.value[0].attributes != null ? string.Join(", ", weatherValues.value[0].attributes) : "None",
+//                //                    Visibility = weatherValues.value[0].visibility != null ? string.Concat(weatherValues.value[0].visibility.value) : "N/A"
+//                //                }.WeatherSummary
+//                //                : "N/A";
+//                //        }
+//                //    }
+
+//            });
+//        }
+//    }
+//}

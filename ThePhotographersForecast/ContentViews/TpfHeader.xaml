@@ -1,0 +1,59 @@
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ThePhotographersForecast.ContentViews.TpfHeader"
+            xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit" xmlns:d="http://schemas.microsoft.com/dotnet/2021/maui/design"
+             SizeChanged="OnPageSizeChanged">
+    <Border Style="{StaticResource ContentBorder}">
+        <Grid x:Name="SiteWideHeader" HorizontalOptions="Fill">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0" HorizontalOptions="Fill">
+                <Image x:Name="Logo" 
+                       Source="initials.png"  
+                       Opacity="0" 
+                       Aspect="AspectFill" 
+                       MaximumWidthRequest="250" 
+                       MaximumHeightRequest="250" 
+                       HorizontalOptions="Center" 
+                       VerticalOptions="Center" 
+                       Margin="0,60,0,0"/>
+                <VerticalStackLayout x:Name="Header" 
+                                     HorizontalOptions="Fill"  
+                                     Margin="0,30,0,0">
+                    <Label x:Name="Title" 
+                           TextColor="{StaticResource GlowInDark}" 
+                           Shadow="4,4,8,#020600,1"
+                           Opacity="0" 
+                           Text="The Photographer's Forecast" 
+                           FontFamily="ManFont" 
+                           LineBreakMode="NoWrap"
+                           HorizontalTextAlignment="Center" 
+                           VerticalTextAlignment="Center"
+                           VerticalOptions="Center" 
+                           HorizontalOptions="Center" />
+                </VerticalStackLayout>
+            </Grid>
+            <VerticalStackLayout Grid.Row="1" Margin="40,10" HorizontalOptions="Center">
+                <Label x:Name="Welcome"  
+                        Text="Welcome to The Photographer's Forecast! " 
+                        TextColor="{StaticResource Mint}" 
+                        FontSize="20"
+                       FontAutoScalingEnabled="True"
+                       Margin="0,10,0,10"
+                       HorizontalOptions="Center"
+                       FontFamily="ManFont"/>
+                <Label x:Name="Message" 
+               FontFamily="Jost" 
+               TextColor="{StaticResource Mint}"  
+               FontSize="14" 
+               LineBreakMode="WordWrap" 
+               Text="This is intended for outdoor photographers, people who want to keep up with the weather at various locations and have an interest in when daily astronomical events happen.This app has been created by Boston from Above, a premiere aerial cinematography company that services the metro Boston, Massachusetts area and beyond. Please visit us at https://BostonfromAbove.com for more details." 
+               HorizontalTextAlignment="Start"
+               Margin="0,10"
+               HorizontalOptions="Center"/>
+            </VerticalStackLayout>
+        </Grid>
+    </Border>
+</ContentView>
