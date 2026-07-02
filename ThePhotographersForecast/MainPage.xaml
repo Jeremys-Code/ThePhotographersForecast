@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ThePhotographersForecast.MainPage"
+             Title="MainPage">
+    <VerticalStackLayout>
+        <Label Text="The Photographer's Forecast" FontSize="Header" FontFamily="ManFont" HorizontalTextAlignment="Center" HorizontalOptions="Center" Margin="20"/>
+        <Button Text="Start Your Adventure Here!!!" Clicked="Button_Clicked" HorizontalOptions="Center" VerticalOptions="Center" Margin="20" Padding="20" CornerRadius="8"/>
+    </VerticalStackLayout>
+</ContentPage>

@@ -1,0 +1,232 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFrameworks>net10.0-android</TargetFrameworks>
+		<!--<TargetFrameworks Condition="!$([MSBuild]::IsOSPlatform('linux'))">$(TargetFrameworks);net10.0-ios;net10.0-maccatalyst</TargetFrameworks>-->
+		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net10.0-windows10.0.22621.0</TargetFrameworks>
+
+		<!-- Note for MacCatalyst:
+		The default runtime is maccatalyst-x64, except in Release config, in which case the default is maccatalyst-x64;maccatalyst-arm64.
+		When specifying both architectures, use the plural <RuntimeIdentifiers> instead of the singular <RuntimeIdentifier>.
+		The Mac App Store will NOT accept apps with ONLY maccatalyst-arm64 indicated;
+		either BOTH runtimes must be indicated or ONLY macatalyst-x64. -->
+		<!-- For example: <RuntimeIdentifiers>maccatalyst-x64;maccatalyst-arm64</RuntimeIdentifiers> -->
+
+		<OutputType>Exe</OutputType>
+		<RootNamespace>ThePhotographersForecast</RootNamespace>
+		<UseMaui>true</UseMaui>
+		<SingleProject>true</SingleProject>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<!-- Enable Material 3 design on Android -->
+		<!--<UseMaterial3>true</UseMaterial3> -->
+
+		<!-- Enable XAML source generation for faster build times and improved performance.
+		     This generates C# code from XAML at compile time instead of runtime inflation.
+		     To disable, remove this line.
+		     For individual files, you can override by setting Inflator metadata:
+		       <MauiXaml Update="MyPage.xaml" Inflator="Default" /> (reverts to defaults: Runtime for Debug, XamlC for Release)
+		       <MauiXaml Update="MyPage.xaml" Inflator="Runtime" /> (force runtime inflation) -->
+		<MauiXamlInflator>SourceGen</MauiXamlInflator>
+
+		<!-- Display name (avoid characters that can break packaging tasks) -->
+		<ApplicationTitle>The Photographers Forecast</ApplicationTitle>
+
+		<!-- App Identifier -->
+		<ApplicationId>com.bostonfromabove.thephotographersforecast</ApplicationId>
+
+		<!-- Versions -->
+		<ApplicationDisplayVersion>1.00</ApplicationDisplayVersion>
+		<ApplicationVersion>1</ApplicationVersion>
+
+		<!-- To develop, package, and publish an app to the Microsoft Store, see: https://aka.ms/MauiTemplateUnpackaged -->
+		<WindowsPackageType>None</WindowsPackageType>
+		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">15.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">35.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.20348.0</SupportedOSPlatformVersion>
+		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.20348.0</TargetPlatformMinVersion>
+		<UserSecretsId>e1023fcc-f14f-41d3-b963-94d92b62633a</UserSecretsId>
+	</PropertyGroup>
+	
+	
+	<ItemGroup>
+		<!-- App Icon -->
+		<MauiIcon Include="Resources\AppIcon\appicon.svg" Color="#BEFCA6" />
+
+		<!-- Splash Screen -->
+		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#BEFCA6" BaseSize="424,520" />
+
+		<!-- Images -->
+		<MauiImage Include="Resources\Images\*" />
+		<MauiImage Include="Resources\Images\icon\bkn.png" />
+		<MauiImage Include="Resources\Images\icon\blizzard.png" />
+		<MauiImage Include="Resources\Images\icon\cold.png" />
+		<MauiImage Include="Resources\Images\icon\du.png" />
+		<MauiImage Include="Resources\Images\icon\fc.png" />
+		<MauiImage Include="Resources\Images\icon\few.png" />
+		<MauiImage Include="Resources\Images\icon\fg.png" />
+		<MauiImage Include="Resources\Images\icon\fu.png" />
+		<MauiImage Include="Resources\Images\icon\fzra.png" />
+		<MauiImage Include="Resources\Images\icon\fzra_sn.png" />
+		<MauiImage Include="Resources\Images\icon\hi_nshwrs.png" />
+		<MauiImage Include="Resources\Images\icon\hi_ntsra.png" />
+		<MauiImage Include="Resources\Images\icon\hi_shwrs.png" />
+		<MauiImage Include="Resources\Images\icon\hi_tsra.png" />
+		<MauiImage Include="Resources\Images\icon\hot.png" />
+		<MauiImage Include="Resources\Images\icon\hur_warn.png" />
+		<MauiImage Include="Resources\Images\icon\hur_watch.png" />
+		<MauiImage Include="Resources\Images\icon\hz.png" />
+		<MauiImage Include="Resources\Images\icon\ip.png" />
+		<MauiImage Include="Resources\Images\icon\minus_ra.png" />
+		<MauiImage Include="Resources\Images\icon\nbkn.png" />
+		<MauiImage Include="Resources\Images\icon\nblizzard.png" />
+		<MauiImage Include="Resources\Images\icon\ncold.png" />
+		<MauiImage Include="Resources\Images\icon\ndu.png" />
+		<MauiImage Include="Resources\Images\icon\nfc.png" />
+		<MauiImage Include="Resources\Images\icon\nfew.png" />
+		<MauiImage Include="Resources\Images\icon\nfg.png" />
+		<MauiImage Include="Resources\Images\icon\nfu.png" />
+		<MauiImage Include="Resources\Images\icon\nfzra.png" />
+		<MauiImage Include="Resources\Images\icon\nfzra_sn.png" />
+		<MauiImage Include="Resources\Images\icon\nip.png" />
+		<MauiImage Include="Resources\Images\icon\novc.png" />
+		<MauiImage Include="Resources\Images\icon\nra.png" />
+		<MauiImage Include="Resources\Images\icon\nraip.png" />
+		<MauiImage Include="Resources\Images\icon\nra_fzra.png" />
+		<MauiImage Include="Resources\Images\icon\nra_sn.png" />
+		<MauiImage Include="Resources\Images\icon\nsct.png" />
+		<MauiImage Include="Resources\Images\icon\nscttsra.png" />
+		<MauiImage Include="Resources\Images\icon\nshra.png" />
+		<MauiImage Include="Resources\Images\icon\nskc.png" />
+		<MauiImage Include="Resources\Images\icon\nsn.png" />
+		<MauiImage Include="Resources\Images\icon\nsnip.png" />
+		<MauiImage Include="Resources\Images\icon\ntor.png" />
+		<MauiImage Include="Resources\Images\icon\ntsra.png" />
+		<MauiImage Include="Resources\Images\icon\nwind_bkn.png" />
+		<MauiImage Include="Resources\Images\icon\nwind_few.png" />
+		<MauiImage Include="Resources\Images\icon\nwind_ovc.png" />
+		<MauiImage Include="Resources\Images\icon\nwind_sct.png" />
+		<MauiImage Include="Resources\Images\icon\nwind_skc.png" />
+		<MauiImage Include="Resources\Images\icon\ovc.png" />
+		<MauiImage Include="Resources\Images\icon\ra.png" />
+		<MauiImage Include="Resources\Images\icon\raip.png" />
+		<MauiImage Include="Resources\Images\icon\ra_fzra.png" />
+		<MauiImage Include="Resources\Images\icon\ra_sn.png" />
+		<MauiImage Include="Resources\Images\icon\sct.png" />
+		<MauiImage Include="Resources\Images\icon\scttsra.png" />
+		<MauiImage Include="Resources\Images\icon\shra.png" />
+		<MauiImage Include="Resources\Images\icon\skc.png" />
+		<MauiImage Include="Resources\Images\icon\sn.png" />
+		<MauiImage Include="Resources\Images\icon\snip.png" />
+		<MauiImage Include="Resources\Images\icon\tor.png" />
+		<MauiImage Include="Resources\Images\icon\tsra.png" />
+		<MauiImage Include="Resources\Images\icon\ts_nowarn.png" />
+		<MauiImage Include="Resources\Images\icon\ts_warn.png" />
+		<MauiImage Include="Resources\Images\icon\ts_watch.png" />
+		<MauiImage Include="Resources\Images\icon\wind_bkn.png" />
+		<MauiImage Include="Resources\Images\icon\wind_few.png" />
+		<MauiImage Include="Resources\Images\icon\wind_ovc.png" />
+		<MauiImage Include="Resources\Images\icon\wind_sct.png" />
+		<MauiImage Include="Resources\Images\icon\wind_skc.png" />
+		
+		<!-- Custom Fonts -->
+		<MauiFont Include="Resources\Fonts\hennypenny.ttf" />
+		<MauiFont Include="Resources\Fonts\jost.ttf" />
+		<MauiFont Include="Resources\Fonts\notosans.ttf" />
+		<MauiFont Include="Resources\Fonts\notosansitalic.ttf" />
+		<MauiFont Include="Resources\Fonts\FluentSystemIcons-Regular.ttf" />
+		<MauiFont Include="Resources\Fonts\FluentSystemIcons-Filled.ttf" />
+		<MauiFont Include="Resources\Fonts\FluentSystemIcons-Light.ttf" />
+		<MauiFont Include="Resources\Fonts\FluentSystemIcons-Resizable.ttf" />
+
+		<!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
+		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Compile Remove="Database\Constants.cs" />
+	  <Compile Remove="Database\DataAccess.cs" />
+	  <Compile Remove="Data\AppUri.cs" />
+	  <Compile Remove="Models\ForecastEventModel.cs" />
+	  <Compile Remove="Services\GetGfsData.cs" />
+	  <Compile Remove="Services\GetPhotoDay.cs" />
+	  <Compile Remove="Services\GetPhotoSchedules.cs" />
+	  <Compile Remove="Services\HttpClientConverter.cs" />
+	  <Compile Remove="Services\ImageCacheService.cs" />
+	  <Compile Remove="Services\IWeatherService.cs" />
+	  <Compile Remove="Services\ServiceHelper.cs" />
+	  <Compile Remove="Services\TimeConverter.cs" />
+	  <Compile Remove="Shared\ISessionStore.cs" />
+	  <Compile Remove="Shared\SessionStore.cs" />
+	  <Compile Remove="Validations\WeatherPayloadValidation.cs" />
+	  <Compile Remove="ViewModels\CalendarViewModel.cs" />
+	  <Compile Remove="ViewModels\CombineViewModels.cs" />
+	  <Compile Remove="ViewModels\PhotoTimeTrackViewModel.cs" />
+	  <Compile Remove="Views\Calendar.xaml.cs" />
+	  <Compile Remove="Views\OldForecast.xaml.cs" />
+	  <Compile Remove="Views\PhotoTimeTrack.xaml.cs" />
+	  <Compile Remove="Views\TimeLine.xaml.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <MauiXaml Remove="Views\Calendar.xaml" />
+	  <MauiXaml Remove="Views\OldForecast.xaml" />
+	  <MauiXaml Remove="Views\PhotoTimeTrack.xaml" />
+	  <MauiXaml Remove="Views\TimeLine.xaml" />
+	</ItemGroup>
+
+	
+
+	<ItemGroup>
+		<PackageReference Include="CommunityToolkit.Maui" Version="14.2.0" />
+		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.9" />
+		<PackageReference Include="Microsoft.Extensions.Http" Version="10.0.9" />
+		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.71" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.9" />
+		<PackageReference Include="Microsoft.Maui.Controls.Foldable" Version="10.0.71" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+		<PackageReference Include="SkiaSharp" Version="4.148.0" />
+	</ItemGroup>
+
+
+
+	<ItemGroup>
+	  <MauiXaml Update="ContentViews\TpfHeader.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="MainPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\Forecast.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\SelectLocation.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\Settings.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	</ItemGroup>
+
+
+
+	<ItemGroup>
+	  <Folder Include="Database\" />
+	  <Folder Include="Shared\" />
+	</ItemGroup>
+
+
+
+	<ItemGroup>
+	  <Compile Update="Views\forecast.xaml.cs">
+	    <DependentUpon>Forecast.xaml</DependentUpon>
+	  </Compile>
+	  <Compile Update="Views\Settings.xaml.cs">
+	    <DependentUpon>Settings.xaml</DependentUpon>
+	  </Compile>
+	</ItemGroup>
+
+</Project>
