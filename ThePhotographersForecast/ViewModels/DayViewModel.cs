@@ -22,6 +22,6 @@ namespace ThePhotographersForecast.ViewModels
         [ObservableProperty]
         private ImageSource dailyIcon;
         [ObservableProperty]
-        private EventsViewModel[] dailyEvents;
+        private EventModel dailyEvents;
     }
 }

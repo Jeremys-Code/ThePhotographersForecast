@@ -71,10 +71,10 @@ namespace ThePhotographersForecast.Models
     {
         public int Number { get; set; }
 
-        public string Name => String.Concat(this.StartTime.ToString("dddd"), " ", Services.GetTimeOfDay.TimeOfDay(this.StartTime.Hour), " @ ", this.StartTime.ToString("h tt"));
+        public string Name => String.Concat(this.StartTime.ToString("dddd"), " ", Services.GetTimeOfDay.CalcTimeOfDay(this.StartTime.Hour).ToString(), " @ ", this.StartTime.ToString("h tt"));
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
-        public string TimeOfDay => Services.GetTimeOfDay.TimeOfDay(this.StartTime.Hour);
+        public string TimeOfDay => Services.GetTimeOfDay.CalcTimeOfDay(this.StartTime.Hour).ToString();
         public bool IsDaytime { get; set; }
 
         public double Temperature { get; set; }

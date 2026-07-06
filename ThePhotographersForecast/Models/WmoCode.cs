@@ -12,5 +12,6 @@ namespace ThePhotographersForecast.Models
         public int IsDay { get; set; }
         public string Description { get; set; } = string.Empty;
         public string Icon { get; set; } = string.Empty;
+        public ImageSource IconImage => ImageSource.FromFile(this.Icon);
     }
 }

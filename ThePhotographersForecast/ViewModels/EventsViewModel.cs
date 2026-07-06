@@ -10,8 +10,6 @@ namespace ThePhotographersForecast.ViewModels
         public string timeOfDay => this.GetEvent.TimeOfDay;
         public string EventName => this.GetEvent.EventName;
         public DateTime EventTime => this.GetEvent.AstroTime;
-        public DateTime? EndTime => this.GetEvent.OtherTime;
-
         [ObservableProperty]
         private HourlyForecast currentHourly;
         public string HourlyName => this.CurrentHourly.Name;

@@ -3,6 +3,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Maui.Foldable;
 using System.Net.Http.Headers;
 using ThePhotographersForecast.Services;
+using ThePhotographersForecast.Services.Modules;
+using ThePhotographersForecast.Shared;
 using ThePhotographersForecast.ViewModels;
 
 
@@ -30,7 +32,6 @@ namespace ThePhotographersForecast
                 });
             builder.UseFoldable();
 
-
             // Registered HttpClientFactory
             builder.Services.AddHttpClient("photographer", c =>
             {
@@ -39,7 +40,7 @@ namespace ThePhotographersForecast
             // Register the database
             //          builder.Services.AddSingleton<Database.DataAccess>();
             // Register Shared Session Service
-            //builder.Services.AddSingleton<ISessionStore, SessionStore>();
+            builder.Services.AddSingleton<Session>();
             // Register the View Models
             builder.Services.AddSingleton<SettingsViewModel>();
             builder.Services.AddSingleton<SelectLocationViewModel>();
@@ -48,7 +49,8 @@ namespace ThePhotographersForecast
             // Register Services
             builder.Services.AddSingleton<GetWeatherService>();
             builder.Services.AddSingleton<WeatherReporter>();
-            builder.Services.AddSingleton<GetTimesOfDayData>();
+            builder.Services.AddSingleton<GetEventService>();
+            builder.Services.AddSingleton<SkyColorEngine>();
             //   builder.Services.AddSingleton<AzureMapsLocationService>();
             // Register the Views
 

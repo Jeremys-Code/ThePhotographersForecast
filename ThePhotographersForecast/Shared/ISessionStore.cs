@@ -7,6 +7,10 @@ namespace ThePhotographersForecast.Shared
 {
     public interface ISessionStore
     {
+        // Example service interface
+
+        void Initialize(IServiceProvider services);
+
         MappedDaily[] DailyCollection { get; set; }
         ObservableCollection<DateTime> DailyStartTimes { get; set; }
         DateTime EndDateTime { get; set; }

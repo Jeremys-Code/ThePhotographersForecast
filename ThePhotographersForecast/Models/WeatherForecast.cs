@@ -23,14 +23,16 @@ namespace ThePhotographersForecast.Models
         private DailyForecast dayForecast;
         [ObservableProperty]
         private HourlyForecast[] hourlyForecasts;
+        [ObservableProperty]
+        private ObservableCollection<EventTime> eventTimes;
     }
     public partial class HourlyForecast : ObservableObject
     {
-        public string Name => String.Concat(this.Time.ToString("dddd"), " ", Services.GetTimeOfDay.TimeOfDay(this.Time.Hour), " @ ", this.Time.ToString("h tt"));
+        public string Name => String.Concat(this.Time.ToString("dddd"), " ", Services.GetTimeOfDay.CalcTimeOfDay(this.Time.Hour), " @ ", this.Time.ToString("h tt"));
         [ObservableProperty]
         private DateTime time;
         public DateOnly Date => DateOnly.FromDateTime(this.Time);
-        public string TimeOfDay => Services.GetTimeOfDay.TimeOfDay(this.Time.Hour);
+        public string TimeOfDay => String.Concat(Services.GetTimeOfDay.CalcTimeOfDay(this.Time.Hour));
         [ObservableProperty]
         private Measurement temperature2m;
         [ObservableProperty]
@@ -160,9 +162,9 @@ namespace ThePhotographersForecast.Models
         [ObservableProperty]
         private string precipitationSummary;
         [ObservableProperty]
-        private ObservableCollection<EventTime> dailyEvents;
-        [ObservableProperty]
-        private DailyAstronomicalData astronomicalData;
+        private EventModel dailyEvents;
+        //[ObservableProperty]
+        //private DailyAstronomicalData astronomicalData;
         [ObservableProperty]
         private ObservableCollection<HourlyForecast> hourlyForecasts;
     }

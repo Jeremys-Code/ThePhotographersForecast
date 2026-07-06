@@ -60,7 +60,21 @@
         public double? Dust { get; set; }
         public double? UvIndex { get; set; }
         public double? UvIndexClearSky { get; set; }
-        public double Irradiance { get; set; },   
+
+        /// <summary>
+        /// Direct Solar Radiation(or Direct Normal Irradiance - DNI) : 
+        /// This is the direct light traveling in a straight line from the sun to the earth.For a photographer, 
+        /// this translates to harsh directional shadows and the intense, warm beams of golden hour.
+        /// Diffuse Solar Radiation (DHI): This is the sunlight that has been scattered by molecules, aerosols, 
+        /// and clouds in the atmosphere. This is the most crucial variable for your sky color logic, as it 
+        /// dictates the ambient light and the glowing reds, pinks, and purples in the sky during sunrise 
+        /// and sunset.Shortwave Solar Radiation (GHI): This is the total global horizontal irradiation (essentially
+        /// Direct + Diffuse). It's helpful as a baseline for total ambient brightness.
+        /// </summary>
+        public double SurfacePressure { get; set; }
+        public double DiffuseRadiation { get; set; }
+        public double DirectNormalIrradiance { get; set; }
+        public double ShortwaveRadiation { get; set; }
         public double CloudCoverPercent { get; set; }
         public double SunAltitudeDeg { get; set; }
         public double SunAzimuthDeg { get; set; }

@@ -1,7 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Net.Http.Json;
-using ThePhotographersForecast.Data;
-using ThePhotographersForecast.Models;
 
 namespace ThePhotographersForecast.Services
 {
@@ -85,6 +82,9 @@ namespace ThePhotographersForecast.Services
             }
             return null;
         }
+
+
+
 
         public static async Task<(double lat, double lon)?> VerifyPermissionAsync()
         {

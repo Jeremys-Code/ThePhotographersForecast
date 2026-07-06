@@ -10,8 +10,22 @@
              BackgroundImageSource="commonwealthmall.jpg"
              Title="Select Location">
     <ScrollView x:Name="PageScrollView" Margin="10" HorizontalScrollBarVisibility="Never" VerticalScrollBarVisibility="Default">
-        <VerticalStackLayout x:Name="PageContainer">
-        <cv:TpfHeader/>
+        <Grid>
+        <cv:TpfHeader ZIndex="0"/>
+        <VerticalStackLayout x:Name="PageContainer" ZIndex="0">
+            <VerticalStackLayout IsVisible="{Binding IsWorking}" HorizontalOptions="Fill" VerticalOptions="Fill" ZIndex="100">
+                <ActivityIndicator
+                IsVisible="{Binding IsWorking}"
+                IsRunning="{Binding IsWorking}"
+                IsEnabled="{Binding IsWorking}"
+                HorizontalOptions="Center"
+                VerticalOptions="Center"
+                HeightRequest="200"
+                WidthRequest="200"
+                Background="{StaticResource White75}"
+                Color="{StaticResource GlowInDarkClick}"/>
+                <Label Text="{Binding ProgressMessage}" HorizontalOptions="Center" HorizontalTextAlignment="Center" Margin="20"/>
+            </VerticalStackLayout>
             <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center">
                 <Grid RowSpacing="5" ColumnSpacing="5">
                     <Grid.RowDefinitions>
@@ -23,14 +37,14 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                   
+
                     <Grid x:Name="SearchTitle" Grid.ColumnSpan="2" Grid.Row="0">
-                        
+
                     </Grid>
                     <Grid x:Name="DatePickers" Grid.ColumnSpan="2" Grid.Row="1">
                         <HorizontalStackLayout Margin="20, 0, 20, 0" HorizontalOptions="Center">
                             <Label Text="Start Date:" Style="{StaticResource Instructions}"/>
-                            <DatePicker x:Name="StartDatePicker" FontFamily="ManFont" TextColor="CornflowerBlue" Date="{Binding StartDate}" MaximumDate="{Binding MaxDate}" MinimumDate="{Binding MinDate}">
+                            <DatePicker x:Name="StartDatePicker" Background="{AppThemeBinding Light=Gold, Dark={StaticResource Gold}}" FontFamily="ManFont" TextColor="CornflowerBlue" Date="{Binding StartDate}" MaximumDate="{Binding MaxDate}" MinimumDate="{Binding MinDate}">
                                 <DatePicker.Behaviors>
                                     <toolkit:EventToCommandBehavior Command="{Binding OnStartDateChangedCommand}"
                                                                 CommandParameter="{Binding .}"
@@ -38,7 +52,7 @@
                                 </DatePicker.Behaviors>
                             </DatePicker>
                             <Label Text="End Date:" Style="{StaticResource Instructions}"/>
-                            <DatePicker x:Name="EndDatePicker" FontFamily="ManFont" TextColor="CornflowerBlue" Date="{Binding EndDate}" MaximumDate="{Binding MaxDate}" MinimumDate="{Binding MinDate}">
+                            <DatePicker x:Name="EndDatePicker" Background="{StaticResource Gold}" FontFamily="ManFont" TextColor="CornflowerBlue" Date="{Binding EndDate}" MaximumDate="{Binding MaxDate}" MinimumDate="{Binding MinDate}">
                                 <DatePicker.Behaviors>
                                     <toolkit:EventToCommandBehavior Command="{Binding OnEndDateChangedCommand}"
                                         CommandParameter="{Binding .}"
@@ -52,96 +66,24 @@
                         <VerticalStackLayout>
                             <Entry x:Name="InputLocation" TextChanged="InputLocation_TextChanged"  Placeholder="Please enter the city and state..." Style="{StaticResource AddressEntryStyle}" />
                             <CollectionView ZIndex="99" x:DataType="vm:SelectLocationViewModel" ItemSizingStrategy="MeasureAllItems" Background="{StaticResource DayTwilight}" IsVisible="{Binding ShowSuggestions}" ItemsSource="{Binding Suggestions}" SelectionMode="Single">
-                            <CollectionView.ItemTemplate>
-                                <DataTemplate>
-                                    <Label Text="{Binding DisplayName}" x:DataType="model:PhotoLocation" HorizontalTextAlignment="Start" LineBreakMode="WordWrap"  FontFamily="Jost">
-                                        <Label.GestureRecognizers>
-                                            <TapGestureRecognizer x:DataType="vm:SelectLocationViewModel" Command="{Binding SuggestionTappedCommand}" CommandParameter="{Binding .}" />
-                                        </Label.GestureRecognizers>
-                                    </Label>
-                                </DataTemplate>
-                            </CollectionView.ItemTemplate>
-                        </CollectionView>
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate>
+                                        <Label Text="{Binding DisplayName}" x:DataType="model:PhotoLocation" HorizontalTextAlignment="Start" LineBreakMode="WordWrap"  FontFamily="Jost">
+                                            <Label.GestureRecognizers>
+                                                <TapGestureRecognizer x:DataType="vm:SelectLocationViewModel" Command="{Binding SuggestionTappedCommand}" CommandParameter="{Binding .}" />
+                                            </Label.GestureRecognizers>
+                                        </Label>
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+                            </CollectionView>
                         </VerticalStackLayout>
                     </Grid>
                     <Grid x:Name="NearBy" Grid.Column="1" Grid.Row="2">
                         <Button x:Name="GpsButton" Text="GPS"  Style="{StaticResource ButtonStyle}" Command="{Binding UseGpsCommand}"/>
                     </Grid>
-
-                </Grid>
-                
-            </VerticalStackLayout>
-        <Border Style="{StaticResource ContentBorder}" HorizontalOptions="Fill" ZIndex="99" VerticalOptions="Fill" IsVisible="{Binding IsWorking}">
-            <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
-                <Label Text="{Binding ProgressMessage}" HorizontalTextAlignment="Center"   Margin="4,20" LineHeight="2.5"  />
-                <Line Stroke="Black" StrokeThickness="12" StrokeLineCap="Round" Margin="10"/>
-                <ActivityIndicator x:Name="ProgressIndicator"  
-                           Grid.RowSpan="3"
-                           Grid.ColumnSpan="3"
-           WidthRequest="100" 
-           HeightRequest="100" 
-           IsEnabled="{Binding IsWorking}"
-           IsVisible="{Binding IsWorking}"
-           IsRunning="{Binding IsWorking}"
-           Style="{StaticResource WaitingSpinner}"
-           ZIndex="100"
-           VerticalOptions="Fill"
-           HorizontalOptions="Fill"/>
-                <!--<Button x:Name="GoToPhotoTimeTrack" Text="Proceed to the Schedule" IsEnabled="{Binding IsComplete}" Style="{StaticResource ButtonStyle}" Command="{Binding NavigateToPhotoTimeTrackCommand}" HorizontalOptions="Center" Margin="8"/>-->
-            </VerticalStackLayout >
-        </Border>
-        <!--<Label x:Name="Name" Text="The Photographer's Forecast" Margin="4,0,4,0"   FontFamily="ManFont" HorizontalTextAlignment="Center" HorizontalOptions="Center" FontSize="Title"/>
-        <Image Source="initials.png" WidthRequest="100" HeightRequest="100" HorizontalOptions="Center"/>-->
-
-            <VerticalStackLayout>
-                <!--<Button x:Name="GoToForecast" Style="{StaticResource ButtonStyle}" Text="Go to the Forecast" IsEnabled="{Binding IsComplete}" HorizontalOptions="Center"/>-->
-                <Label LineBreakMode="WordWrap"  FlexLayout.Basis="100%" Text="All you need to do is provide us with the location of the photo shoot. We have two options, you can either..."/>
-                <Grid x:Name="LocationRequest">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="2*"/>
-                        <ColumnDefinition Width="2*"/>
-                    </Grid.ColumnDefinitions>
-                    <Grid Grid.Column="0">
-                        <VerticalStackLayout>
-                            <toolkit:Expander x:Name="GpsExpander" HorizontalOptions="Fill" Direction="Down">
-                                <toolkit:Expander.Header>
-                                    <Border Style="{StaticResource ContentBorder}" Padding="4" Margin="4">
-                                        <VerticalStackLayout Margin="4">
-                                            <Label Text="Option1" FontSize="Header" HorizontalOptions="Center" HorizontalTextAlignment="Center"/>
-                                            <Label Text="click here to use your device's current location" HorizontalTextAlignment="Center"/>
-                                        </VerticalStackLayout>
-                                    </Border>
-                                </toolkit:Expander.Header>
-                                <Grid>
-                                    <VerticalStackLayout Margin="4" HorizontalOptions="Fill">
-                                        <Label x:Name="GpsInstructionsLabel" LineBreakMode="WordWrap"  HorizontalTextAlignment="Center" MaximumWidthRequest="300" Style="{StaticResource ContentBorderLabelStyle}" Text="If your outdoor photo shoot is in your current area, you can use your device's current location."/>
-                                        
-                                    </VerticalStackLayout>
-                                </Grid>
-                            </toolkit:Expander>
-                        </VerticalStackLayout>
-                    </Grid>
-                    <Grid x:Name="TypedLocationOption" Grid.Column="1">
-                        <VerticalStackLayout>
-                            <toolkit:Expander HorizontalOptions="Fill" Direction="Down">
-                                <toolkit:Expander.Header>
-                                    <Border Style="{StaticResource ContentBorder}" Padding="4">
-                                        <VerticalStackLayout>
-                                            <Label Text="Option 2" FontSize="Header" HorizontalOptions="Center" HorizontalTextAlignment="Center"/>
-                                            <Label Text="or you can enter the location." HorizontalTextAlignment="Center"/>
-                                        </VerticalStackLayout>
-                                    </Border>
-                                </toolkit:Expander.Header>
-                                <VerticalStackLayout Margin="4" HorizontalOptions="Fill">
-                                    <Label LineBreakMode="WordWrap" VerticalTextAlignment="Center" HorizontalTextAlignment="Start" Text="Start entering the city name. 
-                   After entering the third character, you will see a list of suggested location. Please select the location from the list. If you don't see the location you want, keep typing,"/>
-                                    
-                                </VerticalStackLayout>
-                            </toolkit:Expander>
-                        </VerticalStackLayout>
-                    </Grid>
                 </Grid>
             </VerticalStackLayout>
         </VerticalStackLayout>
+            </Grid>
     </ScrollView>
 </ContentPage>

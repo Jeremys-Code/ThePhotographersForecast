@@ -26,7 +26,7 @@ public partial class SelectLocation : ContentPage
         {
             return;
         }
-        Debounce(async () =>
+        _vm.Debounce(async () =>
         {
             string input = e.NewTextValue;
             string apiString = $@"https://nominatim.openstreetmap.org/search?q={input}&format=geocodejson&addressdetails=1&countrycodes=us";
@@ -76,31 +76,31 @@ public partial class SelectLocation : ContentPage
     /// <summary>
     /// Debounces an action so it only runs after the specified delay without new calls.
     /// </summary>
-    private void Debounce(Func<Task> action, TimeSpan delay)
-    {
-        // Cancel any pending execution
-        _cts?.Cancel();
-        _cts?.Dispose();
+    //private void Debounce(Func<Task> action, TimeSpan delay)
+    //{
+    //    // Cancel any pending execution
+    //    _cts?.Cancel();
+    //    _cts?.Dispose();
 
-        // Create a new CTS for the new debounce cycle
-        _cts = new CancellationTokenSource();
-        var token = _cts.Token;
+    //    // Create a new CTS for the new debounce cycle
+    //    _cts = new CancellationTokenSource();
+    //    var token = _cts.Token;
 
-        // Run the delayed task
-        _ = Task.Run(async () =>
-        {
-            try
-            {
-                await Task.Delay(delay, token); // Wait for inactivity
-                if (!token.IsCancellationRequested)
-                {
-                    await action();
-                }
-            }
-            catch (TaskCanceledException)
-            {
-                // Expected when a new event occurs before delay ends
-            }
-        }, token);
-    }
+    //    // Run the delayed task
+    //    _ = Task.Run(async () =>
+    //    {
+    //        try
+    //        {
+    //            await Task.Delay(delay, token); // Wait for inactivity
+    //            if (!token.IsCancellationRequested)
+    //            {
+    //                await action();
+    //            }
+    //        }
+    //        catch (TaskCanceledException)
+    //        {
+    //            // Expected when a new event occurs before delay ends
+    //        }
+    //    }, token);
+    //}
 }

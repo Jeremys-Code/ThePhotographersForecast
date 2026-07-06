@@ -39,13 +39,13 @@ namespace ThePhotographersForecast.Services
         {
             _weatherService = weatherService;
         }
-        public (string weather, string health, string precipitation) GetDailyWeatherSummary(WeatherForecast forecast)
+        public (string weather, string health, string precipitation) GetDailyWeatherSummary(DailyForecast dailyForecast, HourlyForecast[] hourlyForecasts)
         {
-            var dailyForecast = forecast.DayForecast;
+
             var precipitationSummary = GetDailyPrecipitation(dailyForecast);
             string dailySummary = $"{precipitationSummary} " +
                 $"{dailyForecast.WeatherCodeDescription} " +
-                $"{CloudCoverSummary.BuildCondensedSummary(BuildDailyBins(forecast))}" +
+                $"{CloudCoverSummary.BuildCondensedSummary(BuildDailyBins(dailyForecast, hourlyForecasts))}" +
                 $"with a high of {String.Concat(Math.Round(dailyForecast.Temperature2mMax.Value, 0).ToString(), dailyForecast.Temperature2mMax.Unit)} " +
                 $"and a low of {String.Concat(Math.Round(dailyForecast.Temperature2mMin.Value, 0).ToString(), dailyForecast.Temperature2mMin.Unit)}. " +
                 $"{dailyForecast.WindDirection10mDominant.Description} winds up to {String.Concat(dailyForecast.WindSpeed10mMax.Value.ToString(), dailyForecast.WindSpeed10mMax.Unit)} " +
@@ -56,12 +56,11 @@ namespace ThePhotographersForecast.Services
             return (dailySummary, healthSummary, precipitationSummary);
         }
 
-        public MeteorologisticAgent BuildDailyBins(WeatherForecast forecast)
+        public MeteorologisticAgent BuildDailyBins(DailyForecast dailyForecast, HourlyForecast[] hourlyForecasts)
         {
 
             // Filter hourlies for this day
-            var hours = forecast.HourlyForecasts
-                .OrderBy(h => h.Time)
+            var hours = hourlyForecasts
                 .ToList();
 
             // Group by time-of-day bucket
@@ -72,7 +71,7 @@ namespace ThePhotographersForecast.Services
             // Build the agent
             var agent = new MeteorologisticAgent
             {
-                BinDate = forecast.DayForecast.Date.ToDateTime(TimeOnly.MinValue),
+                BinDate = dailyForecast.Date.ToDateTime(TimeOnly.MinValue),
 
                 Overnight = BuildBin("Overnight", groups),
                 EarlyMorning = BuildBin("EarlyMorning", groups),
@@ -110,81 +109,120 @@ namespace ThePhotographersForecast.Services
             }
             if (amt > 0)
             {
-                precipitation = $"with a {String.Concat(day.PrecipitationProbabilityMin.Value.ToString(), day.PrecipitationProbabilityMin.Unit)} to {String.Concat(day.PrecipitationProbabilityMax.Value.ToString(), day.PrecipitationProbabilityMax.Unit)} chance of precipitation. ";
-                string precipitationType = $"Expect {String.Concat(Math.Round(day.PrecipitationSum.Value, 3), day.PrecipitationSum.Unit)} of precipitation. ";
+
                 var snow = Math.Round(day.SnowfallSum.Value, 3);
                 bool isSnow = (snow > 0 ? true : false);
                 var rain = Math.Round(day.RainSum.Value, 3);
                 bool isRain = (rain > 0 ? true : false);
                 var showers = Math.Round(day.ShowersSum.Value, 3);
                 bool isShowers = (showers > 0 ? true : false);
-                while (amt > 0)
+                string precip = string.Empty;
+                if (isSnow)
                 {
-                    if (isShowers)
+                    if (precip == string.Empty)
                     {
-                        string shower = $"{String.Concat(day.ShowersSum.Value, day.ShowersSum.Unit)} of showers, ";
-                        amt -= showers;
-                        if (amt == 0)
-                        {
-                            precipitationType += shower.Remove(shower.LastIndexOf(", "), 2) + ". ";
-                            break;
-                        }
-
-
-                    }
-                    if (isRain)
-                    {
-                        string rn = $"{String.Concat(day.RainSum.Value, day.RainSum.Unit)} of rain, ";
-                        amt -= rain;
-                        if (amt == 0)
-                        {
-                            if (precipitationType.Contains("showers"))
-                            {
-                                precipitationType = precipitationType.Replace(". ", " and ");
-                                precipitationType += string.Concat(rn.Remove(rn.LastIndexOf(", "), 2), ". ");
-                                break;
-                            }
-                            else
-                            {
-                                precipitationType += precipitationType.Remove(precipitationType.LastIndexOf(", "), 2) + ". ";
-                                break;
-                            }
-                        }
-                    }
-                    if (isSnow)
-                    {
-                        amt -= snow;
-                        if (amt == 0)
-                        {
-                            string snw = $"{String.Concat(snow, day.SnowfallSum.Unit)} of snow. ";
-                            if (precipitationType.Contains("showers") && precipitationType.Contains("rain"))
-                            {
-                                precipitationType = precipitationType.Replace(" and ", ", ");
-                                precipitationType = precipitationType.Replace(". ", " and ");
-                                precipitationType += snw;
-                                break;
-                            }
-                            else if (precipitationType.Contains("showers") || precipitationType.Contains("rain"))
-                            {
-                                precipitationType += snw.Replace(". ", " and ");
-                                precipitationType += snw;
-                                break;
-                            }
-                            else
-                            {
-                                precipitationType += snw;
-                                break;
-                            }
-
-                            break;
-                        }
+                        precip = "snow";
                     }
                     else
                     {
-                        Debug.WriteLine($"Error: Precipitation amount does not equal the rain, snow, and showers. Offset amount: {amt}.");
-                        break;
+                        precip += " and snow";
                     }
+
                 }
+                if (isRain)
+                {
+                    if (precip == string.Empty)
+                    {
+                        precip = "rain";
+                    }
+                    else
+                    {
+                        precip += "/rain mix";
+                    }
+
+                }
+                if (isShowers)
+                {
+                    if (precip == string.Empty)
+                    {
+                        precip = "showers";
+                    }
+                    else
+                    {
+                        precip += " showers";
+                    }
+
+                }
+
+                precipitation = $"with a {String.Concat(day.PrecipitationProbabilityMin.Value.ToString(), day.PrecipitationProbabilityMin.Unit)} to {String.Concat(day.PrecipitationProbabilityMax.Value.ToString(), day.PrecipitationProbabilityMax.Unit)} chance of {precip}. ";
+                string precipitationType = $"Expect {String.Concat(Math.Round(day.PrecipitationSum.Value, 3), day.PrecipitationSum.Unit)} of {precip}. ";
+                //while (amt > 0)
+                //{
+                //    if (isShowers)
+                //    {
+                //        string shower = $"{String.Concat(day.ShowersSum.Value, day.ShowersSum.Unit)} of showers, ";
+                //        amt -= showers;
+                //        if (amt == 0)
+                //        {
+                //            precipitationType += shower.Remove(shower.LastIndexOf(", "), 2) + ". ";
+                //            break;
+                //        }
+
+
+                //    }
+                //    if (isRain)
+                //    {
+                //        string rn = $"{String.Concat(day.RainSum.Value, day.RainSum.Unit)} of rain, ";
+                //        amt -= rain;
+                //        if (amt == 0)
+                //        {
+                //            if (precipitationType.Contains("showers"))
+                //            {
+                //                precipitationType = precipitationType.Replace(". ", " and ");
+                //                precipitationType += string.Concat(rn.Remove(rn.LastIndexOf(", "), 2), ". ");
+                //                break;
+                //            }
+                //            else
+                //            {
+                //                precipitationType += precipitationType.Remove(precipitationType.LastIndexOf(", "), 2) + ". ";
+                //                break;
+                //            }
+                //        }
+                //    }
+                //    if (isSnow)
+                //    {
+                //        amt -= snow;
+                //        if (amt == 0)
+                //        {
+                //            string snw = $"{String.Concat(snow, day.SnowfallSum.Unit)} of snow. ";
+                //            if (precipitationType.Contains("showers") && precipitationType.Contains("rain"))
+                //            {
+                //                precipitationType = precipitationType.Replace(" and ", ", ");
+                //                precipitationType = precipitationType.Replace(". ", " and ");
+                //                precipitationType += snw;
+                //                break;
+                //            }
+                //            else if (precipitationType.Contains("showers") || precipitationType.Contains("rain"))
+                //            {
+                //                precipitationType += snw.Replace(". ", " and ");
+                //                precipitationType += snw;
+                //                break;
+                //            }
+                //            else
+                //            {
+                //                precipitationType += snw;
+                //                break;
+                //            }
+
+                //            break;
+                //        }
+                //    }
+                //    else
+                //    {
+                //        Debug.WriteLine($"Error: Precipitation amount does not equal the rain, snow, and showers. Offset amount: {amt}.");
+                //        break;
+                //    }
+                //}
                 precipitation += precipitationType;
 
             }
@@ -336,83 +374,53 @@ namespace ThePhotographersForecast.Services
             }
             if (amt > 0)
             {
-                precipitation = $"with a {String.Concat(hour.PrecipitationProbability.Value.ToString(), hour.PrecipitationProbability.Unit)} chance of precipitation. ";
-                string precipitationType = $"Expect {String.Concat(Math.Round(hour.Precipitation.Value, 3), hour.Precipitation.Unit)} of precipitation. ";
                 var snow = Math.Round(hour.Snowfall.Value, 3);
                 bool isSnow = (snow > 0 ? true : false);
                 var rain = Math.Round(hour.Rain.Value, 3);
                 bool isRain = (rain > 0 ? true : false);
                 var showers = Math.Round(hour.Showers.Value, 3);
                 bool isShowers = (showers > 0 ? true : false);
-                while (amt > 0)
+                string precip = string.Empty;
+                if (isSnow)
                 {
-                    if (isShowers)
+                    if (precip == string.Empty)
                     {
-                        string shower = $"{String.Concat(hour.Showers.Value, hour.Showers.Unit)} of showers, ";
-                        amt -= showers;
-                        if (amt == 0)
-                        {
-                            precipitationType += shower.Remove(shower.LastIndexOf(", "), 2) + ". ";
-                            break;
-                        }
-
-
-                    }
-                    if (isRain)
-                    {
-                        string rn = $"{String.Concat(hour.Rain.Value, hour.Rain.Unit)} of rain, ";
-                        amt -= rain;
-                        if (amt == 0)
-                        {
-                            if (precipitationType.Contains("showers"))
-                            {
-                                precipitationType = precipitationType.Replace(". ", " and ");
-                                precipitationType += string.Concat(rn.Remove(rn.LastIndexOf(", "), 2), ". ");
-                                break;
-                            }
-                            else
-                            {
-                                precipitationType += rn.Remove(rn.LastIndexOf(", "), 2) + ". ";
-                                break;
-                            }
-                        }
-                    }
-                    if (isSnow)
-                    {
-                        amt -= snow;
-                        if (amt == 0)
-                        {
-                            string snw = $"{String.Concat(snow, hour.Snowfall.Unit)} of snow. ";
-                            if (precipitationType.Contains("showers") && precipitationType.Contains("rain"))
-                            {
-                                precipitationType = precipitationType.Replace(" and ", ", ");
-                                precipitationType = precipitationType.Replace(". ", " and ");
-                                precipitationType += snw;
-                                break;
-                            }
-                            else if (precipitationType.Contains("showers") || precipitationType.Contains("rain"))
-                            {
-                                precipitationType = precipitationType.Replace(". ", " and ");
-                                precipitationType += snw;
-                                break;
-                            }
-                            else
-                            {
-                                precipitationType += snw;
-                                break;
-                            }
-
-                            break;
-                        }
+                        precip = "snow";
                     }
                     else
                     {
-                        Debug.WriteLine($"Error: Precipitation amount does not equal the rain, snow, and showers. Offset amount: {amt}.");
-                        break;
+                        precip += " and snow";
                     }
-                }
-                precipitation += precipitationType;
 
+                }
+                if (isRain)
+                {
+                    if (precip == string.Empty)
+                    {
+                        precip = "rain";
+                    }
+                    else
+                    {
+                        precip += "/rain mix";
+                    }
+
+                }
+                if (isShowers)
+                {
+                    if (precip == string.Empty)
+                    {
+                        precip = "showers";
+                    }
+                    else
+                    {
+                        precip += " showers";
+                    }
+
+                }
+
+                precipitation = $"with a {String.Concat(hour.PrecipitationProbability.Value.ToString(), hour.PrecipitationProbability.Unit)} chance of {precip}. ";
+                string precipitationType = $"Expect {String.Concat(Math.Round(hour.Precipitation.Value, 3), hour.Precipitation.Unit)} of {precip}. ";
+                precipitation += precipitationType;
             }
 
             return precipitation;

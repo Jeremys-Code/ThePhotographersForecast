@@ -15,6 +15,6 @@ public class MappedDaily
     public ImageSource DailyImageSource { get; set; }
     public string DailyForecast { get; set; } = string.Empty;
     public MappedHourly[] HourlyCollection { get; set; }
-    public DailyAstronomicalData AstroData { get; set; }
+    //public DailyAstronomicalData AstroData { get; set; }
     public EventTime[] DailyEvents { get; set; }
 }

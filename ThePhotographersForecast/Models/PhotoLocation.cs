@@ -17,7 +17,7 @@ namespace ThePhotographersForecast.Models
         public double Elevation { get; set; } = 0.0;
         public LocationCoordinates SpatialCoordinates { get; set; } = new LocationCoordinates();
         public int TimeZoneOffset => GetTimeZoneInfo().GetUtcOffset(DateTime.UtcNow).Hours;
-        public string? DisplayName { get; set; }
+        public string DisplayName => CreateDisplayName();
         public TimeZoneInfo GetTimeZoneInfo()
         {
             if (!string.IsNullOrEmpty(TimeZone))
@@ -40,15 +40,7 @@ namespace ThePhotographersForecast.Models
         private string CreateDisplayName()
         {
             string displayName = string.Empty;
-            string[] nameParts = new string[5] { this.Neighborhood ?? "", this.Village ?? "", this.Town ?? "", this.Suburb ?? "", this.City ?? "" };
-            for (int p = 0; p < nameParts.Length; p++)
-            {
-                if (!string.IsNullOrWhiteSpace(nameParts[p]))
-                {
-                    displayName += $"{nameParts[p]}, ";
-                }
-            }
-            displayName += this.State + ", " + this.Country;
+            displayName = this.City + ", " + this.State + ", " + this.Country;
             return displayName;
         }
 

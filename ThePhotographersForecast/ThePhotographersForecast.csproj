@@ -144,25 +144,40 @@
 		<!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
 		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
 	</ItemGroup>
+	
+	
+	<ItemGroup>
+	  <AndroidResource Remove="Services\SunMoonCalc\**" />
+	  <Compile Remove="Services\SunMoonCalc\**" />
+	  <EmbeddedResource Remove="Services\SunMoonCalc\**" />
+	  <MauiCss Remove="Services\SunMoonCalc\**" />
+	  <MauiXaml Remove="Services\SunMoonCalc\**" />
+	  <None Remove="Services\SunMoonCalc\**" />
+	</ItemGroup>
 
 	<ItemGroup>
 	  <Compile Remove="Database\Constants.cs" />
 	  <Compile Remove="Database\DataAccess.cs" />
 	  <Compile Remove="Data\AppUri.cs" />
+	  <Compile Remove="Models\DailySunMoon.cs" />
 	  <Compile Remove="Models\ForecastEventModel.cs" />
 	  <Compile Remove="Services\GetGfsData.cs" />
 	  <Compile Remove="Services\GetPhotoDay.cs" />
 	  <Compile Remove="Services\GetPhotoSchedules.cs" />
+	  <Compile Remove="Services\GetTimesOfDayData.cs" />
 	  <Compile Remove="Services\HttpClientConverter.cs" />
 	  <Compile Remove="Services\ImageCacheService.cs" />
 	  <Compile Remove="Services\IWeatherService.cs" />
+	  <Compile Remove="Services\NavigationMessenger.cs" />
+	  <Compile Remove="Services\PickerNullToBoolConverter.cs" />
 	  <Compile Remove="Services\ServiceHelper.cs" />
 	  <Compile Remove="Services\TimeConverter.cs" />
 	  <Compile Remove="Shared\ISessionStore.cs" />
-	  <Compile Remove="Shared\SessionStore.cs" />
 	  <Compile Remove="Validations\WeatherPayloadValidation.cs" />
 	  <Compile Remove="ViewModels\CalendarViewModel.cs" />
 	  <Compile Remove="ViewModels\CombineViewModels.cs" />
+	  <Compile Remove="ViewModels\DayViewModel.cs" />
+	  <Compile Remove="ViewModels\EventsViewModel.cs" />
 	  <Compile Remove="ViewModels\PhotoTimeTrackViewModel.cs" />
 	  <Compile Remove="Views\Calendar.xaml.cs" />
 	  <Compile Remove="Views\OldForecast.xaml.cs" />
@@ -182,11 +197,10 @@
 	<ItemGroup>
 		<PackageReference Include="CommunityToolkit.Maui" Version="14.2.0" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.9" />
 		<PackageReference Include="Microsoft.Extensions.Http" Version="10.0.9" />
-		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.71" />
+		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.80" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.9" />
-		<PackageReference Include="Microsoft.Maui.Controls.Foldable" Version="10.0.71" />
+		<PackageReference Include="Microsoft.Maui.Controls.Foldable" Version="10.0.80" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
 		<PackageReference Include="SkiaSharp" Version="4.148.0" />
 	</ItemGroup>
@@ -215,7 +229,6 @@
 
 	<ItemGroup>
 	  <Folder Include="Database\" />
-	  <Folder Include="Shared\" />
 	</ItemGroup>
 
 

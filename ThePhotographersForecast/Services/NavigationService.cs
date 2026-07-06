@@ -4,14 +4,36 @@ namespace ThePhotographersForecast.Services;
 
 public static class NavigationService
 {
-    private static IServiceProvider? _service;
+    //    private static IServiceProvider? _service;
 
 
-    private static IServiceProvider Service => _service ?? throw new InvalidOperationException("NavigationService not initialized. Call Initialize(IServiceProvider) first.");
+    private static IServiceProvider Service;// => _service ?? throw new InvalidOperationException("NavigationService not initialized. Call Initialize(IServiceProvider) first.");
 
-    public static void Initialize(IServiceProvider service)
+    public static void Initialize(IServiceProvider services)
     {
-        _service = service;
+        Service = services;
+    }
+
+    public static async Task NavigateToLaunchPage()
+    {
+        if (Preferences.Default.ContainsKey("FirstRun"))
+        {
+            var results = Preferences.Default.Get("FirstRun", true);
+            if (results == true)
+            {
+                Preferences.Default.Set("FirstRun", false);
+                await NavigationService.NavigateToSettingsAsync();
+            }
+            else
+            {
+                await NavigationService.NavigateToSelectLocationAsync();
+            }
+        }
+        else
+        {
+            await NavigationService.NavigateToSettingsAsync();
+            Preferences.Default.Set("FirstRun", false);
+        }
     }
 
     public static async Task NavigateToSelectLocationAsync()
@@ -23,7 +45,7 @@ public static class NavigationService
     }
     public static async Task NavigateToForecastAsync()
     {
-        var vm = Service.GetService<ViewModels.SelectLocationViewModel>();
+        var vm = Service.GetService<ViewModels.ForecastViewModel>();
         var page = new Forecast(vm);
         await Shell.Current.Navigation.PushAsync(page);
         return;
@@ -53,4 +75,6 @@ public static class NavigationService
         else
             await Shell.Current.GoToAsync(route);
     }
+
+
 }

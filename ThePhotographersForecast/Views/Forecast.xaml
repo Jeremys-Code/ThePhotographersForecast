@@ -1,153 +1,125 @@
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
-             xmlns:foldable="clr-namespace:Microsoft.Maui.Controls.Foldable;assembly=Microsoft.Maui.Controls.Foldable"
              xmlns:vm="clr-namespace:ThePhotographersForecast.ViewModels"
-             xmlns:service="clr-namespace:ThePhotographersForecast.Services"
-             xmlns:sensors="clr-namespace:Microsoft.Maui.Devices.Sensors;assembly=Microsoft.Maui.Essentials"
+             xmlns:model="clr-namespace:ThePhotographersForecast.Models" 
              x:Class="ThePhotographersForecast.Views.Forecast"
-             xmlns:model="clr-namespace:ThePhotographersForecast.Models"
-             xmlns:cv="clr-namespace:ThePhotographersForecast.ContentViews"
              x:DataType="vm:ForecastViewModel"
-             BackgroundImageSource="backbay.jpg">
+             xmlns:sys="clr-namespace:System;assembly=netstandard"
+             xmlns:cv="clr-namespace:ThePhotographersForecast.ContentViews"
+             xmlns:svc="clr-namespace:ThePhotographersForecast.Services"
+             BackgroundImageSource="backbay.jpg"
+             Title="Forecast">
+    <ContentPage.Resources>
+        <svc:ShortDateDisplayConverter x:Key="ShortDateDisplayConverter"/>
+    </ContentPage.Resources>
     <ScrollView>
-        <Grid Padding="20">
+        <VerticalStackLayout Padding="20">
+            <Label Text="Forecast page" HorizontalOptions="Center" VerticalOptions="Center" />
+            <Grid ColumnSpacing="10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="200"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
 
-            <!-- Background Rounded Rectangle -->
-            <Frame
-                CornerRadius="88"
-                HasShadow="False"
-                Padding="0"
-                BackgroundColor="Transparent"
-                Grid.RowSpan="10">
-
-                <Frame.Background>
-                    <RadialGradientBrush>
-                        <GradientStop Color="#66B2FF" Offset="0.0" />
-                        <GradientStop Color="#002958" Offset="1.0" />
-                    </RadialGradientBrush>
-                </Frame.Background>
-            </Frame>
-
-            <VerticalStackLayout Spacing="18">
-
-                <!-- Title -->
-                <Label Text="The Photographer's Forecast"
-                       FontSize="28"
-                       FontAttributes="Bold"
-                       HorizontalOptions="Center" />
-
-                <!-- Subtitle -->
-                <Label Text="for Boston, Massachusetts, United States"
-                       FontSize="16"
-                       HorizontalOptions="Center" />
-
-                <!-- Location Current Time -->
-                <Label Text="{Binding CurrentLocalTime}"
-                       FontSize="14"
-                       HorizontalOptions="Center"
-                       TextColor="White" />
-
-                <!-- Select Your Date -->
-                <Label Text="Select your date:"
-                       FontSize="16"
-                       FontAttributes="Bold"
-                       TextColor="White"
-                       Margin="0,10,0,0" />
-
-                <!-- Date Grid (3 rows × 4 columns) -->
-                <Grid ColumnDefinitions="*,*,*,*"
-                      RowDefinitions="Auto,Auto,Auto"
-                      ColumnSpacing="10"
-                      RowSpacing="10">
-
-                    <CollectionView ItemsSource="{Binding AvailableDates}"
-                                    SelectionMode="Single"
-                                    SelectedItem="{Binding SelectedDate}">
-                        <CollectionView.ItemsLayout>
-                            <GridItemsLayout Orientation="Vertical"
-                                             Span="4" />
-                        </CollectionView.ItemsLayout>
-
-                        <CollectionView.ItemTemplate>
-                            <DataTemplate>
-                                <Frame CornerRadius="6"
-                                       Padding="6"
-                                       HasShadow="True"
-                                       BorderColor="Black"
-                                       BackgroundColor="#FFCCE6">
-                                    <Label Text="{Binding Display}"
-                                           FontSize="12"
-                                           HorizontalOptions="Center"
-                                           VerticalOptions="Center"
-                                           TextColor="#001933" />
-                                </Frame>
-                            </DataTemplate>
-                        </CollectionView.ItemTemplate>
-                    </CollectionView>
-
+                <!-- Dates -->
+                <CollectionView ItemsSource="{Binding Session.Dates}"
+                            SelectedItem="{Binding SelectedDate}"
+                            SelectionMode="Single"
+                            HeightRequest="280"
+                             Grid.Column="0">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <FlexLayout AlignContent="SpaceEvenly" AlignItems="Start" Wrap="Wrap" Direction="Row">
+                            <Border Margin="6" Stroke="Red" StrokeThickness="2" HeightRequest="40" WidthRequest="40" BackgroundColor="White">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="8" />
+                                </Border.StrokeShape>
+                                    <Label Text="{Binding ., StringFormat='{}{0:ddd, MMM d}'}"
+                                           TextColor="Black" 
+                                           FontSize="12" 
+                                           Margin="1" 
+                                           LineBreakMode="WordWrap" 
+                                           VerticalOptions="Center" 
+                                           VerticalTextAlignment="Center" 
+                                           HorizontalOptions="Center" 
+                                           HorizontalTextAlignment="Center" />
+                            </Border>
+                            </FlexLayout>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+                <Grid Grid.Column="2">
+                    <VerticalStackLayout>
+                        <Label x:Name="DailySummary" Text="{Binding TimePeriod}" FontSize="20" HorizontalOptions="Center" HorizontalTextAlignment="Justify" FontFamily="ManFont"/>
+                        <HorizontalStackLayout>
+                        <VerticalStackLayout WidthRequest="300" Margin="8">
+                                <HorizontalStackLayout>
+                                    <VerticalStackLayout>
+                                        <Grid RowSpacing="20" Margin="20">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="80"/>
+                                                <RowDefinition Height="80"/>
+                                            </Grid.RowDefinitions>
+                                            <Grid Grid.Row="0" WidthRequest="120">
+                                                <Image Source="hightemp.png" Aspect="AspectFill" HeightRequest="80" WidthRequest="120" ZIndex="0"/>
+                                                <HorizontalStackLayout HorizontalOptions="Center" ZIndex="1" Margin="8">
+                                                    <Label x:Name="High" Text="{Binding SelectedDailyMaxTemp}" VerticalOptions="Start" HorizontalOptions="Center" HorizontalTextAlignment="Center" Margin="8"/>
+                                                </HorizontalStackLayout>
+                                            </Grid>
+                                            <Grid Grid.Row="1" WidthRequest="120">
+                                                <Image Source="lowtemp.png" Aspect="AspectFill" HeightRequest="80" WidthRequest="120" ZIndex="0"/>
+                                                <HorizontalStackLayout ZIndex="1" HorizontalOptions="Center" Margin="8">
+                                                    <Label x:Name="Low" Text="{Binding SelectedDailyMinTemp}" HorizontalOptions="Center" HorizontalTextAlignment="Center" VerticalOptions="End" Margin="8"/>
+                                                </HorizontalStackLayout>
+                                            </Grid>
+                                        </Grid>
+                                    </VerticalStackLayout>
+                                    <VerticalStackLayout VerticalOptions="Center">
+                                        <Border Stroke="{StaticResource GlowInDark}" StrokeThickness="4">
+                                            <Border.StrokeShape>
+                                                <RoundRectangle CornerRadius="12"/>
+                                            </Border.StrokeShape>
+                                        <Image Source="{Binding SelectedDailyIcon}" Aspect="AspectFill" HorizontalOptions="Center" VerticalOptions="Center"  HeightRequest="120" WidthRequest="120"/>
+                                        </Border>
+                                    </VerticalStackLayout>
+                                </HorizontalStackLayout>
+                                <Label Text="Weather Summary:" FontFamily="ManFont" HorizontalOptions="Start" HorizontalTextAlignment="Start"/>
+                                <Label Text="{Binding SelectedDailyWeatherSummary}" LineBreakMode="WordWrap" FontFamily="NotoSans" />
+                            </VerticalStackLayout>
+                    </HorizontalStackLayout>
+                    </VerticalStackLayout>
                 </Grid>
+            </Grid>
+            <!-- Periods -->
+            <CollectionView ItemsSource="{Binding DayPeriods}"
+                            ItemsLayout="HorizontalList"
+                            SelectionMode="None"
+                            HeightRequest="200">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Border Padding="8" Margin="6" Background="{Binding BackgroundBrush}">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="12"/>
+                            </Border.StrokeShape>
+                            <VerticalStackLayout>
+                                <Label Text="{Binding Name}" FontAttributes="Bold" HorizontalOptions="Center" />
+                                <CollectionView ItemsSource="{Binding Events}" SelectionMode="None">
+                                    <CollectionView.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackLayout>
+                                                <Label Text="{Binding EventName}" FontSize="12" />
+                                                <Label Text="{Binding AstroTime, StringFormat='{0:h:mm tt}'}" FontSize="10" />
+                                            </StackLayout>
+                                        </DataTemplate>
+                                    </CollectionView.ItemTemplate>
+                                </CollectionView>
+                            </VerticalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
 
-                <!-- Weather Summary -->
-                <VerticalStackLayout Spacing="6" Margin="0,20,0,0">
-                    <Label Text="Weather Summary:"
-                           FontSize="18"
-                           FontAttributes="Bold"
-                           TextColor="White" />
-
-                    <Label Text="{Binding WeatherSummary}"
-                           FontSize="14"
-                           TextColor="White"
-                           LineBreakMode="WordWrap" />
-                </VerticalStackLayout>
-
-                <!-- High / Low Temperature -->
-                <Grid ColumnDefinitions="*,*"
-                      Margin="0,20,0,0">
-
-                    <Frame CornerRadius="6"
-                           BorderColor="Blue"
-                           BackgroundColor="#99CCFF"
-                           Padding="10">
-                        <VerticalStackLayout>
-                            <Label Text="High" FontAttributes="Bold" />
-                            <Label Text="{Binding HighTemp}" />
-                            <Label Text="{Binding HighTempTime}"
-                                   FontSize="12"
-                                   TextColor="Gray" />
-                        </VerticalStackLayout>
-                    </Frame>
-
-                    <Frame CornerRadius="6"
-                           BorderColor="Red"
-                           BackgroundColor="#FF9999"
-                           Padding="10"
-                           Grid.Column="1">
-                        <VerticalStackLayout>
-                            <Label Text="Low" FontAttributes="Bold" />
-                            <Label Text="{Binding LowTemp}" />
-                            <Label Text="{Binding LowTempTime}"
-                                   FontSize="12"
-                                   TextColor="Gray" />
-                        </VerticalStackLayout>
-                    </Frame>
-
-                </Grid>
-
-                <!-- Gradient Bar -->
-                <BoxView HeightRequest="40" Margin="0,30,0,0">
-                    <BoxView.Background>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                            <GradientStop Color="#6A00FF" Offset="0.0" />
-                            <GradientStop Color="#FFFF33" Offset="0.33" />
-                            <GradientStop Color="#FF99FF" Offset="0.66" />
-                            <GradientStop Color="#3399FF" Offset="1.0" />
-                        </LinearGradientBrush>
-                    </BoxView.Background>
-                </BoxView>
-
-            </VerticalStackLayout>
-
-        </Grid>
+        </VerticalStackLayout>
     </ScrollView>
 </ContentPage>
