@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:skia="clr-namespace:SkiaSharp.Extended.UI.Controls;assembly=SkiaSharp.Extended.UI
+             x:Class="ThePhotographersForecast.ViewModels.Compnents.TempHightsLows">
+    <Grid Grid.Row="3" RowDefinitions="Auto,Auto" HorizontalOptions="Fill">
+        <Grid Grid.Row="0">
+            <Border Stroke="Red" StrokeThickness="2" HorizontalOptions="Fill" VerticalOptions="Fill" Background="#70FF0000">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="30,30,0,0" />
+                </Border.StrokeShape>
+                <Grid HorizontalOptions="Fill" VerticalOptions="Fill">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid Grid.Column="0">
+                        <VerticalStackLayout Margin="8">
+                            <Label Text="The High" FontAttributes="Bold" VerticalOptions="Center" FontFamily="ManFont" HorizontalOptions="Start" FontSize="24" HorizontalTextAlignment="Start" Margin="2" TextColor="#701705"/>
+                            <Label Text="{Binding SelectedTimeHighTemp, Mode=TwoWay}" HorizontalOptions="Start" HorizontalTextAlignment="Start" LineBreakMode="WordWrap" VerticalOptions="Center" TextColor="#701705" Margin="2" FontSize="24" FontFamily="ManFont"/>
+                        </VerticalStackLayout>
+                    </Grid>
+                    <Grid Grid.Column="1" Margin="8">
+                        <skia:SKLottieView x:Name="HighTempAnimation" RepeatCount="-1" RepeatMode="Restart"  HeightRequest="80" WidthRequest="80" HorizontalOptions="Center" VerticalOptions="Center"/>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
+        <Grid Grid.Row="1">
+            <Border Stroke="Blue" HorizontalOptions="Fill" VerticalOptions="Fill" StrokeThickness="2" Background="#700000FF">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="0,0,30,30" />
+                </Border.StrokeShape>
+                <Grid HorizontalOptions="Fill" VerticalOptions="Fill">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid Grid.Column="0">
+                        <VerticalStackLayout Margin="8">
+                            <Label Text="The Low" FontAttributes="Bold" VerticalOptions="Center" FontFamily="ManFont" HorizontalOptions="Start" FontSize="24" HorizontalTextAlignment="Start" Margin="2" TextColor="#FFF6F3C0"/>
+                            <Label Text="{Binding SelectTimeLowTemp, Mode=TwoWay}" HorizontalOptions="Start" HorizontalTextAlignment="Start" LineBreakMode="WordWrap" VerticalOptions="Center" TextColor="#F6F3C0" Margin="2" FontSize="24" FontFamily="ManFont"/>
+                        </VerticalStackLayout>
+                    </Grid>
+                    <Grid Grid.Column="1" Margin="8">
+                        <skia:SKLottieView x:Name="LowTempAnimation" HeightRequest="80" RepeatCount="-1" RepeatMode="Restart"  WidthRequest="80" HorizontalOptions="Center" VerticalOptions="Center"/>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</ContentView>

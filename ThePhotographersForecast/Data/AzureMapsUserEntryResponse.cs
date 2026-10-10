@@ -17,11 +17,11 @@ namespace ThePhotographersForecast.Data
         {
             public string query { get; set; }
             public string queryType { get; set; }
-            public int queryTime { get; set; }
-            public int numResults { get; set; }
-            public int offset { get; set; }
-            public int totalResults { get; set; }
-            public int fuzzyLevel { get; set; }
+            public int? queryTime { get; set; }
+            public int? numResults { get; set; }
+            public int? offset { get; set; }
+            public int? totalResults { get; set; }
+            public int? fuzzyLevel { get; set; }
             public object[] queryIntent { get; set; }
         }
 
@@ -29,7 +29,7 @@ namespace ThePhotographersForecast.Data
         {
             public string type { get; set; }
             public string id { get; set; }
-            public double score { get; set; }
+            public double? score { get; set; }
             public string info { get; set; }
             public Poi poi { get; set; }
             public Address address { get; set; }
@@ -50,7 +50,7 @@ namespace ThePhotographersForecast.Data
 
         public class Categoryset
         {
-            public int id { get; set; }
+            public int? id { get; set; }
         }
 
         public class Classification
@@ -92,8 +92,8 @@ namespace ThePhotographersForecast.Data
 
         public class Position
         {
-            public double lat { get; set; }
-            public double lon { get; set; }
+            public double? lat { get; set; }
+            public double? lon { get; set; }
         }
 
         public class Viewport
@@ -104,14 +104,14 @@ namespace ThePhotographersForecast.Data
 
         public class Topleftpoint
         {
-            public double lat { get; set; }
-            public double lon { get; set; }
+            public double? lat { get; set; }
+            public double? lon { get; set; }
         }
 
         public class Btmrightpoint
         {
-            public double lat { get; set; }
-            public double lon { get; set; }
+            public double? lat { get; set; }
+            public double? lon { get; set; }
         }
 
         public class Entrypoint
@@ -122,8 +122,8 @@ namespace ThePhotographersForecast.Data
 
         public class Position1
         {
-            public double lat { get; set; }
-            public double lon { get; set; }
+            public double? lat { get; set; }
+            public double? lon { get; set; }
         }
 
     }

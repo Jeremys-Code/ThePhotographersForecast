@@ -13,3 +13,13 @@ These files will be deployed with your package and will be accessible using Esse
 
 		var contents = reader.ReadToEnd();
 	}
+            Task.Run(async () =>
+            {
+                var lottieFile = this.MoonPhaseName.ToLowerInvariant().Replace(" ", "-") switch { "first-quarter" => "moon-first-quarter.json", "full-moon" => "moon-full.json", "last-quarter" => "moon-last-quarter.json", "waning-cresent" => "moon-waning-cresent.json", "waning-gibbous" => "moon-waning-gibbous.json", "waxing-cresent" => "moon-waxing-cresent.json", "waxing-gibbous" => "moon-waxing-gibbous.json", "new-moon" => "moon-new.json", _ => "not-available.json" };
+                var stream = await FileSystem.OpenAppPackageFileAsync(lottieFile);
+                var read = new StreamReader(stream);
+                var fileLocation = Path.Combine(FileSystem.CacheDirectory, "meteocons", lottieFile);
+                File.WriteAllText(fileLocation, read.ReadToEnd());
+                return new SKFileLottieImageSource { File = fileLocation };
+            });
+            return new SKFileLottieImageSource { File = "unavailable.json" };

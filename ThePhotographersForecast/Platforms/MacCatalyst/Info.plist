@@ -36,11 +36,15 @@
 	</array>
 	<key>XSAppIconAssets</key>
 	<string>Assets.xcassets/appicon.appiconset</string>
-<key>NSLocationTemporaryUsageDescriptionDictionary</key>
-		<string>The Photographer's Forecast needs access to your location to provide geocoding services.</string>
-		<key>NSLocationWhenInUseUsageDescription</key>
-    <string>The Photographer's Forecast needs access to your location to provide geocoding services.</string>
+	<key>NSLocationTemporaryUsageDescriptionDictionary</key>
+	<string>The Photographer&apos;s Forecast needs access to your location to provide geocoding services.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>The Photographer&apos;s Forecast needs access to your location to provide geocoding services.</string>
 	<key>TemporaryFullAccuracyUsageDescription</key>
-<string>Photographer's Forecast needs your GPS coordinates to provide accurate times of the day and weather.</string>
+	<string>Photographer&apos;s Forecast needs your GPS coordinates to provide accurate times of the day and weather.</string>
+	<key>CFBundleIdentifier</key>
+	<string></string>
+	<key>CFBundleShortVersionString</key>
+	<string>6</string>
 </dict>
 </plist>

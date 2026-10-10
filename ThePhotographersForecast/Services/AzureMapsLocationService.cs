@@ -55,8 +55,8 @@ namespace ThePhotographersForecast.Services
                 .Select(r => new PhotoLocation
                 {
                     //DisplayName = string.Concat((r.address.neighbourhood != null ? $"{r.address.neighbourhood}, " : string.Empty), (r.address.municipalitySubdivision != null ? $"{r.address.municipalitySubdivision}, " : string.Empty), r.address.municipality, ", ", r.address.countrySubdivision),
-                    Latitude = r.position.lat,
-                    Longitude = r.position.lon
+                    Latitude = r.position.lat ?? 0.0,
+                    Longitude = r.position.lon ?? 0.0
                 })
                 .ToList() ?? new();
         }

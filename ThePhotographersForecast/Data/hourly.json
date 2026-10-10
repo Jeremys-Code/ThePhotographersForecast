@@ -44,8 +44,8 @@
         "updateTime": "2026-04-23T16:56:53+00:00",
         "validTimes": "2026-04-23T10:00:00+00:00/P7DT18H",
         "elevation": {
-            "unitCode": "wmoUnit:m",
-            "value": 45.1104
+            "UnitCode": "wmoUnit:m",
+            "Value": 45.1104
         },
         "periods": [
             {
@@ -58,16 +58,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 0
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 0
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": -3.3333333333333335
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": -3.3333333333333335
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 25
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 25
                 },
                 "windSpeed": "12 mph",
                 "windDirection": "NW",
@@ -85,16 +85,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 0
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 0
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": -3.888888888888889
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": -3.888888888888889
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 25
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 25
                 },
                 "windSpeed": "12 mph",
                 "windDirection": "NW",
@@ -112,16 +112,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 0
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 0
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": -5
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": -5
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 23
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 23
                 },
                 "windSpeed": "12 mph",
                 "windDirection": "NW",
@@ -139,16 +139,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 0
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 0
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": -6.111111111111111
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": -6.111111111111111
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 21
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 21
                 },
                 "windSpeed": "10 mph",
                 "windDirection": "NW",
@@ -166,16 +166,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 0
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 0
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": -5.555555555555555
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": -5.555555555555555
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 24
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 24
                 },
                 "windSpeed": "10 mph",
                 "windDirection": "NW",
@@ -193,16 +193,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 0
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 0
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": -5
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": -5
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 27
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 27
                 },
                 "windSpeed": "8 mph",
                 "windDirection": "N",
@@ -220,16 +220,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 0
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 0
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": -4.444444444444445
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": -4.444444444444445
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 32
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 32
                 },
                 "windSpeed": "6 mph",
                 "windDirection": "N",
@@ -247,16 +247,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 0
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 0
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": -3.888888888888889
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": -3.888888888888889
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 37
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 37
                 },
                 "windSpeed": "6 mph",
                 "windDirection": "N",
@@ -274,16 +274,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 0
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 0
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": -3.888888888888889
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": -3.888888888888889
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 42
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 42
                 },
                 "windSpeed": "5 mph",
                 "windDirection": "N",
@@ -301,16 +301,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 0
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 0
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": -3.3333333333333335
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": -3.3333333333333335
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 47
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 47
                 },
                 "windSpeed": "5 mph",
                 "windDirection": "N",
@@ -328,16 +328,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 0
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 0
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": -2.7777777777777777
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": -2.7777777777777777
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 53
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 53
                 },
                 "windSpeed": "3 mph",
                 "windDirection": "N",
@@ -355,16 +355,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 1
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 1
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": -2.7777777777777777
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": -2.7777777777777777
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 55
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 55
                 },
                 "windSpeed": "3 mph",
                 "windDirection": "N",
@@ -382,16 +382,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 0
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 0
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": -2.2222222222222223
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": -2.2222222222222223
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 59
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 59
                 },
                 "windSpeed": "3 mph",
                 "windDirection": "NW",
@@ -409,16 +409,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 0
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 0
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": -2.2222222222222223
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": -2.2222222222222223
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 64
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 64
                 },
                 "windSpeed": "3 mph",
                 "windDirection": "NW",
@@ -436,16 +436,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 0
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 0
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": -2.7777777777777777
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": -2.7777777777777777
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 64
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 64
                 },
                 "windSpeed": "3 mph",
                 "windDirection": "NW",
@@ -463,16 +463,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 0
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 0
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": -2.7777777777777777
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": -2.7777777777777777
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 67
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 67
                 },
                 "windSpeed": "5 mph",
                 "windDirection": "NW",
@@ -490,16 +490,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 0
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 0
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": -2.7777777777777777
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": -2.7777777777777777
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 64
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 64
                 },
                 "windSpeed": "5 mph",
                 "windDirection": "NW",
@@ -517,16 +517,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 0
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 0
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": -2.2222222222222223
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": -2.2222222222222223
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 64
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 64
                 },
                 "windSpeed": "6 mph",
                 "windDirection": "N",
@@ -544,16 +544,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 0
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 0
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": -2.2222222222222223
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": -2.2222222222222223
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 60
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 60
                 },
                 "windSpeed": "6 mph",
                 "windDirection": "N",
@@ -571,16 +571,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 0
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 0
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": -2.2222222222222223
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": -2.2222222222222223
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 51
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 51
                 },
                 "windSpeed": "7 mph",
                 "windDirection": "N",
@@ -598,16 +598,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 0
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 0
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": -2.7777777777777777
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": -2.7777777777777777
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 44
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 44
                 },
                 "windSpeed": "7 mph",
                 "windDirection": "N",
@@ -625,16 +625,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 0
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 0
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": -3.3333333333333335
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": -3.3333333333333335
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 40
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 40
                 },
                 "windSpeed": "7 mph",
                 "windDirection": "N",
@@ -652,16 +652,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 0
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 0
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": -3.3333333333333335
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": -3.3333333333333335
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 36
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 36
                 },
                 "windSpeed": "7 mph",
                 "windDirection": "N",
@@ -679,16 +679,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 0
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 0
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": -3.3333333333333335
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": -3.3333333333333335
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 33
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 33
                 },
                 "windSpeed": "6 mph",
                 "windDirection": "N",
@@ -706,16 +706,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 0
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 0
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": -3.3333333333333335
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": -3.3333333333333335
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 32
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 32
                 },
                 "windSpeed": "6 mph",
                 "windDirection": "N",
@@ -733,16 +733,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 0
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 0
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": -3.3333333333333335
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": -3.3333333333333335
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 31
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 31
                 },
                 "windSpeed": "7 mph",
                 "windDirection": "N",
@@ -760,16 +760,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 0
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 0
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": -3.3333333333333335
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": -3.3333333333333335
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 31
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 31
                 },
                 "windSpeed": "6 mph",
                 "windDirection": "N",
@@ -787,16 +787,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 0
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 0
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": -3.3333333333333335
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": -3.3333333333333335
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 32
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 32
                 },
                 "windSpeed": "6 mph",
                 "windDirection": "N",
@@ -814,16 +814,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 0
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 0
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": -2.7777777777777777
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": -2.7777777777777777
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 35
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 35
                 },
                 "windSpeed": "5 mph",
                 "windDirection": "N",
@@ -841,16 +841,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 0
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 0
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": -2.2222222222222223
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": -2.2222222222222223
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 39
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 39
                 },
                 "windSpeed": "5 mph",
                 "windDirection": "E",
@@ -868,16 +868,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 0
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 0
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": -1.6666666666666667
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": -1.6666666666666667
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 47
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 47
                 },
                 "windSpeed": "3 mph",
                 "windDirection": "SE",
@@ -895,16 +895,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 0
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 0
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": -1.1111111111111112
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": -1.1111111111111112
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 58
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 58
                 },
                 "windSpeed": "3 mph",
                 "windDirection": "SE",
@@ -922,16 +922,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 0
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 0
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": -0.5555555555555556
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": -0.5555555555555556
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 62
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 62
                 },
                 "windSpeed": "3 mph",
                 "windDirection": "SE",
@@ -949,16 +949,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 1
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 1
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": -0.5555555555555556
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": -0.5555555555555556
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 65
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 65
                 },
                 "windSpeed": "2 mph",
                 "windDirection": "E",
@@ -976,16 +976,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 1
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 1
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": -0.5555555555555556
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": -0.5555555555555556
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 68
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 68
                 },
                 "windSpeed": "2 mph",
                 "windDirection": "E",
@@ -1003,16 +1003,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 1
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 1
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": -0.5555555555555556
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": -0.5555555555555556
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 71
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 71
                 },
                 "windSpeed": "2 mph",
                 "windDirection": "NE",
@@ -1030,16 +1030,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 1
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 1
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": -0.5555555555555556
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": -0.5555555555555556
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 75
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 75
                 },
                 "windSpeed": "2 mph",
                 "windDirection": "NE",
@@ -1057,16 +1057,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 1
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 1
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": -0.5555555555555556
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": -0.5555555555555556
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 80
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 80
                 },
                 "windSpeed": "2 mph",
                 "windDirection": "NE",
@@ -1084,16 +1084,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 1
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 1
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 0
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 0
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 84
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 84
                 },
                 "windSpeed": "2 mph",
                 "windDirection": "NE",
@@ -1111,16 +1111,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 1
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 1
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 0
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 0
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 86
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 86
                 },
                 "windSpeed": "2 mph",
                 "windDirection": "NE",
@@ -1138,16 +1138,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 1
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 1
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 0
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 0
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 83
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 83
                 },
                 "windSpeed": "3 mph",
                 "windDirection": "NE",
@@ -1165,16 +1165,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 2
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 2
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 0
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 0
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 77
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 77
                 },
                 "windSpeed": "3 mph",
                 "windDirection": "NE",
@@ -1192,16 +1192,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 1
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 1
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 0
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 0
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 70
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 70
                 },
                 "windSpeed": "5 mph",
                 "windDirection": "NE",
@@ -1219,16 +1219,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 1
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 1
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 0
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 0
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 64
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 64
                 },
                 "windSpeed": "5 mph",
                 "windDirection": "NE",
@@ -1246,16 +1246,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 1
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 1
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 0
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 0
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 58
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 58
                 },
                 "windSpeed": "6 mph",
                 "windDirection": "NE",
@@ -1273,16 +1273,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 1
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 1
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 0
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 0
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 54
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 54
                 },
                 "windSpeed": "6 mph",
                 "windDirection": "NE",
@@ -1300,16 +1300,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 2
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 2
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": -0.5555555555555556
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": -0.5555555555555556
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 49
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 49
                 },
                 "windSpeed": "6 mph",
                 "windDirection": "NE",
@@ -1327,16 +1327,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 2
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 2
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": -0.5555555555555556
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": -0.5555555555555556
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 46
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 46
                 },
                 "windSpeed": "7 mph",
                 "windDirection": "E",
@@ -1354,16 +1354,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 3
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 3
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": -1.1111111111111112
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": -1.1111111111111112
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 44
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 44
                 },
                 "windSpeed": "7 mph",
                 "windDirection": "E",
@@ -1381,16 +1381,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 4
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 4
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": -1.1111111111111112
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": -1.1111111111111112
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 43
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 43
                 },
                 "windSpeed": "7 mph",
                 "windDirection": "E",
@@ -1408,16 +1408,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 4
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 4
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": -1.6666666666666667
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": -1.6666666666666667
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 43
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 43
                 },
                 "windSpeed": "6 mph",
                 "windDirection": "E",
@@ -1435,16 +1435,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 5
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 5
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": -1.6666666666666667
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": -1.6666666666666667
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 45
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 45
                 },
                 "windSpeed": "6 mph",
                 "windDirection": "E",
@@ -1462,16 +1462,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 5
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 5
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": -1.6666666666666667
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": -1.6666666666666667
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 48
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 48
                 },
                 "windSpeed": "5 mph",
                 "windDirection": "E",
@@ -1489,16 +1489,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 6
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 6
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": -1.1111111111111112
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": -1.1111111111111112
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 53
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 53
                 },
                 "windSpeed": "3 mph",
                 "windDirection": "E",
@@ -1516,16 +1516,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 9
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 9
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": -1.1111111111111112
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": -1.1111111111111112
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 58
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 58
                 },
                 "windSpeed": "2 mph",
                 "windDirection": "E",
@@ -1543,16 +1543,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 10
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 10
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": -0.5555555555555556
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": -0.5555555555555556
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 63
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 63
                 },
                 "windSpeed": "2 mph",
                 "windDirection": "E",
@@ -1570,16 +1570,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 11
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 11
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": -0.5555555555555556
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": -0.5555555555555556
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 68
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 68
                 },
                 "windSpeed": "2 mph",
                 "windDirection": "SE",
@@ -1597,16 +1597,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 12
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 12
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 0
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 0
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 73
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 73
                 },
                 "windSpeed": "2 mph",
                 "windDirection": "SE",
@@ -1624,16 +1624,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 12
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 12
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 0
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 0
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 76
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 76
                 },
                 "windSpeed": "2 mph",
                 "windDirection": "SE",
@@ -1651,16 +1651,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 12
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 12
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 0.5555555555555556
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 0.5555555555555556
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 78
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 78
                 },
                 "windSpeed": "1 mph",
                 "windDirection": "SE",
@@ -1678,16 +1678,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 15
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 15
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 0.5555555555555556
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 0.5555555555555556
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 80
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 80
                 },
                 "windSpeed": "1 mph",
                 "windDirection": "SE",
@@ -1705,16 +1705,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 15
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 15
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 0.5555555555555556
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 0.5555555555555556
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 83
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 83
                 },
                 "windSpeed": "1 mph",
                 "windDirection": "SE",
@@ -1732,16 +1732,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 16
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 16
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 1.1111111111111112
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 1.1111111111111112
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 86
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 86
                 },
                 "windSpeed": "2 mph",
                 "windDirection": "NE",
@@ -1759,16 +1759,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 16
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 16
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 1.1111111111111112
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 1.1111111111111112
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 86
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 86
                 },
                 "windSpeed": "2 mph",
                 "windDirection": "NE",
@@ -1786,16 +1786,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 16
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 16
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 1.1111111111111112
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 1.1111111111111112
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 84
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 84
                 },
                 "windSpeed": "2 mph",
                 "windDirection": "NE",
@@ -1813,16 +1813,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 17
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 17
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 1.6666666666666667
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 1.6666666666666667
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 79
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 79
                 },
                 "windSpeed": "2 mph",
                 "windDirection": "NE",
@@ -1840,16 +1840,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 18
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 18
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 1.6666666666666667
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 1.6666666666666667
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 73
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 73
                 },
                 "windSpeed": "2 mph",
                 "windDirection": "NE",
@@ -1867,16 +1867,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 18
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 18
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 1.6666666666666667
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 1.6666666666666667
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 66
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 66
                 },
                 "windSpeed": "3 mph",
                 "windDirection": "NE",
@@ -1894,16 +1894,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 18
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 18
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 1.6666666666666667
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 1.6666666666666667
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 59
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 59
                 },
                 "windSpeed": "5 mph",
                 "windDirection": "E",
@@ -1921,16 +1921,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 19
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 19
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 1.6666666666666667
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 1.6666666666666667
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 54
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 54
                 },
                 "windSpeed": "6 mph",
                 "windDirection": "E",
@@ -1948,16 +1948,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 19
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 19
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 1.6666666666666667
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 1.6666666666666667
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 50
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 50
                 },
                 "windSpeed": "6 mph",
                 "windDirection": "E",
@@ -1975,16 +1975,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 19
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 19
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 1.1111111111111112
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 1.1111111111111112
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 48
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 48
                 },
                 "windSpeed": "7 mph",
                 "windDirection": "E",
@@ -2002,16 +2002,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 21
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 21
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 1.1111111111111112
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 1.1111111111111112
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 46
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 46
                 },
                 "windSpeed": "7 mph",
                 "windDirection": "E",
@@ -2029,16 +2029,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 21
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 21
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 1.1111111111111112
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 1.1111111111111112
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 46
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 46
                 },
                 "windSpeed": "7 mph",
                 "windDirection": "E",
@@ -2056,16 +2056,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 22
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 22
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 1.1111111111111112
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 1.1111111111111112
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 47
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 47
                 },
                 "windSpeed": "7 mph",
                 "windDirection": "NE",
@@ -2083,16 +2083,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 22
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 22
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 1.1111111111111112
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 1.1111111111111112
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 49
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 49
                 },
                 "windSpeed": "7 mph",
                 "windDirection": "NE",
@@ -2110,16 +2110,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 22
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 22
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 1.6666666666666667
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 1.6666666666666667
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 54
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 54
                 },
                 "windSpeed": "6 mph",
                 "windDirection": "NE",
@@ -2137,16 +2137,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 22
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 22
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 1.6666666666666667
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 1.6666666666666667
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 61
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 61
                 },
                 "windSpeed": "6 mph",
                 "windDirection": "E",
@@ -2164,16 +2164,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 21
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 21
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 2.2222222222222223
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 2.2222222222222223
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 68
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 68
                 },
                 "windSpeed": "5 mph",
                 "windDirection": "E",
@@ -2191,16 +2191,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 20
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 20
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 2.2222222222222223
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 2.2222222222222223
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 72
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 72
                 },
                 "windSpeed": "5 mph",
                 "windDirection": "E",
@@ -2218,16 +2218,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 20
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 20
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 2.2222222222222223
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 2.2222222222222223
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 76
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 76
                 },
                 "windSpeed": "3 mph",
                 "windDirection": "NE",
@@ -2245,16 +2245,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 20
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 20
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 2.2222222222222223
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 2.2222222222222223
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 79
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 79
                 },
                 "windSpeed": "3 mph",
                 "windDirection": "NE",
@@ -2272,16 +2272,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 20
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 20
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 2.2222222222222223
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 2.2222222222222223
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 82
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 82
                 },
                 "windSpeed": "3 mph",
                 "windDirection": "NE",
@@ -2299,16 +2299,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 20
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 20
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 2.7777777777777777
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 2.7777777777777777
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 85
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 85
                 },
                 "windSpeed": "3 mph",
                 "windDirection": "NE",
@@ -2326,16 +2326,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 21
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 21
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 2.7777777777777777
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 2.7777777777777777
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 87
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 87
                 },
                 "windSpeed": "3 mph",
                 "windDirection": "NE",
@@ -2353,16 +2353,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 21
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 21
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 2.7777777777777777
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 2.7777777777777777
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 89
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 89
                 },
                 "windSpeed": "3 mph",
                 "windDirection": "NE",
@@ -2380,16 +2380,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 21
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 21
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 2.7777777777777777
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 2.7777777777777777
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 91
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 91
                 },
                 "windSpeed": "5 mph",
                 "windDirection": "NE",
@@ -2407,16 +2407,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 21
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 21
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 2.7777777777777777
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 2.7777777777777777
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 90
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 90
                 },
                 "windSpeed": "5 mph",
                 "windDirection": "NE",
@@ -2434,16 +2434,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 21
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 21
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 3.3333333333333335
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 3.3333333333333335
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 88
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 88
                 },
                 "windSpeed": "5 mph",
                 "windDirection": "NE",
@@ -2461,16 +2461,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 21
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 21
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 3.3333333333333335
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 3.3333333333333335
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 84
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 84
                 },
                 "windSpeed": "6 mph",
                 "windDirection": "NE",
@@ -2488,16 +2488,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 21
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 21
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 3.888888888888889
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 3.888888888888889
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 79
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 79
                 },
                 "windSpeed": "6 mph",
                 "windDirection": "NE",
@@ -2515,16 +2515,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 21
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 21
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 4.444444444444445
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 4.444444444444445
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 74
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 74
                 },
                 "windSpeed": "7 mph",
                 "windDirection": "NE",
@@ -2542,16 +2542,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 21
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 21
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 4.444444444444445
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 4.444444444444445
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 69
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 69
                 },
                 "windSpeed": "7 mph",
                 "windDirection": "NE",
@@ -2569,16 +2569,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 21
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 21
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 5
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 5
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 66
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 66
                 },
                 "windSpeed": "8 mph",
                 "windDirection": "NE",
@@ -2596,16 +2596,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 21
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 21
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 5
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 5
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 62
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 62
                 },
                 "windSpeed": "8 mph",
                 "windDirection": "NE",
@@ -2623,16 +2623,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 21
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 21
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 4.444444444444445
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 4.444444444444445
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 60
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 60
                 },
                 "windSpeed": "9 mph",
                 "windDirection": "NE",
@@ -2650,16 +2650,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 21
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 21
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 4.444444444444445
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 4.444444444444445
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 59
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 59
                 },
                 "windSpeed": "9 mph",
                 "windDirection": "NE",
@@ -2677,16 +2677,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 22
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 22
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 3.888888888888889
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 3.888888888888889
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 57
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 57
                 },
                 "windSpeed": "9 mph",
                 "windDirection": "NE",
@@ -2704,16 +2704,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 22
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 22
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 3.888888888888889
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 3.888888888888889
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 56
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 56
                 },
                 "windSpeed": "9 mph",
                 "windDirection": "NE",
@@ -2731,16 +2731,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 22
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 22
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 3.3333333333333335
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 3.3333333333333335
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 57
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 57
                 },
                 "windSpeed": "9 mph",
                 "windDirection": "NE",
@@ -2758,16 +2758,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 22
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 22
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 3.3333333333333335
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 3.3333333333333335
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 62
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 62
                 },
                 "windSpeed": "8 mph",
                 "windDirection": "NE",
@@ -2785,16 +2785,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 21
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 21
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 3.3333333333333335
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 3.3333333333333335
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 68
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 68
                 },
                 "windSpeed": "7 mph",
                 "windDirection": "NE",
@@ -2812,16 +2812,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 19
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 19
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 3.3333333333333335
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 3.3333333333333335
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 73
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 73
                 },
                 "windSpeed": "6 mph",
                 "windDirection": "NE",
@@ -2839,16 +2839,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 18
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 18
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 3.3333333333333335
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 3.3333333333333335
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 77
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 77
                 },
                 "windSpeed": "6 mph",
                 "windDirection": "NE",
@@ -2866,16 +2866,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 18
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 18
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 3.3333333333333335
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 3.3333333333333335
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 80
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 80
                 },
                 "windSpeed": "6 mph",
                 "windDirection": "NE",
@@ -2893,16 +2893,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 18
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 18
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 3.3333333333333335
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 3.3333333333333335
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 82
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 82
                 },
                 "windSpeed": "6 mph",
                 "windDirection": "NE",
@@ -2920,16 +2920,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 17
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 17
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 3.3333333333333335
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 3.3333333333333335
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 85
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 85
                 },
                 "windSpeed": "6 mph",
                 "windDirection": "NE",
@@ -2947,16 +2947,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 17
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 17
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 3.3333333333333335
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 3.3333333333333335
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 86
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 86
                 },
                 "windSpeed": "5 mph",
                 "windDirection": "NE",
@@ -2974,16 +2974,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 15
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 15
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 3.3333333333333335
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 3.3333333333333335
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 88
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 88
                 },
                 "windSpeed": "5 mph",
                 "windDirection": "NE",
@@ -3001,16 +3001,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 15
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 15
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 3.3333333333333335
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 3.3333333333333335
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 90
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 90
                 },
                 "windSpeed": "5 mph",
                 "windDirection": "NE",
@@ -3028,16 +3028,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 14
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 14
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 3.3333333333333335
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 3.3333333333333335
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 91
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 91
                 },
                 "windSpeed": "6 mph",
                 "windDirection": "N",
@@ -3055,16 +3055,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 14
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 14
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 3.3333333333333335
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 3.3333333333333335
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 91
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 91
                 },
                 "windSpeed": "6 mph",
                 "windDirection": "N",
@@ -3082,16 +3082,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 14
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 14
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 3.888888888888889
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 3.888888888888889
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 91
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 91
                 },
                 "windSpeed": "6 mph",
                 "windDirection": "N",
@@ -3109,16 +3109,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 14
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 14
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 4.444444444444445
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 4.444444444444445
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 89
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 89
                 },
                 "windSpeed": "6 mph",
                 "windDirection": "NE",
@@ -3136,16 +3136,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 13
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 13
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 5
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 5
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 86
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 86
                 },
                 "windSpeed": "6 mph",
                 "windDirection": "NE",
@@ -3163,16 +3163,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 13
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 13
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 5
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 5
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 77
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 77
                 },
                 "windSpeed": "6 mph",
                 "windDirection": "NE",
@@ -3190,16 +3190,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 13
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 13
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 5
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 5
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 70
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 70
                 },
                 "windSpeed": "7 mph",
                 "windDirection": "NE",
@@ -3217,16 +3217,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 13
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 13
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 5
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 5
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 64
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 64
                 },
                 "windSpeed": "7 mph",
                 "windDirection": "NE",
@@ -3244,16 +3244,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 14
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 14
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 5
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 5
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 61
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 61
                 },
                 "windSpeed": "8 mph",
                 "windDirection": "NE",
@@ -3271,16 +3271,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 17
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 17
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 5.555555555555555
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 5.555555555555555
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 60
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 60
                 },
                 "windSpeed": "8 mph",
                 "windDirection": "NE",
@@ -3298,16 +3298,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 19
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 19
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 5.555555555555555
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 5.555555555555555
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 61
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 61
                 },
                 "windSpeed": "9 mph",
                 "windDirection": "NE",
@@ -3325,16 +3325,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 22
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 22
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 5.555555555555555
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 5.555555555555555
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 61
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 61
                 },
                 "windSpeed": "9 mph",
                 "windDirection": "NE",
@@ -3352,16 +3352,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 24
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 24
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 5.555555555555555
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 5.555555555555555
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 63
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 63
                 },
                 "windSpeed": "8 mph",
                 "windDirection": "E",
@@ -3379,16 +3379,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 26
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 26
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 5.555555555555555
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 5.555555555555555
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 66
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 66
                 },
                 "windSpeed": "8 mph",
                 "windDirection": "E",
@@ -3406,16 +3406,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 27
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 27
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 5.555555555555555
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 5.555555555555555
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 71
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 71
                 },
                 "windSpeed": "8 mph",
                 "windDirection": "E",
@@ -3433,16 +3433,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 31
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 31
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 5.555555555555555
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 5.555555555555555
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 77
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 77
                 },
                 "windSpeed": "7 mph",
                 "windDirection": "NE",
@@ -3460,16 +3460,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 42
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 42
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 5.555555555555555
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 5.555555555555555
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 83
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 83
                 },
                 "windSpeed": "7 mph",
                 "windDirection": "NE",
@@ -3487,16 +3487,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 47
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 47
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 5.555555555555555
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 5.555555555555555
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 87
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 87
                 },
                 "windSpeed": "7 mph",
                 "windDirection": "NE",
@@ -3514,16 +3514,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 51
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 51
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 6.111111111111111
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 6.111111111111111
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 90
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 90
                 },
                 "windSpeed": "6 mph",
                 "windDirection": "NE",
@@ -3541,16 +3541,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 53
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 53
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 6.111111111111111
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 6.111111111111111
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 93
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 93
                 },
                 "windSpeed": "6 mph",
                 "windDirection": "NE",
@@ -3568,16 +3568,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 53
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 53
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 6.111111111111111
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 6.111111111111111
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 95
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 95
                 },
                 "windSpeed": "6 mph",
                 "windDirection": "NE",
@@ -3595,16 +3595,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 52
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 52
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 6.666666666666667
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 6.666666666666667
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 97
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 97
                 },
                 "windSpeed": "5 mph",
                 "windDirection": "NE",
@@ -3622,16 +3622,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 48
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 48
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 6.666666666666667
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 6.666666666666667
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 98
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 98
                 },
                 "windSpeed": "5 mph",
                 "windDirection": "NE",
@@ -3649,16 +3649,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 48
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 48
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 6.666666666666667
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 6.666666666666667
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 99
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 99
                 },
                 "windSpeed": "5 mph",
                 "windDirection": "NE",
@@ -3676,16 +3676,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 47
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 47
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 7.222222222222222
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 7.222222222222222
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 99
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 99
                 },
                 "windSpeed": "6 mph",
                 "windDirection": "NE",
@@ -3703,16 +3703,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 47
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 47
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 7.222222222222222
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 7.222222222222222
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 99
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 99
                 },
                 "windSpeed": "6 mph",
                 "windDirection": "NE",
@@ -3730,16 +3730,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 46
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 46
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 7.222222222222222
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 7.222222222222222
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 99
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 99
                 },
                 "windSpeed": "6 mph",
                 "windDirection": "NE",
@@ -3757,16 +3757,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 44
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 44
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 7.777777777777778
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 7.777777777777778
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 98
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 98
                 },
                 "windSpeed": "6 mph",
                 "windDirection": "NE",
@@ -3784,16 +3784,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 41
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 41
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 7.777777777777778
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 7.777777777777778
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 96
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 96
                 },
                 "windSpeed": "6 mph",
                 "windDirection": "NE",
@@ -3811,16 +3811,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 40
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 40
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 8.333333333333334
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 8.333333333333334
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 94
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 94
                 },
                 "windSpeed": "6 mph",
                 "windDirection": "NE",
@@ -3838,16 +3838,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 38
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 38
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 8.88888888888889
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 8.88888888888889
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 92
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 92
                 },
                 "windSpeed": "6 mph",
                 "windDirection": "E",
@@ -3865,16 +3865,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 37
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 37
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 9.444444444444445
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 9.444444444444445
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 89
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 89
                 },
                 "windSpeed": "6 mph",
                 "windDirection": "E",
@@ -3892,16 +3892,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 38
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 38
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 9.444444444444445
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 9.444444444444445
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 85
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 85
                 },
                 "windSpeed": "6 mph",
                 "windDirection": "E",
@@ -3919,16 +3919,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 39
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 39
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 9.444444444444445
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 9.444444444444445
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 83
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 83
                 },
                 "windSpeed": "7 mph",
                 "windDirection": "E",
@@ -3946,16 +3946,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 42
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 42
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 9.444444444444445
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 9.444444444444445
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 81
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 81
                 },
                 "windSpeed": "7 mph",
                 "windDirection": "E",
@@ -3973,16 +3973,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 44
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 44
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 8.88888888888889
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 8.88888888888889
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 78
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 78
                 },
                 "windSpeed": "7 mph",
                 "windDirection": "E",
@@ -4000,16 +4000,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 45
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 45
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 8.88888888888889
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 8.88888888888889
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 77
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 77
                 },
                 "windSpeed": "8 mph",
                 "windDirection": "E",
@@ -4027,16 +4027,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 45
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 45
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 8.333333333333334
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 8.333333333333334
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 77
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 77
                 },
                 "windSpeed": "8 mph",
                 "windDirection": "E",
@@ -4054,16 +4054,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 45
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 45
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 8.333333333333334
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 8.333333333333334
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 81
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 81
                 },
                 "windSpeed": "7 mph",
                 "windDirection": "E",
@@ -4081,16 +4081,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 45
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 45
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 7.777777777777778
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 7.777777777777778
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 85
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 85
                 },
                 "windSpeed": "7 mph",
                 "windDirection": "NE",
@@ -4108,16 +4108,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 45
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 45
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 7.777777777777778
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 7.777777777777778
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 89
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 89
                 },
                 "windSpeed": "6 mph",
                 "windDirection": "NE",
@@ -4135,16 +4135,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 45
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 45
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 7.777777777777778
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 7.777777777777778
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 91
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 91
                 },
                 "windSpeed": "6 mph",
                 "windDirection": "NE",
@@ -4162,16 +4162,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 45
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 45
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 7.222222222222222
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 7.222222222222222
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 92
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 92
                 },
                 "windSpeed": "5 mph",
                 "windDirection": "NE",
@@ -4189,16 +4189,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 45
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 45
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 7.222222222222222
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 7.222222222222222
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 93
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 93
                 },
                 "windSpeed": "5 mph",
                 "windDirection": "NE",
@@ -4216,16 +4216,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 44
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 44
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 7.222222222222222
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 7.222222222222222
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 95
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 95
                 },
                 "windSpeed": "5 mph",
                 "windDirection": "NE",
@@ -4243,16 +4243,16 @@
                 "temperatureUnit": "F",
                 "temperatureTrend": null,
                 "probabilityOfPrecipitation": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 42
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 42
                 },
                 "dewpoint": {
-                    "unitCode": "wmoUnit:degC",
-                    "value": 7.222222222222222
+                    "UnitCode": "wmoUnit:degC",
+                    "Value": 7.222222222222222
                 },
                 "relativeHumidity": {
-                    "unitCode": "wmoUnit:percent",
-                    "value": 96
+                    "UnitCode": "wmoUnit:percent",
+                    "Value": 96
                 },
                 "windSpeed": "5 mph",
                 "windDirection": "NE",

@@ -1,13 +1,9 @@
-﻿using CommunityToolkit.Maui.Converters;
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ThePhotographersForecast.Services
+﻿namespace ThePhotographersForecast.Services
 {
-    public class ImageCacheService
+    public class ImageCacheService : IImageCacheService
     {
         private readonly HttpClient _client;
+        private Char[] rand = new char[16] { 'a', 'b', 'c', 'd', 'e', 'f', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
 
         public ImageCacheService(IHttpClientFactory factory)
         {
@@ -15,9 +11,13 @@ namespace ThePhotographersForecast.Services
         }
         public async Task<ImageSource> GetCachedFileAsync(string url)
         {
-            var hash = url.GetHashCode().ToString();
+            var urlong = url.Split('/').ToArray();
+            string name = string.Empty;
+            foreach (var u in urlong.Skip(4)) { name += u.Replace(",", ""); }
+            ;
+            name = name.Replace("?size=", "");
             var cache = FileSystem.Current.CacheDirectory;
-            var cacheResults = Directory.EnumerateFiles(cache, hash, SearchOption.TopDirectoryOnly);
+            var cacheResults = Directory.EnumerateFiles(cache, name, SearchOption.TopDirectoryOnly);
             if (cacheResults.Any())
             {
                 return cacheResults.First();
@@ -27,34 +27,25 @@ namespace ThePhotographersForecast.Services
                 try
                 {
                     //Local file path
-                    var imagePath = Path.Combine(cache, hash);
-                    // Build request with required headers for weather.gov
-                    var request = new System.Net.Http.HttpRequestMessage(System.Net.Http.HttpMethod.Get, url);
-                    // Use a descriptive User-Agent per weather.gov policy
-                    _client.DefaultRequestHeaders.UserAgent.Add(new System.Net.Http.Headers.ProductInfoHeaderValue("ThePhotographersForecast", "1.0"));
-                    var response = await _client.SendAsync(request);
-                    if (!response.IsSuccessStatusCode)
-                    {
-                        ImageSource imageSource = ImageSource.FromFile("unknown.png");
-                        return imageSource;
-                    }
-                    var bytes = await response.Content.ReadAsByteArrayAsync();
-                    if (bytes == null || bytes.Length == 0)
-                    {
-                        ImageSource imageSource = ImageSource.FromFile("unknown.png");
-                        return imageSource;
-                    }
-                    else
-                    {
-                        // Return an ImageSource created from an in-memory stream so it survives after disposal
-                        var content = await response.Content.ReadAsByteArrayAsync();
-                        ImageSource imgSource = ImageSource.FromStream(() => new MemoryStream(content));
-                        return imgSource;
-                    }
+                    var imagePath = Path.Combine(cache, name);
+
+                    // Download the image as a byte[]
+                    var result = await _client.GetByteArrayAsync(url);
+
+                    // Write the byte[] out to a physical file location and then make it an ImageSource
+                    File.AppendAllBytes(imagePath, result);
+                    ImageSource imageSource = ImageSource.FromFile(imagePath);
+
+                    // Return the FromFile ImageSource
+                    return imageSource;
+
                 }
                 catch (Exception)
                 {
-                    return "unknown.png";
+                    // If anything goes wrong return the unknown image
+                    ImageSource imageSource = ImageSource.FromFile("unknown.png");
+                    return imageSource;
+
                 }
             }
 

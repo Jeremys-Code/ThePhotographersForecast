@@ -3,11 +3,16 @@
     x:Class="ThePhotographersForecast.AppShell"
     xmlns:local="clr-namespace:ThePhotographersForecast"
     xmlns:views="clr-namespace:ThePhotographersForecast.Views"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
     FlyoutBehavior="Disabled"
     Title="The Photographer's Forecast">
     <TabBar>
-        <ShellContent Title="Home" ContentTemplate="{DataTemplate views:SelectLocation}"/>
-        <ShellContent Title="Forecast" ContentTemplate="{DataTemplate views:Forecast}" />
-        <ShellContent Title="Preferences" ContentTemplate="{DataTemplate views:Settings}" />
+        <ShellContent Title="Select Location" Route="SelectLocation" ContentTemplate="{DataTemplate views:SelectLocation}"/>
+        <ShellContent Title="Forecast" Route="Forecast" ContentTemplate="{DataTemplate views:Forecast}" />
+        <ShellContent Title="Forecast Details" Route="ForecastDetails" ContentTemplate="{DataTemplate views:ForecastDetails}"/>
+        <ShellContent Title="Calendar" Route="Calendar" ContentTemplate="{DataTemplate views:Calendar}" />
+        <ShellContent Title="Event Planner" Route="EventPlanner" ContentTemplate="{DataTemplate views:EventPlanner}"/>
+        <ShellContent Title="DataCheck" Route="DataCheck" ContentTemplate="{DataTemplate views:DataCheck}"/>
+        <ShellContent Title="Preferences" Route="Settings" ContentTemplate="{DataTemplate views:Settings}" />
     </TabBar>
 </Shell>

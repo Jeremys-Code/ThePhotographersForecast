@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:toolkit ="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:share="clr-namespace:ThePhotographersForecast.Shared"
+             xmlns:model="clr-namespace:ThePhotographersForecast.Models"
+             xmlns:skia="clr-namespace:SkiaSharp.Extended.UI.Controls;assembly=SkiaSharp.Extended.UI"
+             x:Class="ThePhotographersForecast.Components.DailyForecastCarouselView"
+             x:Name="Root">
+    <Grid RowDefinitions="Auto,*,Auto">
+        <CarouselView x:Name="Daily"
+                      Grid.Row="1"
+                    ItemsSource="{Binding Dailies, Source={x:Reference Root}}"
+                    PeekAreaInsets="40">
+            <CarouselView.ItemsLayout>
+                <LinearItemsLayout Orientation="Horizontal"
+                                   ItemSpacing="10"
+                                   SnapPointsAlignment="Center" 
+                                   SnapPointsType="MandatorySingle" />
+            </CarouselView.ItemsLayout>
+            <CarouselView.ItemTemplate>
+                <DataTemplate x:DataType="model:DayViewModel">
+                    <Grid Padding="4,8,4,16">
+                        <Grid.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnCardTapped"/>
+                            </Grid.GestureRecognizers>
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup Name="FlipStates">
+                                    <VisualState Name="Flipped">
+                                        <VisualState.Setters>
+                                            <Setter TargetName="FrontView" Property="VisualElement.RotationY" Value="-180" />
+                                            <Setter TargetName="CardBack" Property="VisualElement.RotationY" Value="0" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                    <VisualState Name="Normal">
+                                        <VisualState.Setters>
+                                            <Setter TargetName="FrontView" Property="VisualElement.RotationY" Value="0" />
+                                            <Setter TargetName="CardBack" Property="VisualElement.RotationY" Value="180" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
+                            <!-- Root card border & elevation -->
+                        <VerticalStackLayout>
+                            <!-- Card Tap Gesture-->
+                            <Border StrokeShape="RoundRectangle 24" 
+            Stroke="{StaticResource Moon}"
+            Background="{StaticResource ForecastBackground}"
+            StrokeThickness="2">
+                                <Border.Shadow>
+                                    <Shadow Brush="#000000"
+                                         Offset="0,8"
+                                         Radius="16"
+                                         Opacity="0.45"/>
+                                </Border.Shadow>
+                                <Grid>
+                                    <!--Front of Card-->
+                                    <Grid x:Name="FrontView" 
+                                  RowDefinitions="Auto,*,Auto" 
+                                  IsVisible="True">
+                                        <!-- Front Header -->
+                                        <Border Grid.Row="0" 
+                                        StrokeShape="RoundRectangle 24,24,0,0" 
+                                        HeightRequest="100"
+                                        VerticalOptions="Start"
+                                        Background="{StaticResource BlueBorderBackground}">
+                                            <VerticalStackLayout Padding="16" 
+                                                         HorizontalOptions="Center">
+                                                <Label x:Name="CardTitle" 
+                                               Text="{Binding Name}" 
+                                               FontAutoScalingEnabled="True" 
+                                               FontFamily="ManFont" 
+                                               HorizontalOptions="Center"
+                                               HorizontalTextAlignment="Center"
+                                               FontAttributes="Bold"/>
+                                                <!-- Date -->
+                                                <HorizontalStackLayout>
+                                                    <Label Text="Start TIme:"/>
+                                                    <Label Text="{Binding StartTime, StringFormat='{}{0:F}'}"/>
+                                                    <Label Text=" End TIme:"/>
+                                                    <Label Text="{Binding EndTime, StringFormat='{}{1:F}'}"/>
+                                                </HorizontalStackLayout>
+
+
+                                            </VerticalStackLayout>
+                                        </Border>
+                                        <!-- Front card body -->
+                                        <Grid Grid.Row="1" 
+                                      ColumnDefinitions="*,Auto" 
+                                      ColumnSpacing="10" 
+                                      RowSpacing="10" 
+                                      RowDefinitions="Auto,*,Auto" 
+                                      Padding="20">
+                                            <Border Grid.Row="0" Grid.Column="0" HorizontalOptions="Fill" HeightRequest="210" StrokeShape="RoundRectangle 15" Stroke="{StaticResource Noon}" Margin="10" VerticalOptions="Start">
+                                                <Label x:Name="CardSubTitle" 
+                                                   Text="{Binding ShortForecast}" 
+                                                    LineBreakMode="WordWrap"
+                                                    HorizontalTextAlignment="Start"
+                                                    HorizontalOptions="Start"
+                                                    FontAutoScalingEnabled="True" 
+                                                    FontFamily="NotoSans"/>
+                                            </Border>
+                                            <VerticalStackLayout Grid.Row="1" 
+                                                         Grid.Column="1"
+                                                         Grid.ColumnSpan="2"
+                                                         Padding="5">
+                                                <!--Daily High and Low-->
+                                                <Grid RowDefinitions="*,*">
+                                                    <Border Stroke="Red" StrokeThickness="2" HorizontalOptions="Fill" VerticalOptions="Fill" Background="#70FF0000">
+                                                        <Border.StrokeShape>
+                                                            <RoundRectangle CornerRadius="15,15,0,0" />
+                                                        </Border.StrokeShape>
+                                                        <Grid ColumnDefinitions="*,*" HorizontalOptions="Fill" VerticalOptions="Fill">
+
+                                                            <VerticalStackLayout Grid.Column="0" Margin="8">
+                                                                <Label Text="The High" FontAttributes="Bold" FontFamily="ManFont" HorizontalOptions="Center" HorizontalTextAlignment="Center" Margin="2" TextColor="#701705"/>
+                                                                <Label Text="{Binding SelectedTimeHighTemp}" HorizontalOptions="Center" HorizontalTextAlignment="Center" LineBreakMode="WordWrap" TextColor="#701705" Margin="2" FontFamily="NotoSans"/>
+                                                            </VerticalStackLayout>
+                                                            <Grid Grid.Column="1" Margin="8">
+                                                                <skia:SKLottieView Source="{Binding DailyHighAnimation}" RepeatCount="-1" RepeatMode="Restart" HorizontalOptions="Fill" VerticalOptions="Fill" Margin="10,5,10,5"/>
+                                                            </Grid>
+                                                        </Grid>
+                                                    </Border>
+                                                </Grid>
+                                                <Grid Grid.Row="1">
+                                                    <Border Stroke="Blue" HorizontalOptions="Fill" VerticalOptions="Fill" StrokeThickness="2" Background="#700000FF">
+                                                        <Border.StrokeShape>
+                                                            <RoundRectangle CornerRadius="0,0,30,30" />
+                                                        </Border.StrokeShape>
+                                                        <Grid HorizontalOptions="Fill" VerticalOptions="Fill">
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="*"/>
+                                                                <ColumnDefinition Width="*"/>
+                                                            </Grid.ColumnDefinitions>
+                                                            <Grid Grid.Column="0">
+                                                                <VerticalStackLayout Margin="8">
+                                                                    <Label Text="The Low" FontAttributes="Bold" VerticalOptions="Center" FontFamily="ManFont" HorizontalOptions="Start" FontSize="24" HorizontalTextAlignment="Start" Margin="2" TextColor="#FFF6F3C0"/>
+                                                                    <Label Text="{Binding SelectedTimeLowTemp}" HorizontalOptions="Start" HorizontalTextAlignment="Start" LineBreakMode="WordWrap" VerticalOptions="Center" TextColor="#F6F3C0" Margin="2" FontSize="24" FontFamily="ManFont"/>
+                                                                </VerticalStackLayout>
+                                                            </Grid>
+                                                            <Grid Grid.Column="1" Margin="8">
+                                                                <skia:SKLottieView Source="{Binding DailyLowAnimation}" HeightRequest="80" RepeatCount="-1" RepeatMode="Restart"  WidthRequest="80" HorizontalOptions="Center" VerticalOptions="Center"/>
+                                                            </Grid>
+                                                        </Grid>
+                                                    </Border>
+                                                </Grid>
+                                            </VerticalStackLayout>
+                                            <Label x:Name="TempLabel" 
+                                               Text="Temp:" 
+                                               FontFamily="NotoSans" 
+                                               FontSize="Caption" 
+                                               HorizontalTextAlignment="Start" 
+                                               VerticalTextAlignment="Start"/>
+                                            <Label x:Name="Temp" 
+                                               Text="{Binding TempAndUnit}" 
+                                               HorizontalOptions="Center" 
+                                               VerticalOptions="Fill" 
+                                               HorizontalTextAlignment="Center" 
+                                               VerticalTextAlignment="Center"/>
+                                            <skia:SKLottieView Grid.Row="0" 
+                                                               Grid.Column="1" 
+                                                               Source="{Binding SkDailyAnimation}" 
+                                                               HorizontalOptions="Fill" 
+                                                               VerticalOptions="Fill" 
+                                                               RepeatCount="-1" 
+                                                               RepeatMode="Restart"/>
+                                            <!--<skia:SKLottieView.ControlTemplate>
+                                            <ControlTemplate>
+                                                -->
+                                            <!-- Use SKGLView for GPU-accelerated rendering when available -->
+                                            <!--
+                                                <skiaViews:SKGLView x:Name="PART_DrawingSurface" />
+                                            </ControlTemplate>
+                                        </skia:SKLottieView.ControlTemplate
+                                    </skia:SKLottieView>>-->
+                                            <VerticalStackLayout Grid.ColumnSpan="2" 
+                                                         Grid.Row="1" 
+                                                         Padding="5">
+                                                <Label x:Name="ForecastSummary" 
+                                               Text="{Binding EnrichedForecast}" 
+                                               HorizontalOptions="Fill" 
+                                               
+                                               HorizontalTextAlignment="Start" 
+                                               LineBreakMode="WordWrap"/>
+                                            </VerticalStackLayout>
+                                            <!-- Front Footer-->
+                                            <Grid Grid.Row="2" Padding="16, 10" 
+                                      Background="{StaticResource ForecastBackground}">
+                                                <Label x:Name="CardFooter" Text="Tap to see more." HorizontalTextAlignment="Center" HorizontalOptions="Center" FontAttributes="Bold"/>
+                                            </Grid>
+
+                                            <!-- The Back of the Card-->
+                                            <Grid x:Name="CardBack"
+                                  RowDefinitions="Auto,*,Auto"
+                                  IsVisible="False"
+                                  RotationY="-90">
+                                                <!--Back Header -->
+                                                <Grid Grid.Row="0" Padding="16"
+                                      Background="{StaticResource ForecastBackground}">
+                                                    <Label x:Name="BackHeader" Text="Time Of Day" FontAttributes="Bold" FontFamily="ManFont" HorizontalTextAlignment="Center"/>
+                                                </Grid>
+                                                <!-- Back Details -->
+                                                <VerticalStackLayout Grid.Row="1" Padding="20" Spacing="10">
+                                                    <CarouselView x:Name="EventsCarousel"
+                                                  ItemsSource="{Binding EventTimes}"
+                                                  CurrentItem="{Binding CurrentEvent}"
+                                                  PeekAreaInsets="40"
+                                                  IndicatorView="{Reference EventIndicatorView}"
+                                                  HeightRequest="300">
+                                                        <CarouselView.ItemsLayout>
+                                                            <LinearItemsLayout Orientation="Horizontal" ItemSpacing="10" SnapPointsAlignment="Center" SnapPointsType="MandatorySingle"/>
+                                                        </CarouselView.ItemsLayout>
+                                                        <CarouselView.ItemTemplate>
+                                                            <DataTemplate x:DataType="model:EventTime">
+                                                                <Grid Padding="4,8,4,16">
+                                                                    <!-- Root card border & elevation -->
+                                                                    <Border StrokeShape="RoundRectangle 24" 
+                                                            Stroke="{StaticResource Moon}"
+                                                            StrokeThickness="2">
+                                                                        <Border.Shadow>
+                                                                            <Shadow Brush="#000000"
+                                                                    Offset="0, 8"
+                                                                    Radius="16"
+                                                                    Opacity="0.45"/>
+                                                                        </Border.Shadow>
+                                                                        <Grid RowDefinitions="Auto,*,Auto" ColumnDefinitions="*,*">
+                                                                            <Label Text="{Binding EventName}" 
+                                                                       HorizontalTextAlignment="Center" 
+                                                                       LineBreakMode="WordWrap" 
+                                                                       MaxLines="2"
+                                                                       Grid.Row="0"/>
+                                                                            <Label Text="{Binding TimeLabel}" FontFamily="NotoSans" Grid.Row="1" Grid.Column="0"/>
+                                                                            <Label Text="{Binding OtherTimeLabel}" FontFamily="NotoSans" Grid.Row="1" Grid.Column="1"/>
+
+                                                                        </Grid>
+
+                                                                    </Border>
+                                                                </Grid>
+                                                            </DataTemplate>
+                                                        </CarouselView.ItemTemplate>
+                                                    </CarouselView>
+                                                    <IndicatorView x:Name="EventIndicatorView" 
+                                                   HorizontalOptions="Center" 
+                                                   IndicatorColor="{StaticResource Mint}" 
+                                                   SelectedIndicatorColor="{StaticResource Gray500}" />
+                                                </VerticalStackLayout>
+                                            </Grid>
+                                        </Grid>
+                                    </Grid>
+                                </Grid>
+                            </Border>
+                        </VerticalStackLayout>
+                    </Grid>
+                </DataTemplate>
+            </CarouselView.ItemTemplate>
+        </CarouselView>
+    </Grid>
+</ContentView>

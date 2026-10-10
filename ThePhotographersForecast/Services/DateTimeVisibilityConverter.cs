@@ -4,10 +4,10 @@ namespace ThePhotographersForecast.Services; // Replace with your actual namespa
 
 public class DateTimeVisibilityConverter
 {
-    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    public object Convert(object Value, Type targetType, object parameter, CultureInfo culture)
     {
-        // Check if the value is a DateTime and not equal to MinValue
-        if (value is DateTime dateTime)
+        // Check if the Value is a DateTime and not equal to MinValue
+        if (Value is DateTime dateTime)
         {
             return dateTime != DateTime.MinValue;
         }
@@ -16,7 +16,7 @@ public class DateTimeVisibilityConverter
         return false;
     }
 
-    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    public object ConvertBack(object Value, Type targetType, object parameter, CultureInfo culture)
     {
         // ConvertBack is not needed for OneWay bindings like IsVisible
         throw new NotImplementedException();

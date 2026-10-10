@@ -1,0 +1,3 @@
+Sheri Spears Thoughts:
+Nation weather isn't correct GFS grb2 is a acurate as a meteorologist uses. Use a grb2 viewer, meteorologist ingest 
+them into their own proprietary software. Get the dictionary for a grb2 and translate it into meteorological speech.

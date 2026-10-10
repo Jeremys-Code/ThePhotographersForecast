@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Text;
 using ThePhotographersForecast.Models;
 using ThePhotographersForecast.Services.Modules;
 
@@ -12,7 +10,7 @@ namespace ThePhotographersForecast.Services.Narratives
         {
             var bins = new[]
             {
-            agent.Overnight,
+            agent.EarlyHours,
             agent.EarlyMorning,
             agent.Morning,
             agent.Afternoon,
@@ -21,7 +19,7 @@ namespace ThePhotographersForecast.Services.Narratives
         };
 
             var sb = new StringBuilder();
-            sb.AppendLine($"Cloud cover evolution for {agent.BinDate:dddd, MMMM dd}:");
+            //   sb.AppendLine($"Cloud cover evolution for {agent.BinDate:dddd, MMMM dd}:");
 
             for (int i = 0; i < bins.Length; i++)
             {
@@ -35,6 +33,8 @@ namespace ThePhotographersForecast.Services.Narratives
                 string category = CloudCoverEngine.Category(mean);
 
                 // Base description for this period
+                //sb.Append($"{bin.Label}: skies are {category} on average ");
+
                 sb.Append($"{bin.Label}: skies are {category} on average ");
 
                 sb.Append($"(cloud cover ranging from {min:P0} to {max:P0}).");

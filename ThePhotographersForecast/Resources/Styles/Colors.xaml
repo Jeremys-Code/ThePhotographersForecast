@@ -1,29 +1,75 @@
-﻿<?xml version="1.0" encoding="UTF-8" ?>
-<?xaml-comp compile="true" ?>
 <ResourceDictionary 
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
 
-    <!-- Note: For Android please see also Platforms\Android\Resources\values\colors.xml -->
+    <!-- Note: For Android please see also Platforms\Android\Resources\Values\colors.xml -->
 
     <Color x:Key="Primary">#4577AF</Color>
+	<Color x:Key="OnPrimary">#FFFFFF</Color>
+    <Color x:Key="PrimaryContainer">#EADDFF</Color>
+    <Color x:Key="OnPrimaryContainer">#21005D</Color>
+    <Color x:Key="RedSelectedOverlayBrush">#FCC6BB</Color>
+    <Color x:Key="RedOuterBandOverlayBrush">#75F54927</Color>    
+    <Color x:Key="BlueSelectedOverlayBrush">#750068CC</Color>
     <Color x:Key="PrimaryDark">#ac99ea</Color>
     <Color x:Key="PrimaryDarkText">#befac6</Color>
-    <Color x:Key="Secondary">#DFD8F7</Color>
-    <Color x:Key="SecondaryDarkText">#befac6</Color>
+	<Color x:Key="OnPrimaryDark">#381E72</Color>
+    <Color x:Key="PrimaryContainerDark">#4F378B</Color>
+    <Color x:Key="OnPrimaryContainerDark">#EADDFF</Color>
+	
+	<Color x:Key="Secondary">#DFD8F7</Color>
+	<Color x:Key="OnSecondary">#FFFFFF</Color>
+    <Color x:Key="SecondaryContainer">#E8DEF8</Color>
+    <Color x:Key="OnSecondaryContainer">#1D192B</Color>
+
+	<Color x:Key="SecondaryDarkText">#befac6</Color>
+    <Color x:Key="SecondaryDark">#CCC2DC</Color>
+    <Color x:Key="OnSecondaryDark">#332D41</Color>
+    <Color x:Key="SecondaryContainerDark">#4A4458</Color>
+    <Color x:Key="OnSecondaryContainerDark">#E8DEF8</Color>
+	
     <Color x:Key="Tertiary">#0068CC</Color>
-    <Color x:Key="GlowInDark">#befac6</Color>
+    <Color x:Key="OnTertiary">#FFFFFF</Color>
+    <Color x:Key="TertiaryContainer">#FFD8E4</Color>
+    <Color x:Key="OnTertiaryContainer">#31111D</Color>
+
+    <Color x:Key="TertiaryDark">#EFB8C8</Color>
+    <Color x:Key="OnTertiaryDark">#492532</Color>
+    <Color x:Key="TertiaryContainerDark">#633B48</Color>
+    <Color x:Key="OnTertiaryContainerDark">#FFD8E4</Color>
+
+    <Color x:Key="SurfaceLight">#FEF7FF</Color>
+    <Color x:Key="SurfaceContainerLight">#F3EDF7</Color>
+    <Color x:Key="SurfaceVariantLight">#E7E0EC</Color>
+    <Color x:Key="OnSurfaceLight">#1D1B20</Color>
+    <Color x:Key="OnSurfaceVariantLight">#49454F</Color>
+    <Color x:Key="OutlineLight">#79747E</Color>
+    <Color x:Key="OutlineVariantLight">#CAC4D0</Color>
+
+    <Color x:Key="SurfaceDark">#141218</Color>
+    <Color x:Key="SurfaceContainerDark">#211F26</Color>
+    <Color x:Key="SurfaceVariantDark">#49454F</Color>
+    <Color x:Key="OnSurfaceDark">#E6E0E9</Color>
+    <Color x:Key="OnSurfaceVariantDark">#CAC4D0</Color>
+    <Color x:Key="OutlineDark">#938F99</Color>
+    <Color x:Key="OutlineVariantDark">#49454F</Color>
+	
+	<Color x:Key="White">White</Color>
+    <Color x:Key="Black">Black</Color>
+	<Color x:Key="OffBlack">#1f1f1f</Color>
+	
+	<Color x:Key="GlowInDark">#befac6</Color>
     <Color x:Key="GlowInDarkClick">#88fa5c</Color>
+    <Color x:Key="Moon">#FCFEDA</Color>
     <Color x:Key="HunterGreenBorder">#020600</Color>
     <Color x:Key="Midnight">#0F0F4B</Color>
     <Color x:Key="Gold">#FFD075</Color>
     <Color x:Key="DarkYellow">#E3D092</Color>
     <Color x:Key="SailOnBlue">#4577AF</Color>
-    <Color x:Key="White">White</Color>
-    <Color x:Key="Black">Black</Color>
+    <Color x:Key="BlueBorderBackground">#654577AF</Color>
+    <Color x:Key="SkyBlueBorderBackground">#6565ffff</Color>
     <Color x:Key="Magenta">#D600AA</Color>
     <Color x:Key="MidnightBlue">#190649</Color>
-    <Color x:Key="OffBlack">#1f1f1f</Color>
     <Color x:Key="Mint">#ccffaa</Color>
 
     <Color x:Key="Gray100">#E1E1E1</Color>
@@ -42,6 +88,14 @@
     <SolidColorBrush x:Key="WhiteBrush" Color="{StaticResource White}"/>
     <SolidColorBrush x:Key="BlackBrush" Color="{StaticResource Black}"/>
 
+
+
+    <SolidColorBrush x:Key="SurfaceLightBrush" Color="{StaticResource SurfaceLight}"/>
+    <SolidColorBrush x:Key="SurfaceDarkBrush" Color="{StaticResource SurfaceDark}"/>
+    <SolidColorBrush x:Key="SurfaceContainerLightBrush" Color="{StaticResource SurfaceContainerLight}"/>
+    <SolidColorBrush x:Key="SurfaceContainerDarkBrush" Color="{StaticResource SurfaceContainerDark}"/>
+
+
     <SolidColorBrush x:Key="Gray100Brush" Color="{StaticResource Gray100}"/>
     <SolidColorBrush x:Key="Gray200Brush" Color="{StaticResource Gray200}"/>
     <SolidColorBrush x:Key="Gray300Brush" Color="{StaticResource Gray300}"/>
@@ -56,12 +110,12 @@
         <GradientStop Color="#befca6" Offset="0.5" />
         <GradientStop Color="#020600" Offset="1.0"/>
     </LinearGradientBrush> 
-    <LinearGradientBrush x:Key="MorningTwilight" StartPoint="0,0" EndPoint="1,0">
+    <RadialGradientBrush x:Key="MorningTwilight">
         <GradientStop Color="#FF164476" Offset="0.0" />
         <GradientStop Color="#FF82638E" Offset="0.33" />
         <GradientStop Color="#FF747DAB" Offset="0.66" />
         <GradientStop Color="#FF5976AA" Offset="1.0" />
-    </LinearGradientBrush>
+    </RadialGradientBrush>
 
     <LinearGradientBrush x:Key="Sunrise" StartPoint="0,0" EndPoint="1,0">
         <GradientStop Color="#0068CC" Offset="0.0" />
@@ -70,11 +124,34 @@
         <GradientStop Color="#FFFFFF" Offset="1.0" />
     </LinearGradientBrush>
 
-    <LinearGradientBrush x:Key="Noon" StartPoint="0,0" EndPoint="1,0">
+    <LinearGradientBrush x:Key="Noon" StartPoint="0,0" EndPoint="0,1">
         <GradientStop Color="#FFF4AF" Offset="0.0" />
         <GradientStop Color="#E3D092" Offset="0.33" />
         <GradientStop Color="#4388B1" Offset="0.66" />
         <GradientStop Color="#0068CC" Offset="1.0" />
+    </LinearGradientBrush>
+
+    <RadialGradientBrush x:Key="RadialNoon" Center="0.5,0" Radius="0.5">
+        <GradientStop Color="#FFF4AF" Offset="0.0" />
+        <GradientStop Color="#E3D092" Offset="0.33" />
+        <GradientStop Color="#4388B1" Offset="0.66" />
+        <GradientStop Color="#0068CC" Offset="1.0" />
+    </RadialGradientBrush>
+    <RadialGradientBrush x:Key="RadialRed" Center="0.5,0" Radius="0.5">
+        <GradientStop Color="{StaticResource RedSelectedOverlayBrush}" Offset="0.0"/>
+        <GradientStop Color="{StaticResource RedOuterBandOverlayBrush}" Offset="1.0"/>
+    </RadialGradientBrush>
+
+    <RadialGradientBrush x:Key="RadialBlue" Center="0.5,0" Radius="0.5">
+        <GradientStop Color="{StaticResource RedSelectedOverlayBrush}" Offset="0.0"/>
+        <GradientStop Color="{StaticResource RedOuterBandOverlayBrush}" Offset="1.0"/>
+    </RadialGradientBrush>
+
+    <LinearGradientBrush x:Key="NoonReverse" StartPoint="0,1" EndPoint="0,0">
+        <GradientStop Color="#30FFF4AF" Offset="0.0" />
+        <GradientStop Color="#60E3D092" Offset="0.33" />
+        <GradientStop Color="#404388B1" Offset="0.66" />
+        <GradientStop Color="#750068CC" Offset="1.0" />
     </LinearGradientBrush>
 
     <LinearGradientBrush x:Key="Sunset" StartPoint="1,0" EndPoint="0,0">
@@ -102,9 +179,73 @@
     <Color x:Key="White75">#75ffffff</Color>
     <Color x:Key="Black75">#75000000</Color>
 
-    <RadialGradientBrush x:Key="ForecastBackground" Radius="400">
-        <GradientStop Color="#500e0e18" Offset="0.0" />
-        <GradientStop Color="#700e0e18" Offset="1.0"/>
+    <RadialGradientBrush x:Key="ForecastBackground" Radius="5">
+        <GradientStop Color="#4577AF" Offset="0.0" />
+        <GradientStop Color="#0e0eff" Offset="1.0"/>
     </RadialGradientBrush>
-    
+
+    <LinearGradientBrush x:Key="PeriodEarlyHours" StartPoint="1,0" EndPoint="0,0">
+        <GradientStop Color="#081F43" Offset="0.0"/>
+        <GradientStop Color="#000000" Offset="0.5"/>
+        <GradientStop Color="#081F43" Offset="1.0"/>
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="PeriodEarlyMorning" StartPoint="0,0" EndPoint="1,0">
+        <GradientStop Color="#081F43" Offset="0.0"/>
+        <GradientStop Color="#0D297A" Offset="0.5"/>
+        <GradientStop Color="#203AA4" Offset="1.0"/>
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="PeriodMorning" StartPoint="0,0" EndPoint="1,0">
+        <GradientStop Color="#203AA4" Offset="0.0"/>
+        <GradientStop Color="#316BE8" Offset="0.33"/>
+        <GradientStop Color="#49A8FC" Offset="0.66"/>
+        <GradientStop Color="#7DD2F8" Offset="1.0"/>
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="GpsBackground" StartPoint="0,1" EndPoint="0,0">
+        <GradientStop Color="#203AA4" Offset="0.0"/>
+        <GradientStop Color="#316BE8" Offset="0.33"/>
+        <GradientStop Color="#49A8FC" Offset="0.66"/>
+        <GradientStop Color="#7DD2F8" Offset="1.0"/>
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="GpsBorder" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#203AA4" Offset="0.0"/>
+        <GradientStop Color="#316BE8" Offset="0.33"/>
+        <GradientStop Color="#49A8FC" Offset="0.66"/>
+        <GradientStop Color="#7DD2F8" Offset="1.0"/>
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="GpsCircleBorder" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#080E29" Offset="1.0"/>
+        <GradientStop Color="#0C1B3A" Offset="0.66"/>
+        <GradientStop Color="#122A3F" Offset="0.33"/>
+        <GradientStop Color="#1F345E" Offset="0.0"/>
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="SunMoon" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color= "#35BAFF" Offset="0.0"/>
+        <GradientStop Color="#0d1755" Offset="1.0"/>
+    </LinearGradientBrush>
+   
+
+    <LinearGradientBrush x:Key="PeriodAfternoon" StartPoint="1,0" EndPoint="0,0">
+        <GradientStop Color="#7DD2F8" Offset="0.0"/>
+        <GradientStop Color="#d8f0fd" Offset="0.5"/>
+        <GradientStop Color="#7DD2F8" Offset="1.0"/>
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="PeriodEvening" StartPoint="0,0" EndPoint="1,0">
+        <GradientStop Color="#7DD2F8" Offset="0.0"/>
+        <GradientStop Color="#49A8FC" Offset="0.33"/>
+        <GradientStop Color="#316BE8" Offset="0.66"/>
+        <GradientStop Color="#203AA4" Offset="1.0"/>
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="PeriodNight" StartPoint="0,0" EndPoint="1,0">
+        <GradientStop Color="#203AA4" Offset="0.0"/>
+        <GradientStop Color="#0D297A" Offset="0.5"/>
+        <GradientStop Color="#081F43" Offset="1.0"/>
+    </LinearGradientBrush>
+
+
 </ResourceDictionary>

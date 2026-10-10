@@ -1,10 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net10.0-android</TargetFrameworks>
-		<!--<TargetFrameworks Condition="!$([MSBuild]::IsOSPlatform('linux'))">$(TargetFrameworks);net10.0-ios;net10.0-maccatalyst</TargetFrameworks>-->
-		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net10.0-windows10.0.22621.0</TargetFrameworks>
+		<TargetFrameworks>net10.0-android;net10.0-ios;net10.0-maccatalyst</TargetFrameworks>
+		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net10.0-windows10.0.26100.0</TargetFrameworks>
 
+		<!-- Uncomment to also build the tizen app. You will need to install tizen by following this: https://github.com/Samsung/Tizen.NET -->
+		<!-- <TargetFrameworks>$(TargetFrameworks);net10.0-tizen</TargetFrameworks> -->
 		<!-- Note for MacCatalyst:
 		The default runtime is maccatalyst-x64, except in Release config, in which case the default is maccatalyst-x64;maccatalyst-arm64.
 		When specifying both architectures, use the plural <RuntimeIdentifiers> instead of the singular <RuntimeIdentifier>.
@@ -19,7 +20,7 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<!-- Enable Material 3 design on Android -->
-		<!--<UseMaterial3>true</UseMaterial3> -->
+		<UseMaterial3>true</UseMaterial3>
 
 		<!-- Enable XAML source generation for faster build times and improved performance.
 		     This generates C# code from XAML at compile time instead of runtime inflation.
@@ -36,19 +37,102 @@
 		<ApplicationId>com.bostonfromabove.thephotographersforecast</ApplicationId>
 
 		<!-- Versions -->
-		<ApplicationDisplayVersion>1.00</ApplicationDisplayVersion>
-		<ApplicationVersion>1</ApplicationVersion>
+		<ApplicationDisplayVersion>6.0.0</ApplicationDisplayVersion>
+		<ApplicationVersion>6</ApplicationVersion>
 
 		<!-- To develop, package, and publish an app to the Microsoft Store, see: https://aka.ms/MauiTemplateUnpackaged -->
 		<WindowsPackageType>None</WindowsPackageType>
-		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
-		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</SupportedOSPlatformVersion>
+
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">16.0</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">15.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">34.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.19041.0</SupportedOSPlatformVersion>
+		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.19041.0</TargetPlatformMinVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
+
+		
+		
+		<!--<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">16.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">16.0</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">35.0</SupportedOSPlatformVersion>
-		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.20348.0</SupportedOSPlatformVersion>
-		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.20348.0</TargetPlatformMinVersion>
-		<UserSecretsId>e1023fcc-f14f-41d3-b963-94d92b62633a</UserSecretsId>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.22000.0</SupportedOSPlatformVersion>
+		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.22000.0</TargetPlatformMinVersion>-->
 	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net10.0-android|AnyCPU'">
+	  <Optimize>True</Optimize>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net10.0-ios|AnyCPU'">
+	  <Optimize>False</Optimize>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net10.0-maccatalyst|AnyCPU'">
+	  <Optimize>False</Optimize>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net10.0-windows10.0.26100.0|AnyCPU'">
+	  <Optimize>False</Optimize>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net10.0-android|AnyCPU'">
+	  <Optimize>False</Optimize>
+	  <AndroidKeyStore>False</AndroidKeyStore>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net10.0-android|AnyCPU'">
+	  <ApplicationDisplayVersion>6.0.0</ApplicationDisplayVersion>
+	  <ApplicationVersion>6</ApplicationVersion>
+	  <Optimize>False</Optimize>
+		<DebugSymbols>true</DebugSymbols>
+		<AndroidEnableProfiler>true</AndroidEnableProfiler>
+		<AndroidIncludeDebugSymbols>true</AndroidIncludeDebugSymbols>
+		<AndroidKeyStore>False</AndroidKeyStore>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net10.0-ios|AnyCPU'">
+	  <Optimize>False</Optimize>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net10.0-maccatalyst|AnyCPU'">
+	  <Optimize>False</Optimize>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net10.0-windows10.0.26100.0|AnyCPU'">
+	  <Optimize>False</Optimize>
+	</PropertyGroup>
+
+	<!--<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net10.0-windows10.0.22621.0|AnyCPU'">
+	  <ApplicationDisplayVersion>5.0.0</ApplicationDisplayVersion>
+	  <ApplicationVersion>5</ApplicationVersion>
+	  <Optimize>True</Optimize>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net10.0-android|AnyCPU'">
+	  <ApplicationDisplayVersion>5.0.0</ApplicationDisplayVersion>
+	  <ApplicationVersion>5</ApplicationVersion>
+	  <DebugSymbols>True</DebugSymbols>
+	  <RunAOTCompilation>False</RunAOTCompilation>
+	  <PublishTrimmed>False</PublishTrimmed>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net10.0-windows10.0.22621.0|AnyCPU'">
+	  <ApplicationDisplayVersion>5.0.0</ApplicationDisplayVersion>
+	  <ApplicationVersion>5</ApplicationVersion>
+	</PropertyGroup>-->
+
+	<!--<PropertyGroup>
+	  <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net10.0-windows10.0.22621.0</TargetFrameworks>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net10.0-ios|AnyCPU'">
+	  <Optimize>True</Optimize>
+	  <ApplicationDisplayVersion>5.0.0</ApplicationDisplayVersion>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net10.0-ios|AnyCPU'">
+	  <ApplicationDisplayVersion>5.0.0</ApplicationDisplayVersion>
+	</PropertyGroup>-->
 	
 	
 	<ItemGroup>
@@ -130,79 +214,145 @@
 		<MauiImage Include="Resources\Images\icon\wind_ovc.png" />
 		<MauiImage Include="Resources\Images\icon\wind_sct.png" />
 		<MauiImage Include="Resources\Images\icon\wind_skc.png" />
+		<MauiImage Include="Resources\Images\moons\firstquarter.png" />
+		<MauiImage Include="Resources\Images\moons\fullmoon.png" />
+		<MauiImage Include="Resources\Images\moons\lastquarter.png" />
+		<MauiImage Include="Resources\Images\moons\newmoon.png" />
+		<MauiImage Include="Resources\Images\moons\waningcresent.png" />
+		<MauiImage Include="Resources\Images\moons\waninggibbous.png" />
+		<MauiImage Include="Resources\Images\moons\waxingcresent.png" />
+		<MauiImage Include="Resources\Images\moons\waxinggibbous.png" />
 		
 		<!-- Custom Fonts -->
 		<MauiFont Include="Resources\Fonts\hennypenny.ttf" />
 		<MauiFont Include="Resources\Fonts\jost.ttf" />
 		<MauiFont Include="Resources\Fonts\notosans.ttf" />
+		<MauiFont Include="Resources\Fonts\NotoSansBlack.ttf" />
 		<MauiFont Include="Resources\Fonts\notosansitalic.ttf" />
-		<MauiFont Include="Resources\Fonts\FluentSystemIcons-Regular.ttf" />
-		<MauiFont Include="Resources\Fonts\FluentSystemIcons-Filled.ttf" />
-		<MauiFont Include="Resources\Fonts\FluentSystemIcons-Light.ttf" />
-		<MauiFont Include="Resources\Fonts\FluentSystemIcons-Resizable.ttf" />
+		<MauiFont Include="Resources\Fonts\NotoSansLight.ttf" />
+		<MauiFont Include="Resources\Fonts\segoefluenticons.ttf" />
 
 		<!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
 		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
 	</ItemGroup>
-
-	<ItemGroup>
-	  <Compile Remove="Database\Constants.cs" />
-	  <Compile Remove="Database\DataAccess.cs" />
-	  <Compile Remove="Data\AppUri.cs" />
-	  <Compile Remove="Models\ForecastEventModel.cs" />
-	  <Compile Remove="Services\GetGfsData.cs" />
-	  <Compile Remove="Services\GetPhotoDay.cs" />
-	  <Compile Remove="Services\GetPhotoSchedules.cs" />
-	  <Compile Remove="Services\HttpClientConverter.cs" />
-	  <Compile Remove="Services\ImageCacheService.cs" />
-	  <Compile Remove="Services\IWeatherService.cs" />
-	  <Compile Remove="Services\ServiceHelper.cs" />
-	  <Compile Remove="Services\TimeConverter.cs" />
-	  <Compile Remove="Shared\ISessionStore.cs" />
-	  <Compile Remove="Shared\SessionStore.cs" />
-	  <Compile Remove="Validations\WeatherPayloadValidation.cs" />
-	  <Compile Remove="ViewModels\CalendarViewModel.cs" />
-	  <Compile Remove="ViewModels\CombineViewModels.cs" />
-	  <Compile Remove="ViewModels\PhotoTimeTrackViewModel.cs" />
-	  <Compile Remove="Views\Calendar.xaml.cs" />
-	  <Compile Remove="Views\OldForecast.xaml.cs" />
-	  <Compile Remove="Views\PhotoTimeTrack.xaml.cs" />
-	  <Compile Remove="Views\TimeLine.xaml.cs" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <MauiXaml Remove="Views\Calendar.xaml" />
-	  <MauiXaml Remove="Views\OldForecast.xaml" />
-	  <MauiXaml Remove="Views\PhotoTimeTrack.xaml" />
-	  <MauiXaml Remove="Views\TimeLine.xaml" />
-	</ItemGroup>
-
 	
-
+	
 	<ItemGroup>
-		<PackageReference Include="CommunityToolkit.Maui" Version="14.2.0" />
+	  <AndroidResource Remove="Controls\**" />
+	  <AndroidResource Remove="Resources\Images\moons\**" />
+	  <AndroidResource Remove="Resources\Raw\meteocons\**" />
+	  <Compile Remove="Controls\**" />
+	  <Compile Remove="Resources\Images\moons\**" />
+	  <Compile Remove="Resources\Raw\meteocons\**" />
+	  <EmbeddedResource Remove="Controls\**" />
+	  <EmbeddedResource Remove="Resources\Images\moons\**" />
+	  <EmbeddedResource Remove="Resources\Raw\meteocons\**" />
+	  <MauiAsset Remove="Resources\Raw\meteocons\**" />
+	  <MauiCss Remove="Controls\**" />
+	  <MauiCss Remove="Resources\Images\moons\**" />
+	  <MauiCss Remove="Resources\Raw\meteocons\**" />
+	  <MauiImage Remove="Resources\Images\moons\**" />
+	  <MauiXaml Remove="Controls\**" />
+	  <MauiXaml Remove="Resources\Images\moons\**" />
+	  <MauiXaml Remove="Resources\Raw\meteocons\**" />
+	  <None Remove="Controls\**" />
+	  <None Remove="Resources\Images\moons\**" />
+	  <None Remove="Resources\Raw\meteocons\**" />
+	</ItemGroup>
+	
+	
+	<ItemGroup>
+	  <Compile Remove="ApiClients\GetApi.cs" />
+	  <Compile Remove="ApiClients\IGetApi.cs" />
+	  <Compile Remove="ApiClients\IIpGeolocationApiClient.cs" />
+	  <Compile Remove="ApiClients\INwsApiClient.cs" />
+	  <Compile Remove="ApiClients\IOpenMeteoApiClient.cs" />
+	  <Compile Remove="ApiClients\IpGeolocationApiClient.cs" />
+	  <Compile Remove="ApiClients\NwsApiClient.cs" />
+	  <Compile Remove="ApiClients\OpenMeteoApiClient.cs" />
+	  <Compile Remove="Models\ILottie.cs" />
+	  <Compile Remove="Models\Meteocon.cs" />
+	  <Compile Remove="Models\NwsHour.cs" />
+	  <Compile Remove="Services\HttpClientConverter.cs" />
+	  <Compile Remove="Services\NavigationService.cs" />
+	  <Compile Remove="Shared\VerifySession.cs" />
+	  <Compile Remove="ViewModels\Compnents\TempHightsLows.xaml.cs" />
+	</ItemGroup>
+	
+	
+	<ItemGroup>
+	  <MauiImage Remove="Resources\Images\greenplane.svg.2026_08_20_23_56_27.1.svg" />
+	</ItemGroup>
+	
+	
+	<ItemGroup>
+	  <MauiXaml Remove="ViewModels\Compnents\TempHightsLows.xaml" />
+	</ItemGroup>
+	
+	
+	<ItemGroup>
+		<PackageReference Include="CommunityToolkit.Maui" Version="15.0.1" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.9" />
-		<PackageReference Include="Microsoft.Extensions.Http" Version="10.0.9" />
-		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.71" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.9" />
-		<PackageReference Include="Microsoft.Maui.Controls.Foldable" Version="10.0.71" />
-		<PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
-		<PackageReference Include="SkiaSharp" Version="4.148.0" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.12" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.12">
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		  <PrivateAssets>all</PrivateAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.12" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.12">
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		  <PrivateAssets>all</PrivateAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.Extensions.Http" Version="10.0.12" />
+		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.110" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.12" />
+		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="10.0.110" />
+		<PackageReference Include="Microsoft.Maui.Controls.Foldable" Version="10.0.110" />
+		<PackageReference Include="Microsoft.Maui.Controls.Maps" Version="10.0.110" />
+		<PackageReference Include="Microsoft.Maui.Maps" Version="10.0.110" />
+		<PackageReference Include="NReco.Logging.File" Version="1.4.0" />
+		<PackageReference Include="Serilog" Version="4.4.0" />
+		<PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1" />
+		<PackageReference Include="Serilog.Extensions.Logging" Version="10.0.0" />
+		<PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
+		<PackageReference Include="SkiaSharp" Version="4.153.1" />
+		<PackageReference Include="SkiaSharp.Extended.UI.Maui" Version="3.0.0" />
+		<PackageReference Include="SkiaSharp.Views" Version="4.153.1" />
+		<PackageReference Include="SkiaSharp.Views.Maui.Controls" Version="4.153.1" />
+		<PackageReference Include="SkiaSharp.Views.Maui.Controls.Compatibility" Version="2.88.9" />
+		<PackageReference Include="SQLitePCLRaw.lib.e_sqlite3" Version="3.53.3" />
+		<PackageReference Include="SQLitePCLRaw.lib.e_sqlite3.android" Version="2.1.13" />
+		<PackageReference Include="SQLitePCLRaw.lib.e_sqlite3.ios" Version="2.1.13" />
 	</ItemGroup>
 
-
-
 	<ItemGroup>
-	  <MauiXaml Update="ContentViews\TpfHeader.xaml">
+	  <MauiXaml Update="Components\MoonPhasesCarouselView.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
-	  <MauiXaml Update="MainPage.xaml">
+	  <MauiXaml Update="Components\DailyForecastCarouselView.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\Calendar.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Components\NwsDailyHourlyView.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Components\RangeCalendarView.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\EventPlanner.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Views\Forecast.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+		<MauiXaml Update="Views\ForecastDetails.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+		<MauiXaml Update="Views\DataCheck.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
 	  <MauiXaml Update="Views\SelectLocation.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
@@ -211,22 +361,33 @@
 	  </MauiXaml>
 	</ItemGroup>
 
-
-
 	<ItemGroup>
-	  <Folder Include="Database\" />
-	  <Folder Include="Shared\" />
+	  <Folder Include="Views\Components\" />
 	</ItemGroup>
 
-
+	<ItemGroup>
+	  <MauiAsset Include="Data\openmeteo.json" />
+	</ItemGroup>
 
 	<ItemGroup>
-	  <Compile Update="Views\forecast.xaml.cs">
-	    <DependentUpon>Forecast.xaml</DependentUpon>
+	  <ProjectReference Include="..\SunCalcSharp\SunCalcSharp.csproj">
+	    <CopyLocalSatelliteAssemblies></CopyLocalSatelliteAssemblies>
+	    <Private>True</Private>
+	    <EmbedInteropTypes>False</EmbedInteropTypes>
+	    <ReferenceOutputAssembly></ReferenceOutputAssembly>
+	  </ProjectReference>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Compile Update="Components\DailyForecastCarouselView.xaml.cs">
+	    <DependentUpon>DailyForecastCarouselView.xaml</DependentUpon>
 	  </Compile>
-	  <Compile Update="Views\Settings.xaml.cs">
-	    <DependentUpon>Settings.xaml</DependentUpon>
+	  <Compile Update="Views\DataCheck.xaml.cs">
+	    <DependentUpon>DataCheck.xaml</DependentUpon>
 	  </Compile>
 	</ItemGroup>
+	<PropertyGroup>
+		<NoWarn>$(NoWarn);MAUIAI0001</NoWarn>
+	</PropertyGroup>
 
 </Project>

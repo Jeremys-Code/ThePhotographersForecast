@@ -6,44 +6,57 @@ namespace ThePhotographersForecast.Data
 {
     public class GeocodeResult
     {
+
         public class Rootobject
         {
-            public Class1[] Property1 { get; set; }
+            public Feature[] features { get; set; }
         }
 
-        public class Class1
+        public class Feature
         {
-            public int place_id { get; set; }
-            public string licence { get; set; }
+            public Properties properties { get; set; }
+            public Geometry geometry { get; set; }
+        }
+
+        public class Properties
+        {
+            public Geocoding1 geocoding { get; set; }
+        }
+
+        public class Geocoding1
+        {
+            public int? place_id { get; set; }
             public string osm_type { get; set; }
-            public int osm_id { get; set; }
-            public string lat { get; set; }
-            public string lon { get; set; }
-            public string _class { get; set; }
+            public int? osm_id { get; set; }
+            public string osm_key { get; set; }
+            public string osm_Value { get; set; }
             public string type { get; set; }
-            public int place_rank { get; set; }
-            public float importance { get; set; }
-            public string addresstype { get; set; }
+            public string label { get; set; }
             public string name { get; set; }
-            public string display_name { get; set; }
-            public Address address { get; set; }
-            public double[] boundingbox { get; set; }
-        }
-
-        public class Address
-        {
-            public string county { get; set; }
             public string state { get; set; }
-            public string ISO31662lvl4 { get; set; }
             public string country { get; set; }
             public string country_code { get; set; }
-            public string suburb { get; set; }
+            public Admin admin { get; set; }
             public string city { get; set; }
-            public string village { get; set; }
-            public string town { get; set; }
+            public string county { get; set; }
+            public string district { get; set; }
             public string postcode { get; set; }
-            public string neighbourhood { get; set; }
         }
+
+        public class Admin
+        {
+            public string level6 { get; set; }
+            public string level4 { get; set; }
+            public string level8 { get; set; }
+            public string level10 { get; set; }
+        }
+
+        public class Geometry
+        {
+            public string type { get; set; }
+            public float[] coordinates { get; set; }
+        }
+
 
     }
 }

@@ -1,3 +1,11 @@
 <Solution>
+  <Project Path="NationWeatherService/NationWeatherService.csproj" Id="c59764c4-cbc8-4d26-87c6-70dcb47d05d5">
+    <Deploy Solution="Debug|*" />
+  </Project>
+  <Project Path="SocketTest/SocketTest.csproj" Id="93dd124b-7bb4-4f46-a0b4-694b9a49d5e9" />
+  <Project Path="SunCalcSharp/SunCalcSharp.csproj" />
+  <Project Path="ThePhotographersForecast.Tests/ThePhotographersForecast.Tests.csproj" Id="d0aa3315-7780-4773-9f94-37a825bd657a">
+    <Build Solution="Debug|*" Project="false" />
+  </Project>
   <Project Path="ThePhotographersForecast/ThePhotographersForecast.csproj" />
 </Solution>

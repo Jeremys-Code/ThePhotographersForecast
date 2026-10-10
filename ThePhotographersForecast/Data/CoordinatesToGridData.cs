@@ -2,9 +2,10 @@
 
 public class CoordinatesToGridData
 {
+
     public class Rootobject
     {
-        public object[]? context { get; set; }
+        public object[] context { get; set; }
         public string id { get; set; }
         public string type { get; set; }
         public Geometry geometry { get; set; }
@@ -14,14 +15,12 @@ public class CoordinatesToGridData
     public class Geometry
     {
         public string type { get; set; }
-        public double[] coordinates { get; set; }
+        public float[] coordinates { get; set; }
     }
 
     public class Properties
     {
-        public int sessionId { get; set; }
         public string id { get; set; }
-        public string type { get; set; }
         public string cwa { get; set; }
         public string forecastOffice { get; set; }
         public string gridId { get; set; }
@@ -65,13 +64,13 @@ public class CoordinatesToGridData
     public class Distance
     {
         public string unitCode { get; set; }
-        public float value { get; set; }
+        public double value { get; set; }
     }
 
     public class Bearing
     {
         public string unitCode { get; set; }
-        public int value { get; set; }
+        public double value { get; set; }
     }
 
     public class Astronomicaldata
@@ -94,4 +93,5 @@ public class CoordinatesToGridData
         public string areaBroadcast { get; set; }
         public string pointBroadcast { get; set; }
     }
+
 }

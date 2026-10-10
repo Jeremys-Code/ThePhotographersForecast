@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+﻿using SkiaSharp.Extended.UI.Controls;
 
 namespace ThePhotographersForecast.Models;
 
@@ -12,9 +12,11 @@ public class MappedDaily
     public string DailyTemperatureUnits { get; set; } = string.Empty;
     public string DailyHigh { get; set; } = string.Empty;
     public string DailyLow { get; set; } = string.Empty;
-    public ImageSource DailyImageSource { get; set; }
+    public SKFileLottieImageSource SkDailyAnimation { get; set; }
     public string DailyForecast { get; set; } = string.Empty;
     public MappedHourly[] HourlyCollection { get; set; }
-    public DailyAstronomicalData AstroData { get; set; }
-    public EventTime[] DailyEvents { get; set; }
+    //public Astronomical AstroData { get; set; }
+    public EventModel DailyEvents;
+
+
 }

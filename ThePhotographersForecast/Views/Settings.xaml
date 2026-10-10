@@ -1,10 +1,11 @@
-<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              x:Class="ThePhotographersForecast.Views.Settings"
              x:Name="Preferences"
-             xmlns:pm="clr-namespace:ThePhotographersForecast.ViewModels"
-             x:DataType="pm:SettingsViewModel"
+             xmlns:vm="clr-namespace:ThePhotographersForecast.ViewModels"
+             xmlns:local="clr-namespace:ThePhotographersForecast"
+             x:DataType="vm:SettingsViewModel"
              BackgroundImageSource="faneuilhall.png"
              Title="Preferences">
     <ScrollView Orientation="Vertical">
@@ -26,7 +27,6 @@
                     <Label Text="Temperature Units:"
       Style="{StaticResource PickerLabelStyle}"
                IsVisible="{Binding SelectedTemperatureUnit}" />
-
                     <Picker 
             x:Name="TempUnitPicker" 
            Style="{StaticResource PickerStyle}" 
@@ -34,7 +34,6 @@
             ItemDisplayBinding="{Binding UnitName}"
             ItemsSource="{Binding TemperatureUnits}"
             SelectedItem="{Binding SelectedTemperatureUnit}"/>
-
                     <Label Text="Precipitation Units:"
 Style="{StaticResource PickerLabelStyle}"
  IsVisible="{Binding SelectedPrecipitationUnit}" />

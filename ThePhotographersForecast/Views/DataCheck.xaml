@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ThePhotographersForecast.Views.DataCheck"
+             xmlns:model="clr-namespace:ThePhotographersForecast.Models"
+             xmlns:fold="clr-namespace:Microsoft.Maui.Controls.Foldable;assembly=Microsoft.Maui.Controls.Foldable"
+             xmlns:component="clr-namespace:ThePhotographersForecast.Components"
+             xmlns:svc="clr-namespace:ThePhotographersForecast.Services"
+             xmlns:vm="clr-namespace:ThePhotographersForecast.ViewModels"
+             xmlns:skia="clr-namespace:SkiaSharp.Extended.UI.Controls;assembly=SkiaSharp.Extended.UI"
+             xmlns:maps="http://schemas.microsoft.com/dotnet/2021/maui/maps"
+             x:DataType="vm:DataCheckViewModel"
+             Title="Data Card Tester">
+    <fold:TwoPaneView Pane1Length="1*"
+                      Pane2Length="1*"
+                      PanePriority="Pane1"
+                      WideModeConfiguration="LeftRight"
+                      TallModeConfiguration="TopBottom"
+                      MinWideModeWidth="720"
+                      MinTallModeHeight="800">
+        <fold:TwoPaneView.Pane1>
+    <Grid x:Name="DataCardContainer" RowDefinitions="Auto,Auto,*" ColumnDefinitions="*,*" Padding="30">
+        <maps:Map x:Name="BackgroundMapView" MapType="Street" IsShowingUser="False" InputTransparent="True" />
+        <VerticalStackLayout Grid.Column="0" Grid.Row="0">
+        <Border Stroke="{StaticResource NoonReverse}" 
+                StrokeThickness="4" 
+                Margin="10" 
+                HorizontalOptions="Start">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="15"/>
+            </Border.StrokeShape>
+            <VerticalStackLayout HorizontalOptions="Center">
+                <Image Source="thephotographersforecast.png" 
+                       Aspect="AspectFit"/>
+                <Label x:Name="LocationNameLabel" 
+                       Text="{Binding Location}" 
+                       FontFamily="ManFont" 
+                       FontAttributes="Bold"/>
+            </VerticalStackLayout>
+            </Border>
+            </VerticalStackLayout>
+        <VerticalStackLayout Grid.Row="1" 
+                             Grid.Column="0">
+            <Label Text="Hourly or Daily" 
+                   HorizontalOptions="Center"/>
+            <component:RangeCalendarView HeightRequest="250"
+                                         StartDate="{Binding StartDate, Mode=TwoWay}"
+                                         EndDate="{Binding EndDate, Mode=TwoWay}"
+                                         MinDate="{Binding MinDate}"
+                                         MaxDate="{Binding MaxDate}"
+                                         SelectedDate="{Binding StartDate, Mode=TwoWay}"
+                                         HorizontalOptions="Center"/>
+        </VerticalStackLayout>
+        <!-- Daily forecast carousel bound to the view model's selected NWS dailies -->
+       
+    </Grid>
+        </fold:TwoPaneView.Pane1>
+        <fold:TwoPaneView.Pane2>
+            <Grid>
+                <component:NwsDailyHourlyView VerticalOptions="Fill"
+        Days="{Binding Dailies}"
+        SelectedDaysHourlyForecasts="{Binding SelectedDailyHourlies}"
+        SelectedDay="{Binding SelectedDaily, Mode=TwoWay}"
+        SelectedLocation="{Binding SelectedLocation}"
+        CurrentForecast ="{Binding CurrentForecast}"
+        HorizontalOptions="Fill"/>
+            </Grid>
+            
+        </fold:TwoPaneView.Pane2>
+    </fold:TwoPaneView>
+</ContentPage>

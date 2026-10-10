@@ -1,145 +1,234 @@
 ﻿using SkiaSharp;
-using System.Net.Http.Json;
+using System.Diagnostics;
+using System.Net.Sockets;
+using System.Text.Json;
 using ThePhotographersForecast.Data;
 using ThePhotographersForecast.Models;
+using ThePhotographersForecast.Services.JsonConverters;
+using ThePhotographersForecast.Shared;
 
 namespace ThePhotographersForecast.Services.Modules
 {
-    public class SkyColorEngine
+    public class SkyColorEngine : ISkyColorEngine
     {
-        private HttpClient _client;
-        private SKColor[] startColors;
-        private SKColor[] endColors;
-        private float[] startPositions;
-        private float[] endPositions;
-        private float progress;
-        private double irradianceWm2;
-        private DateTime time;
-        private double cloudCoverPercent;
-        private double sunAltitudeDeg;
-        private double sunAzimuthDeg;
-        private DateTime sunrise;
-        private DateTime sunset;
-        private DateTime solarNoon;
+        private readonly HttpClient _client;
+        public Session SharedSession { get; set; }
+        private IGetEventService _eventService;
 
-        public void ForecastSkyColor(IHttpClientFactory client, double latitude, double longitude, DateTime startDate, DateTime endDate)
+        public SkyColorEngine(IHttpClientFactory client, Session sharedSession, IGetEventService eventService)
         {
-            _client = client.CreateClient("photographer");
-            string apiString = $"https://air-quality-api.open-meteo.com/v1/air-quality?latitude={latitude}&longitude={longitude}&hourly=pm10,pm2_5,nitrogen_dioxide,sulphur_dioxide,ozone,dust,uv_index,uv_index_clear_sky,aerosol_optical_depth,carbon_monoxide&start_date={startDate.ToString("yyyy-MM-dd")}&end_date={endDate.ToString("yyyy-MM-dd")}";
+            _client = client.CreateClient("skyClient");
+            SharedSession = sharedSession;
+            _eventService = eventService;
+        }
+        private async Task<T?> GetDataAsync<T>(HttpRequestMessage request)
+        {
             try
             {
-                // Early call to pull all Hourly Forecasts at once
-                var allHourlyForecasts = GetHourly(item);
-                // this.startColors = new SKColor[] { SKColor.Parse("#FF250032"), SKColor.Parse("#FF330018"), SKColor.Parse("#FF140158"), SKColor.Parse("#FF002C5B") };
-                //var sky = GetColor();
-                //this.endColors = new SKColor[] { InterpolateColor(this.startColors[0], sky), InterpolateColor(this.startColors[1], sky), InterpolateColor(this.startColors[2], sky), InterpolateColor(this.startColors[3], sky) };
-                //Random random = new Random();
-                //random.NextDouble();
-                //float[] positionOne = new float[4] { 0.0f, 0.33f, 0.66f, 1.0f };
-                //float[] positionTwo = new float[4] { 0.0f, 0.25f, 0.75f, 1.0f };
-                //for (int i = 0; i < 4; i++)
-                //{
-                //    if (i == 0) { random.NextSingle()}
-                //    positionOne[i] = (float)random.NextDouble();
-                //    positionTwo[i] = (float)random.NextDouble();
-                //};
-                //this.startPositions = positionOne;
-                //this.endPositions = positionTwo;
-                // }
+                // ensure response is disposed so connection returns to pool promptly
+                using var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
 
-            }}
-
-        private async Task<GfsDataService.Rootobject> GetSkyCompositionAsync(DateTime startDate, DateTime endDate, double latitude, double longitude)
-        {
-            string apiString = $"https://air-quality-api.open-meteo.com/v1/air-quality?latitude={latitude}&longitude={longitude}&hourly=pm10,pm2_5,nitrogen_dioxide,sulphur_dioxide,ozone,dust,uv_index,uv_index_clear_sky,aerosol_optical_depth,carbon_monoxide,ammonia&start_date={startDate.ToString("yyyy-MM-dd")}&end_date={endDate.ToString("yyyy-MM-dd")}";
-            try
-            {
-                CancellationToken ct = new CancellationToken();
-                var request = new HttpRequestMessage(HttpMethod.Get, apiString);
-                var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
                 if (!response.IsSuccessStatusCode)
-                    return null;
-                var item = await response.Content.ReadFromJsonAsync<SkyCompositionData.Rootobject>(cancellationToken: ct);
-                int nbrOfDays = item.hourly.time.Length;
-                var skyColors = new SkyColor[nbrOfDays];
-                for (int s = 0; s < nbrOfDays; s++)
                 {
-                    skyColors[s] = new SkyColor
-                    {
-                        Time = item.hourly.time[s],
-                        Pm10 = item.hourly.pm10[s],
-                        Pm25 = item.hourly.pm2_5[s],
-                        CarbonMonoxide = item.hourly.carbon_monoxide[s],
-                        NitrogenDioxide = item.hourly.nitrogen_dioxide[s],
-                        SulphurDioxide = item.hourly.sulphur_dioxide[s],
-                        Ozone = item.hourly.ozone[s],
-                        Dust = item.hourly.dust[s],
-                        UvIndex = item.hourly.uv_index[s],
-                        UvIndexClearSky = item.hourly.uv_index_clear_sky[s],
-                        Irradiance = item.hourly.irradiance[s],
-                        CloudCoverPercent = item.hourly.cloud_cover_percent[s],
-                        SunAltitudeDeg = item.hourly.sun_altitude_deg[s],
-                        SunAzimuthDeg = item.hourly.sun_azimuth_deg[s],
-                        Sunrise = item.hourly.sunrise[s],
-                        Sunset = item.hourly.sunset[s],
-                        SolarNoon = item.hourly.solar_noon[s]
-                    }
+                    Debug.WriteLine($"ERROR: {_client.BaseAddress} FAILED: Status Code {response.StatusCode}. Reason: {response.ReasonPhrase}");
+                    return default;
                 }
+
+                await using var stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                options.Converters.Add(new NullNumberConverterFactory());
+                var result = await JsonSerializer.DeserializeAsync<T>(stream, options).ConfigureAwait(false);
+                return result;
+            }
+            catch (Exception ex) when (ex is HttpRequestException || ex is IOException || ex is ObjectDisposedException || ex is SocketException)
+            {
+                Debug.WriteLine($"Transient error: {ex.GetType().Name} - {ex.Message}");
+                return default;
+            }
+        }
+
+        // ------------------------------------------------------------
+        // PUBLIC ENTRY POINT
+        // ------------------------------------------------------------
+        public async Task<Dictionary<DateOnly, SKColor[]>> GetDailySkyColorGradientsAsync()
+        {
+            var sky = await GetSkyCompositionAsync();
+            if (sky == null)
+                return new Dictionary<DateOnly, SKColor[]>();
+
+            var daily = new Dictionary<DateOnly, SKColor[]>();
+
+            var grouped = sky.GroupBy(s => DateOnly.FromDateTime(s.Time));
+
+            foreach (var dayGroup in grouped)
+            {
+                var day = dayGroup.Key;
+                var hourly = dayGroup.ToList();
+
+                // Compute a representative color for the day
+                var dailyColor = ComputeDailySkyColor(hourly);
+
+                // Build a 4‑stop gradient using your signature palette
+                var gradient = BuildGradientArray(dailyColor);
+                //                var dailyBrush = ToLinearGradientBrush(gradient, new Point(0, 0), new Point(0, 1));
+                daily[day] = gradient;
+
+
+
+            }
+
+            return daily;
+        }
+        private LinearGradientBrush ToLinearGradientBrush(SKColor[] colors,
+                                                          Microsoft.Maui.Graphics.Point startPoint,
+                                                            Microsoft.Maui.Graphics.Point endPoint)
+        {
+            if (colors == null || colors.Length == 0)
+                throw new ArgumentException("Colors array cannot be null or empty.", nameof(colors));
+
+            // Create gradient stops evenly spaced
+            var gradientStops = new GradientStopCollection();
+            for (int i = 0; i < colors.Length; i++)
+            {
+                double offset = (double)i / (colors.Length - 1); // 0 to 1
+                gradientStops.Add(new GradientStop(
+                    Color.FromRgba(colors[i].Red, colors[i].Green, colors[i].Blue, colors[i].Alpha),
+                    (float)offset
+                ));
+            }
+
+            return new LinearGradientBrush(gradientStops, startPoint, endPoint);
+        }
+
+        // ------------------------------------------------------------
+        // FETCH AIR QUALITY + WEATHER + SUN/MOON
+        // ------------------------------------------------------------
+        private async Task<SkyColor[]> GetSkyCompositionAsync()
+        {
+            try
+            {
+                // AIR QUALITY API
+                string aqUrl =
+                    $"https://air-quality-api.open-meteo.com/v1/air-quality?latitude={SharedSession.SelectedLocation.Latitude}&longitude={SharedSession.SelectedLocation.Longitude}&hourly=pm10,pm2_5,nitrogen_dioxide,sulphur_dioxide,ozone,dust,uv_index,uv_index_clear_sky,aerosol_optical_depth,carbon_monoxide&timezone=auto&start_date={DateTime.Now.Date.ToString("yyyy-MM-dd")}&end_date={DateTime.Now.AddDays(3).Date.ToString("yyyy-MM-dd")}";
+                var aqRequest = new HttpRequestMessage(HttpMethod.Get, aqUrl);
+                aqRequest.Headers.UserAgent.Add(new System.Net.Http.Headers.ProductInfoHeaderValue("ThePhotographersForecast", "6.0"));
+                var aqResult = await GetDataAsync<SkyCompositionData.Rootobject>(aqRequest);
+                if (aqResult == null) return null;
+
+                // WEATHER API
+                string weatherUrl =
+                    $"https://api.open-meteo.com/v1/forecast?latitude={SharedSession.SelectedLocation.Latitude}&longitude={SharedSession.SelectedLocation.Longitude}&hourly=surface_pressure,cloud_cover,direct_normal_irradiance,diffuse_radiation,shortwave_radiation&models=gfs_seamless&timezone=auto&start_date={DateTime.Now.Date.ToString("yyyy-MM-dd")}&end_date={DateTime.Now.AddDays(3).ToString("yyyy-MM-dd")}";
+                var weatherRequest = new HttpRequestMessage(HttpMethod.Get, weatherUrl);
+                weatherRequest.Headers.UserAgent.Add(new System.Net.Http.Headers.ProductInfoHeaderValue("ThePhotographersForecast", "6.0"));
+                var airQ = await GetDataAsync<SkyColorAttributesData.Rootobject>(weatherRequest);
+                if (airQ == null) return null;
+
+
+                var timeZone = TimeZoneInfo.FindSystemTimeZoneById(aqResult.timezone);
+                int count = airQ.hourly.time.Length;
+                var sky = new SkyColor[count];
+
+                for (int i = 0; i < count; i++)
+                {
+                    var t = airQ.hourly.time[i];
+
+                    var eventDay = await _eventService.GetSelectedDayEventModelAsync(t);
+                    if (eventDay == null)
+                        return null;
+
+                    sky[i] = new SkyColor
+                    {
+                        Time = t,
+
+                        // Air quality
+                        Pm10 = aqResult.hourly.pm10[i],
+                        Pm25 = aqResult.hourly.pm2_5[i],
+                        CarbonMonoxide = aqResult.hourly.carbon_monoxide[i],
+                        NitrogenDioxide = aqResult.hourly.nitrogen_dioxide[i],
+                        SulphurDioxide = aqResult.hourly.sulphur_dioxide[i],
+                        Ozone = aqResult.hourly.ozone[i],
+                        Dust = aqResult.hourly.dust[i],
+                        UvIndex = aqResult.hourly.uv_index[i],
+                        UvIndexClearSky = aqResult.hourly.uv_index_clear_sky[i],
+
+                        // Weather
+                        SurfacePressure = airQ.hourly.surface_pressure[i],
+                        CloudCoverPercent = airQ.hourly.cloud_cover[i],
+                        DirectNormalIrradiance = airQ.hourly.direct_normal_irradiance[i],
+                        DiffuseRadiation = airQ.hourly.diffuse_radiation[i],
+                        ShortwaveRadiation = airQ.hourly.shortwave_radiation[i],
+
+                        // Solar geometry
+                        // SunAltitudeDeg = eventDay.AstronomicalData.SunAltitude,
+                        //  SunAzimuthDeg = eventDay.AstronomicalData.SunAzimuth,
+                        Sunrise = eventDay.EventTimes.Where(s => s.EventName == "Sunrise").First().AstroTime,
+                        Sunset = eventDay.EventTimes.Where(s => s.EventName == "Sunset").First().AstroTime,
+                        SolarNoon = eventDay.EventTimes.Where(s => s.EventName == "Solar Noon").First().AstroTime
+                    };
+                }
+
+                return sky;
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Error fetching sky composition data: {ex.Message}");
+                Debug.WriteLine($"Sky composition error: {ex.Message}");
                 return null;
             }
         }
 
-        public void DrawGradient(SKCanvas canvas)
+        // ------------------------------------------------------------
+        // COMPUTE DAILY SKY COLOR
+        // ------------------------------------------------------------
+        private SKColor ComputeDailySkyColor(List<SkyColor> hourly)
         {
-            var interpolatedColors = new SKColor[4];
-            var interpolatedPositions = new float[4];
+            // Weighted average of hourly colors
+            double r = 0, g = 0, b = 0;
+            double totalWeight = 0;
 
-            for (int i = 0; i < 4; i++)
+            foreach (var h in hourly)
             {
+                var c = EstimateSkyColor(
+                    h.DirectNormalIrradiance,
+                    h.Time,
+                    h.CloudCoverPercent,
+                    h.SunAltitudeDeg,
+                    h.SunAzimuthDeg,
+                    h.Sunrise,
+                    h.Sunset,
+                    h.SolarNoon);
 
-                interpolatedColors[i] = InterpolateColor(startColors[i], endColors[i]);
-                interpolatedPositions[i] = InterpolatePosition(startPositions[i], endPositions[i]);
+                double w = Math.Max(0.1, h.DirectNormalIrradiance / 1000.0);
+
+                r += c.Red * w;
+                g += c.Green * w;
+                b += c.Blue * w;
+
+                totalWeight += w;
             }
 
-            if (DeviceDisplay.MainDisplayInfo.Width != 0 && DeviceDisplay.MainDisplayInfo.Height != 0)
+            return new SKColor(
+                (byte)(r / totalWeight),
+                (byte)(g / totalWeight),
+                (byte)(b / totalWeight));
+        }
+
+        // ------------------------------------------------------------
+        // BUILD 4‑STOP GRADIENT FOR A DAY
+        // ------------------------------------------------------------
+        private SKColor[] BuildGradientArray(SKColor dailyColor)
+        {
+            return new SKColor[]
             {
-                using var paint = new SKPaint
-                {
-
-                    Shader = SKShader.CreateLinearGradient(
-                        new SKPoint(0, 0),
-                        new SKPoint((float)Shell.Current.Window.Width / 2, (float)Shell.Current.Window.Height),
-                        interpolatedColors,
-                        interpolatedPositions,
-                        SKShaderTileMode.Clamp)
-                };
-                canvas.DrawRect(canvas.LocalClipBounds, paint);
-            }
-        }
-        //Morphes the colors
-        public SKColor InterpolateColor(SKColor c1, SKColor c2)
-        {
-            SKColor newInteropColor = new SKColor(
-                (byte)(c1.Red + (c2.Red - c1.Red) * progress),
-                (byte)(c1.Green + (c2.Green - c1.Green) * progress),
-                (byte)(c1.Blue + (c2.Blue - c1.Blue) * progress),
-                (byte)(c1.Alpha + (c2.Alpha - c1.Alpha) * progress));
-            return newInteropColor;
+                SKColor.Parse("#382365"),   // deep twilight purple
+                SKColor.Parse("#002C5B"),   // deep blue
+                dailyColor,                 // predicted sky color
+                SKColor.Parse("#F2F27B")    // warm yellow highlight
+            };
         }
 
-        //Moving the transition point of the color gradient
-        private float InterpolatePosition(float p1, float p2)
-        {
-            float position = p1 + (p2 - p1) * progress;
-            return position;
-        }
-
-
-        // Creates the predicted color of the sky
+        // ------------------------------------------------------------
+        // SKY COLOR ESTIMATION (your physics model)
+        // ------------------------------------------------------------
         public Color EstimateSkyColor(
             double irradianceWm2,
             DateTime time,
@@ -150,131 +239,35 @@ namespace ThePhotographersForecast.Services.Modules
             DateTime sunset,
             DateTime solarNoon)
         {
-            // Normalize irradiance (original formula)
             double irradiancePercent = Math.Clamp(irradianceWm2 / 1000.0, 0, 1);
-
-            // Normalize sun altitude (0° = horizon, 90° = zenith)
             double altitudeFactor = Math.Clamp(sunAltitudeDeg / 90.0, 0, 1);
-
-            // Time-based transition factor (sunrise/sunset glow)
-            double minutesFromSunrise = (time - sunrise).TotalMinutes;
-            double minutesToSunset = (sunset - time).TotalMinutes;
-            double transitionFactor = 0;
-
-            if (minutesFromSunrise >= 0 && minutesFromSunrise <= 60)
-                transitionFactor = 1 - (minutesFromSunrise / 60.0); // sunrise glow
-            else if (minutesToSunset >= 0 && minutesToSunset <= 60)
-                transitionFactor = 1 - (minutesToSunset / 60.0); // sunset glow
-
-            // Cloud cover dampening
             double clarityFactor = 1.0 - (cloudCoverPercent / 100.0);
 
-            // Composite intensity
             double intensity = irradiancePercent * altitudeFactor * clarityFactor;
 
-            // Apply warm tint during transition periods
+            double minutesFromSunrise = (time - sunrise).TotalMinutes;
+            double minutesToSunset = (sunset - time).TotalMinutes;
+
+            double transitionFactor = 0;
+            if (minutesFromSunrise >= 0 && minutesFromSunrise <= 60)
+                transitionFactor = 1 - (minutesFromSunrise / 60.0);
+            else if (minutesToSunset >= 0 && minutesToSunset <= 60)
+                transitionFactor = 1 - (minutesToSunset / 60.0);
+
             if (transitionFactor > 0)
             {
-                // Blend toward warm hues (orange/red)
                 return Color.FromRgba(
-                    (int)(255 * transitionFactor + 135 * (1 - transitionFactor)), // R
-                    (int)(69 * transitionFactor + 206 * (1 - transitionFactor)),  // G
-                    (int)(0 * transitionFactor + 235 * (1 - transitionFactor)),    // B
-                    255
-                );
+                    (int)(255 * transitionFactor + 135 * (1 - transitionFactor)),
+                    (int)(69 * transitionFactor + 206 * (1 - transitionFactor)),
+                    (int)(0 * transitionFactor + 235 * (1 - transitionFactor)),
+                    255);
             }
 
-            // Map intensity to daytime gradient
-            if (intensity > 0.8)
-                return Color.FromRgb(135, 206, 235); // SkyBlue RGB
-            else if (intensity > 0.5)
-                return Color.FromRgb(135, 206, 250); // LightSkyBlue RGB
-            else if (intensity > 0.2)
-                return Color.FromRgb(176, 196, 222); // LightSteelBlue RGB
-            else
-                return Color.FromRgb(0, 44, 91); // DarkSlateGray RGB
+            if (intensity > 0.8) return Color.FromRgb(135, 206, 235);
+            if (intensity > 0.5) return Color.FromRgb(135, 206, 250);
+            if (intensity > 0.2) return Color.FromRgb(176, 196, 222);
+
+            return Color.FromRgb(0, 44, 91);
         }
-
-        //Creates the color array
-        //public Color GetColor()
-        //{
-
-        //    DateOnly currentDate = DateOnly.FromDateTime(DateTime.Now);
-        //    List<Color> colors = new List<Color>();
-        //    List<DateTime> dateTimes = new List<DateTime>();
-
-
-        //    double irradianceWm2 = (double)_db.ForecastHour.Where(a => DateOnly.FromDateTime(a.Time) == currentDate && a.Time.Hour == DateTime.Now.Hour).Select(x => x.DirectNormalIrradiance).FirstOrDefault();
-        //    double cloudCoverPercent = (double)_db.ForecastHour.Where(a => DateOnly.FromDateTime(a.Time) == currentDate && a.Time.Hour == DateTime.Now.Hour).Select(x => x.CloudCover).FirstOrDefault();
-        //    double sunAltitudeDeg = _db.Astronomies.Where(a => a.ForecastTime == currentDate).Select(x => x.SunAltitude).FirstOrDefault();
-        //    double sunAzimuthDeg = _db.Astronomies.Where(a => a.ForecastTime == currentDate).Select(x => x.SunAzimuth).FirstOrDefault();
-        //    DateTime sunrise = _db.Astronomies.Where(a => a.ForecastTime == currentDate).Select(x => x.Morning.Sunrise).FirstOrDefault();
-        //    DateTime sunset = _db.Astronomies.Where(a => a.ForecastTime == currentDate).Select(x => x.Evening.Sunset).FirstOrDefault();
-        //    DateTime solarNoon = _db.Astronomies.Where(a => a.ForecastTime == currentDate).Select(x => x.Morning.SolarNoon).FirstOrDefault();
-
-
-        //    var color = EstimateSkyColor(irradianceWm2, DateTime.Now, cloudCoverPercent, sunAltitudeDeg, sunAzimuthDeg, sunrise, sunset, solarNoon);
-
-        //    return color;
-
-        //Debug.WriteLine(" colors recorded.");
-
-
-        //SKColor skColor = new SKColor(color.GetByteRed(), color.GetByteGreen(), color.GetByteBlue(), color.GetByteAlpha());
-        //return skColor;
-
-        //var kColors = new SKColor[4] { SKColor.Parse("#382365"), SKColor.Parse("#002C5B"), skColor, SKColor.Parse("#F2F27B") }; //Light Yellow 
-
-        //return kColors;
-
-        //        }
-
-        // Creates a gradient
-        //public SKShader ColorMorphing(float width, float height)
-        //{
-        //    var sky = GetColor();
-
-        //    // Define two gradients to morph between
-        //    //SKColor[] gradient2 = { SKColor.Parse("#FFB78BAF"), SKColor.Parse("#FF0068CC"), SKColor.Parse("#FFFFD075"), SKColor.Parse("#FFFFFFFF") };
-        //    //SKColor[] gradient3 = { SKColor.Parse("#FFFFF4AF"), SKColor.Parse("#FFE3D092"), SKColor.Parse("#FF4388B1"), SKColor.Parse("#FF0068CC") };
-        //    SKColor[] gradient2 = sky.ToArray();
-        //    float[] positions = { 0.0f, 0.3f, 0.7f, 1.0f }; // Gradient positions
-
-
-
-        //    // Interpolate colors
-        //    SKColor[] morphedGradient = new SKColor[startColors.Length];
-        //    for (int i = 0; i < startColors.Length; i++)
-        //    {
-        //        morphedGradient[i] = InterpolateColor(startColors[i], endColors[i]);
-        //    }
-
-        //    // Create the gradient shader
-        //    using var shader = SKShader.CreateLinearGradient(
-        //        new SKPoint(width / 2, height),
-        //        new SKPoint(0, 0),
-        //        morphedGradient,
-        //        positions,
-        //        SKShaderTileMode.Clamp
-        //    );
-
-        //    return shader;
-
-        //    // Draw the gradient
-        //    //            using var paint = new SKPaint { Shader = shader };
-        //    //          canvas.DrawRect(new SKRect(0, 0, width, height), paint);
-
-        //    // Save the result
-        //    //using var image = surface.Snapshot();
-        //    //using var data = image.Encode(SKEncodedImageFormat.Png, 100);
-        //    // System.IO.File.WriteAllBytes("GradientMorph.png", data);
-
-        //    //Console.WriteLine("Gradient morphing image saved as 'GradientMorph.png'.");
-        //}
     }
-}
-
-
-
-}
 }

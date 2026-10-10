@@ -1,62 +1,67 @@
-﻿using System.Diagnostics;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace ThePhotographersForecast.Models
 {
-    public class PhotoLocation
+    public partial class PhotoLocation : ObservableObject
     {
-        public double Latitude { get; set; } = 42.31250;
-        public double Longitude { get; set; } = -70.99787;
-        public string? Village { get; set; }
-        public string? Town { get; set; }
-        public string? Suburb { get; set; }
-        public string? Neighborhood { get; set; }
-        public string? City { get; set; }
-        public string State { get; set; } = string.Empty;
-        public string TimeZone { get; set; } = string.Empty;
-        public string Country { get; set; } = "United States";
-        public double Elevation { get; set; } = 0.0;
-        public LocationCoordinates SpatialCoordinates { get; set; } = new LocationCoordinates();
-        public int TimeZoneOffset => GetTimeZoneInfo().GetUtcOffset(DateTime.UtcNow).Hours;
-        public string? DisplayName { get; set; }
-        public TimeZoneInfo GetTimeZoneInfo()
-        {
-            if (!string.IsNullOrEmpty(TimeZone))
-            {
-                try
-                {
-                    return TimeZoneInfo.FindSystemTimeZoneById(TimeZone);
-                }
-                catch (TimeZoneNotFoundException)
-                {
-                    Debug.WriteLine($"The Time Zone '{TimeZone}' was not found on the system.");
-                }
-                catch (InvalidTimeZoneException)
-                {
-                    Debug.WriteLine($"The Time Zone '{TimeZone}' is invalid.");
-                }
-            }
-            return TimeZoneInfo.Local; // Fallback to local timezone if not set or invalid
-        }
+        [ObservableProperty]
+        public partial string GeocodeDisplayName { get; set; } = string.Empty;
+        public string DisplayName => CreateDisplayName();
+        [ObservableProperty]
+        public partial double Latitude { get; set; }
+        [ObservableProperty]
+        public partial double Longitude { get; set; }
+        [ObservableProperty]
+        public partial string City { get; set; } = string.Empty;
+        [ObservableProperty]
+        public partial string County { get; set; } = string.Empty;
+        [ObservableProperty]
+        public partial string State { get; set; } = string.Empty;
+        [ObservableProperty]
+        public partial string Country { get; set; } = string.Empty;
+        [ObservableProperty]
+        public partial ElevationValue Elevation { get; set; }
+        [ObservableProperty]
+        public partial string TimeZoneName { get; set; }
+        [ObservableProperty]
+        public partial string TimeZoneOffset { get; set; }
+
         private string CreateDisplayName()
         {
             string displayName = string.Empty;
-            string[] nameParts = new string[5] { this.Neighborhood ?? "", this.Village ?? "", this.Town ?? "", this.Suburb ?? "", this.City ?? "" };
-            for (int p = 0; p < nameParts.Length; p++)
-            {
-                if (!string.IsNullOrWhiteSpace(nameParts[p]))
-                {
-                    displayName += $"{nameParts[p]}, ";
-                }
-            }
-            displayName += this.State + ", " + this.Country;
+            displayName = this.City + ", " + this.State;
             return displayName;
         }
 
+        public PhotoLocation()
+        { }
 
-        public class LocationCoordinates
+        public PhotoLocation(PhotoLocation location)
         {
-            public (Double Latitude, Double Longitude) SouthWest { get; set; } = (-71.39122, 42.17460);
-            public (Double Latitude, Double Longitude) NorthEast { get; set; } = (-70.60432, 42.45031);
+            if (location == null)
+                throw new ArgumentNullException(nameof(location), "Source object cannot be null.");
+
+            Latitude = location.Latitude;
+            Longitude = location.Longitude;
+            City = location.City;
+            State = location.State;
+            County = location.County;
+            Country = location.Country;
+            GeocodeDisplayName = location.GeocodeDisplayName;
+            Elevation = location.Elevation;
+            TimeZoneName = location.TimeZoneName;
+            TimeZoneOffset = location.TimeZoneOffset;
+        }
+    }
+
+    public class ElevationValue
+    {
+        public double Elevation { get; set; }
+        public string UnitCode { get; set; }
+        public string ElevationStatement => GetElevationString();
+        private string GetElevationString()
+        {
+            return $"Elevation: {Math.Round(this.Elevation, 0)}{this.UnitCode} above sea level (MSL).";
         }
     }
 }

@@ -1,39 +1,21 @@
+<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="ThePhotographersForecast.Views.Calendar"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             x:Class="ThePhotographersForecast.Views.Calendar"
              xmlns:vm="clr-namespace:ThePhotographersForecast.ViewModels"
+             xmlns:model="clr-namespace:ThePhotographersForecast.Models"
              xmlns:svc="clr-namespace:ThePhotographersForecast.Services"
-             xmlns:m="clr-namespace:ThePhotographersForecast.Models"
+             xmlns:skia="clr-namespace:SkiaSharp.Extended.UI.Controls;assembly=SkiaSharp.Extended.UI"
              Title="Calendar"
              x:DataType="vm:CalendarViewModel">
-
     <Grid RowDefinitions="Auto, Auto, *" BackgroundColor="{StaticResource OffWhite}">
         <!-- Header: Month/Year and Navigation -->
         <Grid Grid.Row="0" ColumnDefinitions="*, Auto, *" Padding="10">
-
-            <Button Grid.Column="0" Text="&lt; Prev" Command="{Binding PreviousMonthCommand}" HorizontalOptions="Start"/>
+            <Button Grid.Column="0" Text="&lt; Prev" Command="{Binding PreviousCommand}" HorizontalOptions="Start"/>
             <Label Grid.Column="1" Text="{Binding MonthYear}" FontSize="Large" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center"/>
-            <Button Grid.Column="2" Text="Next &gt;" Command="{Binding NextMonthCommand}" HorizontalOptions="End"/>
+            <Button Grid.Column="2" Text="Next &gt;" Command="{Binding NextCommand}" HorizontalOptions="End"/>
         </Grid>
-        <Border Style="{StaticResource ContentBorder}" HorizontalOptions="Center" ZIndex="99" VerticalOptions="Center" IsVisible="{Binding IsWorking}">
-            <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
-                <Label Text="{Binding ProgressMessage}" HorizontalTextAlignment="Center" FontAttributes="Bold"  Margin="4,0,4,0"  />
-                <Line Stroke="Black" StrokeThickness="12" StrokeLineCap="Round" Margin="10"/>
-                <ActivityIndicator x:Name="ProgressIndicator"  
-                           Grid.RowSpan="3"
-                           Grid.ColumnSpan="3"
-           WidthRequest="100" 
-           HeightRequest="100" 
-           IsEnabled="{Binding IsWorking}"
-           IsVisible="{Binding IsWorking}"
-           IsRunning="{Binding IsWorking}"
-           Style="{StaticResource WaitingSpinner}"
-           ZIndex="2"
-           VerticalOptions="Fill"
-           HorizontalOptions="Fill"/>
-            </VerticalStackLayout>
-        </Border>
 
         <!-- Days of the Week -->
         <Grid Grid.Row="1" ColumnDefinitions="*,*,*,*,*,*,*" Padding="5,0">
@@ -46,188 +28,132 @@
             <Label Grid.Column="6" Text="Sat" Style="{StaticResource DayOfWeekLabelStyle}"/>
         </Grid>
 
-        <!-- Calendar Days  -->
-        <!-- TODO: change to use PhotoDayModel -->
-        <!-- TODO: Command uses GetPhotoDay -->
-        <CollectionView Grid.Row="2" x:DataType="vm:CalendarViewModel" ItemsSource="{Binding Days}" SelectedItem="{Binding SelectedDay}" SelectionChangedCommand="{Binding OnDateChangedCommand}" Margin="5">
+        <!-- Calendar Days -->
+        <CollectionView Grid.Row="2" ItemsSource="{Binding Days}" SelectedItem="{Binding SelectedDay}"  Margin="5">
+            <CollectionView.ItemsLayout>
+                <GridItemsLayout Orientation="Vertical" Span="7"/>
+            </CollectionView.ItemsLayout>
             <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="m:PhotoDay">
-                    <VerticalStackLayout x:Name="CalendarItems">
+                <DataTemplate x:DataType="model:DayViewModel">
 
-                        <Grid IsVisible="{Binding IsEmpty, Converter={StaticResource InverseBoolConverter}}"
-                  Padding="1"
-                  HeightRequest="120">
-                            <Grid.GestureRecognizers>
-                                <TapGestureRecognizer x:DataType="vm:CalendarViewModel" Command="{Binding FlipCommand}"
-                                           CommandParameter="{Binding .}"/>
-                            </Grid.GestureRecognizers>
+                    <Grid IsVisible="{Binding IsEmpty, Converter={StaticResource InverseBoolConverter}}"
+                          Padding="1"
+                          HeightRequest="120">
+                        <Grid.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding FlipCommand}"
+                                                  CommandParameter="{Binding .}"/>
+                        </Grid.GestureRecognizers>
 
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup Name="FlipStates">
+                                <VisualState Name="Flipped">
+                                    <VisualState.Setters>
+                                        <Setter TargetName="CardFront" Property="VisualElement.RotationY" Value="-180" />
+                                        <Setter TargetName="CardBack" Property="VisualElement.RotationY" Value="0" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState Name="Normal">
+                                    <VisualState.Setters>
+                                        <Setter TargetName="CardFront" Property="VisualElement.RotationY" Value="0" />
+                                        <Setter TargetName="CardBack" Property="VisualElement.RotationY" Value="180" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
 
-
-                            <VisualStateManager.VisualStateGroups>
-                                <VisualStateGroup Name="FlipStates">
-                                    <VisualState Name="Flipped">
-                                        <VisualState.Setters>
-                                            <Setter TargetName="CardFront" Property="VisualElement.RotationY" Value="-180" />
-                                            <Setter TargetName="CardBack" Property="VisualElement.RotationY" Value="0" />
-                                        </VisualState.Setters>
-                                    </VisualState>
-                                    <VisualState Name="Normal">
-                                        <VisualState.Setters>
-                                            <Setter TargetName="CardFront" Property="VisualElement.RotationY" Value="0" />
-                                            <Setter TargetName="CardBack" Property="VisualElement.RotationY" Value="180" />
-                                        </VisualState.Setters>
-                                    </VisualState>
-                                </VisualStateGroup>
-                            </VisualStateManager.VisualStateGroups>
-                            <!-- Card Front -->
-                            <Border  x:Name="CardFront" Style="{StaticResource InactiveDateStyle}">
-                                <Border.Triggers>
-                                    <DataTrigger TargetType="Border" Binding="{Binding IsEventDay}" Value="True">
-                                        <Setter Property="Stroke" Value="Red"/>
+                        <!-- Card Front -->
+                        <Border  x:Name="CardFront" Style="{StaticResource InactiveDateStyle}">
+                            <Border.Triggers>
+                                <DataTrigger TargetType="Border" Binding="{Binding IsEventDay}" Value="True">
+                                    <Setter Property="Stroke" Value="Red"/>
+                                </DataTrigger>
+                                <DataTrigger TargetType="Border" Binding="{Binding IsEventWindowDay}" Value="True">
+                                    <Setter Property="Stroke" Value="{StaticResource Gold}"/>
+                                </DataTrigger>
+                                <DataTrigger TargetType="Border" Binding="{Binding IsToday}" Value="True">
+                                    <Setter Property="Stroke" Value="{StaticResource HunterGreenBorder}"/>
+                                </DataTrigger>
+                            </Border.Triggers>
+                            <Label Text="{Binding Day}" Style="{StaticResource DayLabelStyle}">
+                                <Label.Triggers>
+                                    <DataTrigger TargetType="Label" Binding="{Binding IsEventDay}" Value="True">
+                                        <Setter Property="TextColor" Value="White"/>
                                     </DataTrigger>
-                                    <DataTrigger TargetType="Border" Binding="{Binding IsEventWindowDay}" Value="True">
-                                        <Setter Property="Stroke" Value="{StaticResource Gold}"/>
-                                    </DataTrigger>
-                                    <DataTrigger TargetType="Border" Binding="{Binding IsToday}" Value="True">
-                                        <Setter Property="Stroke" Value="{StaticResource HunterGreenBorder}"/>
-                                    </DataTrigger>
-                                </Border.Triggers>
-                                <!-- TODO: Card Title should read "TimeOfDay,Weekday, Month name, Day" -->
-                                <!-- TODO: Change to use PhotoDay -->
-                                <Label Text="{Binding SelectedDay}" Style="{StaticResource DayLabelStyle}">
-                                    <Label.Triggers>
-                                        <DataTrigger TargetType="Label" Binding="{Binding IsEventDay}" Value="True">
-                                            <Setter Property="TextColor" Value="White"/>
-                                        </DataTrigger>
-                                    </Label.Triggers>
+                                </Label.Triggers>
+                            </Label>
+                        </Border>
+
+                        <!-- Card Back -->
+                        <Border x:Name="CardBack" Style="{StaticResource ActiveDateStyle}" RotationY="180">
+                            <VerticalStackLayout>
+                                <Label x:Name="CardTitle" HorizontalTextAlignment="Center">
+                                    <Label.Text>
+                                        <MultiBinding StringFormat="Photographer's Day for {0} at {1}">
+                                            <Binding Path="Date"/>
+                                            <Binding Path="SelectedLocation.DisplayName"/>
+                                        </MultiBinding>
+                                    </Label.Text>
                                 </Label>
-                            </Border>
+                                <Grid x:Name="PhotoDayDetails" ColumnDefinitions="*,*">
+                                    <VerticalStackLayout x:Name="LeftSummary" Grid.Column="0">
+                                        <CollectionView x:Name="WeatherDescriptionByTimeOfDay"  ItemsSource="{Binding SelectedDayDayWeather.WeatherDetails}">
+                                            <CollectionView.ItemTemplate>
+                                                <DataTemplate x:DataType="model:DailyForecast">
+                                                    <VerticalStackLayout>
+                                                        <Label Text="Weather Forecast Summary:"/>
+                                                        <Label x:Name="LocationTime" Text="{Binding WeatherDetail.LocalTime}"/>
+                                                        <skia:SKLottieView x:Name="DailyWeatherImage" Source="{Binding SkDailyMeteocon}" RepeatCount="-1" RepeatMode="Restart" />
+                                                        <Label x:Name="DailySummary" Text="{Binding DailyForecastSummary.StormSummary}" LineBreakMode="WordWrap"/>
+                                                        <Label Text="Health and Safety:"/>
+                                                        <Label x:Name="HealthAndSafety" Text="{Binding DailyForecastSummary.HealthSafetySummary}" LineBreakMode="WordWrap"/>
+                                                    </VerticalStackLayout>
+                                                </DataTemplate>
+                                            </CollectionView.ItemTemplate>
+                                        </CollectionView>
+                                    </VerticalStackLayout>
+                                    <VerticalStackLayout x:Name="RightDetails" Grid.Column="1">
+                                        <CarouselView x:Name="EventCarousel" RemainingItemsThreshold="7" ItemsUpdatingScrollMode="KeepItemsInView" CurrentItem="{Binding SelectedDayCurrentEventTime}" ItemsSource="{Binding SelectedDayEventTimes}">
+                                            <CarouselView.ItemTemplate>
+                                                <DataTemplate x:DataType="model:EventTime">
+                                                    <Grid>
+                                                        <Grid.RowDefinitions>
+                                                            <RowDefinition Height="auto"/>
+                                                            <RowDefinition Height="auto"/>
+                                                        </Grid.RowDefinitions>
+                                                        <VerticalStackLayout Grid.Row="0" x:Name="EventDisplay">
+                                                            <HorizontalStackLayout>
+                                                                <Label x:Name="EventNameLabel" Text="Event: " FontSize="18" FontFamily="NotoSans"/>
+                                                                <Label x:Name="EventName" Text="{Binding EventName}" FontSize="20" FontFamily="ManFont"/>
+                                                            </HorizontalStackLayout>
+                                                            <HorizontalStackLayout>
+                                                                <Label x:Name="EventTimeLable" Text="Event: " FontSize="18" FontFamily="NotoSans"/>
+                                                                <Label x:Name="EventTime" Text="{Binding OrderTime, StringFormat='{}{0:h:mm tt}'}" FontSize="20" FontFamily="NotoSans"/>
+                                                            </HorizontalStackLayout>
 
-                            <!-- Card Back -->
-                            <Border x:Name="CardBack" Style="{StaticResource ActiveDateStyle}" RotationY="180">
+                                                            <skia:SKLottieView Source="{Binding HourlyForecast.WeatherImage}" RepeatCount="-1" RepeatMode="Restart"/>
+                                                            <Label x:Name="SummaryLabel" Text="Summary:" HorizontalTextAlignment="Start"/>
+                                                            <Label x:Name="HourlySummary" Text="{Binding HourlyWeather.HourlyForecastSummary.WeatherSummary}" LineBreakMode="WordWrap"/>
+                                                            <Label x:Name="HealthSafetyLabel" Text="Outdoors Health and Safety:" HorizontalTextAlignment="Start"/>
+                                                            <Label x:Name="SafetySummary" Text="{Binding HourlyWeather.HourlyForecastSummary.HealthSafetySummary}" LineBreakMode="WordWrap"/>
+                                                        </VerticalStackLayout>
+
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </CarouselView.ItemTemplate>
+                                        </CarouselView>
+                                    </VerticalStackLayout>
+                                </Grid>
                                 <VerticalStackLayout>
-                                    <Label x:Name="CardTitle" HorizontalTextAlignment="Center">
-                                        <Label.Text>
-                                            <MultiBinding StringFormat="Photographer's Day for {0} at {1}">
-                                                <Binding Path="LocationTime"/>
-                                                <Binding Path="LocationName"/>
-                                            </MultiBinding>
-                                        </Label.Text>
-                                    </Label>
-                                    <CollectionView x:Name="PhotoDayCollection" ItemsSource="{Binding Days}" SelectionChangedCommand="{Binding OnDateChangedCommand}" SelectedItem="{Binding SelectedDay}">
-                                        <CollectionView.ItemTemplate>
-                                        <DataTemplate>
-                                            <Grid x:Name="PhotoDayDetails">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="auto"/>
-                                                </Grid.ColumnDefinitions>
-                                                <VerticalStackLayout x:Name="LeftSummary" Grid.Column="0">
-                                                    <!-- TODO: Change to use PhotoDayModel.Forecast -->
-
-                                                    <!-- TODO: Change to use PhotoDayModel.Forecast -->
-                                                    <Label Text="Itinerary while at:"/>
-                                                    <Label x:Name="LocationNameLabel" Text="{Binding LocationName, StringFormat='{}Destination:{0}'}"/>
-                                                    <FlexLayout Grid.Column="0" Direction="Row" Wrap="Wrap" JustifyContent="Start">
-                                                        <Label x:Name="CurrentTime" Text="{Binding CurrentTime, StringFormat='{}Your current date and time: {F}'}"/>
-
-                                                        <Label x:Name="LocationTime" Text="{Binding LocationTime, StringFormat='{}Your photo location date and time: {2}'}"/>
-                                                    </FlexLayout>
-
-                                                    <CarouselView x:Name="WeatherDescriptionByTimeOfDay" ItemsSource="{Binding SelectedDayDailyForecasts}" CurrentItem="{Binding SelectedDayCurrentDailyForecast}" RemainingItemsThreshold="3">
-                                                        <CarouselView.ItemTemplate>
-                                                            <DataTemplate x:DataType="m:Daily">
-                                                                <VerticalStackLayout HorizontalOptions="Center">
-                                                                    <Label Text="{Binding TimeOfDay}" FontAttributes="Bold"/>
-                                                                    <Label Text="{Binding Name}" LineBreakMode="WordWrap"/>
-                                                                    <HorizontalStackLayout Spacing="10">
-                                                                        <Label Text="Start Time:"/>
-                                                                        <Label Text="{Binding StartTime, StringFormat='{0:hhtt}'}"/>
-                                                                    </HorizontalStackLayout>
-                                                                    <HorizontalStackLayout Spacing="10">
-                                                                        <Label Text="End Time:"/>
-                                                                        <Label Text="{Binding EndTime, StringFormat='{0:hhtt}'}"/>
-                                                                    </HorizontalStackLayout>
-                                                                    <Label x:Name="HighLowLabel" Text="Temperature high and low:" HorizontalOptions="Center" HorizontalTextAlignment="Justify"/>
-                                                                    <Grid>
-                                                                        <Grid.ColumnDefinitions>
-                                                                            <ColumnDefinition Width="2*"/>
-                                                                            <ColumnDefinition Width="2*"/>
-                                                                        </Grid.ColumnDefinitions>
-                                                                        <Grid x:Name="DailyHigh" Padding="4" Grid.Column="0">
-                                                                            <Image Source="hightemp.png" Aspect="AspectFill" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand" ZIndex="1"/>
-                                                                            <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
-                                                                                <Label x:Name="HighTemp" Text="{Binding DailyHigh}" FontSize="Caption" FontFamily="Jost" LineBreakMode="WordWrap" ZIndex="2"/>
-                                                                            </VerticalStackLayout>
-                                                                        </Grid>
-                                                                        <Grid x:Name="DailyLow" Padding="4" Grid.Column="1">
-                                                                            <Image Source="lowtemp.png" Aspect="AspectFill" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand" ZIndex="1"/>
-                                                                            <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
-                                                                                <Label x:Name="LowTemp" Text="{Binding DailyLow}" FontSize="Caption" FontFamily="Jost" LineBreakMode="WordWrap" ZIndex="2"/>
-                                                                            </VerticalStackLayout>
-                                                                        </Grid>
-                                                                    </Grid>
-                                                                    <Image Source="{Binding DailyImageSource}" HeightRequest="50" WidthRequest="50"/>
-                                                                    <Label Text="{Binding DailyForecast}" LineBreakMode="WordWrap"/>
-                                                                </VerticalStackLayout>
-
-                                                            </DataTemplate>
-                                                        </CarouselView.ItemTemplate>
-                                                    </CarouselView>
-                                                </VerticalStackLayout>
-                                                <VerticalStackLayout x:Name="RightDetails" Grid.Column="1">
-                                                    <!-- TODO: Change to use PhotoDayModel.HourlyForecast -->
-                                                    <!-- TODO: Change Days to PhotoDay-->
-                                                    <CarouselView x:Name="HourlyForecastCarousel" x:DataType="vm:CalendarViewModel" RemainingItemsThreshold="7"  ItemsUpdatingScrollMode="KeepItemsInView" ItemsSource="{Binding SelectedDayHourlies}" CurrentItem="{Binding SelectedDayCurrentHourly}">
-                                                        <CarouselView.ItemTemplate>
-                                                            <DataTemplate x:DataType="m:Hourly">
-                                                                <Grid>
-                                                                    <HorizontalStackLayout>
-                                                                        <Label x:Name="TimeOfDay" Text="{Binding TimeOfDay}" />
-                                                                        <Label x:Name="MonthDate" Text="{Binding StartTime, StringFormat='{0:WWWW, MMMM, d}'}" />
-                                                                    </HorizontalStackLayout>
-                                                                    <!-- TODO: Give each period a name TimeOfDay and Hour maybe make it expandable-->
-                                                                        <VerticalStackLayout HorizontalOptions="Center" Margin="4">
-                                                                    <Label x:Name="HourlySection"  Text="{Binding Name}" FontAttributes="Bold"/>
-                                                                     <Label x:Name="TemperatureLabel" Text="{Binding Temp}"  FontAttributes="Bold"/>
-                                                                    
-                                                                        <Image Source="{Binding HourlyImageSource}"/>
-                                                                    <Label x:Name="SummaryLabel" Text="Summary:" HorizontalTextAlignment="Start"/>
-                                                                    <Label x:Name="DetailedSummary" Text="{Binding HourlyForecast}" LineBreakMode="WordWrap"/>
-                                                                        </VerticalStackLayout>
-                                                                        <VerticalStackLayout Grid.Row="1" x:Name="Events">
-                                                                            <Label x:Name="EventsTitle" Text="Astronomically Important Times" FontFamily="ManFont" />
-                                                                            <!-- TODO: Change to use PhotoDayModel.Events -->
-                                                                        <CollectionView x:Name="EventsCollectionView" x:DataType="vm:CalendarViewModel" ItemsSource="{Binding SelectedDayCurrentHourlyEvents}" SelectedItem="{Binding SelectedDayCurrentHourlyCurrentEvent}"  >
-                                                                            <CollectionView.ItemTemplate>
-                                                                                <DataTemplate x:DataType="m:EventTime">
-                                                                                    <Grid>
-                                                                                            <VerticalStackLayout>
-                                                                                        <!-- TODO: Show a start and end time. If the event has only a start or end time, hide the respective label -->
-                                                                                        <Label Text="{Binding EventName}" FontAttributes="Bold"/>
-                                                                                        <Label Text="{Binding OrderTime, StringFormat='{}at {h:mm tt}'}" LineBreakMode="WordWrap"/>
-                                                                                            </VerticalStackLayout>
-                                                                                        </Grid>
-                                                                                </DataTemplate>
-                                                                            </CollectionView.ItemTemplate>
-                                                                        </CollectionView>
-                                                                    </VerticalStackLayout>
-                                                                </Grid>
-                                                            </DataTemplate>
-                                                        </CarouselView.ItemTemplate>
-                                                    </CarouselView>
-                                                </VerticalStackLayout>
-                                            </Grid>
-                                        </DataTemplate>
-                                    </CollectionView.ItemTemplate>
-                                    </CollectionView>
-
+                                    <Label Text="{Binding Date, StringFormat='{0:d}'}" FontAttributes="Bold"/>
+                                    <Label Text="Details will go here..." FontSize="Micro"/>
                                 </VerticalStackLayout>
-                            </Border>
-                        </Grid>
-                    </VerticalStackLayout>
+                            </VerticalStackLayout>
+                        </Border>
+                    </Grid>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
     </Grid>
 </ContentPage>
+
+                                                      

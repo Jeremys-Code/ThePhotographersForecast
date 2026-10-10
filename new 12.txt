@@ -1,0 +1,4 @@
+Nws - Requires Lat and Long
+Astronomy -Sets City,State
+WeatherForecast - Requires city and Nws, Sets Offset and TimeZone
+Moon - Requires TimeZone

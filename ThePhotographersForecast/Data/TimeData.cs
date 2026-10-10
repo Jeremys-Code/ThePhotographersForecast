@@ -5,18 +5,18 @@
         public class Rootobject
         {
             public Location location { get; set; } = null!;
-            public Astronomy astronomy { get; set; } = null!;
+            public Astronomy[] astronomy { get; set; } = null!;
         }
 
         public class Location
         {
             public double latitude { get; set; }
             public double longitude { get; set; }
-            public required string country_name { get; set; }
-            public required string state_prov { get; set; }
-            public required string city { get; set; }
+            public string country_name { get; set; }
+            public string state_prov { get; set; }
+            public string city { get; set; }
             public string? locality { get; set; }
-            public int elevation { get; set; }
+            public double elevation { get; set; }
         }
 
         public class Astronomy

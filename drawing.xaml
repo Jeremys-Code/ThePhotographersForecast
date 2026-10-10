@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--This file is NOT compatible with Silverlight-->
+<Viewbox xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" Stretch="Uniform">
+  <Canvas Name="svg5" Width="800" Height="800">
+    <Canvas.RenderTransform>
+      <TranslateTransform X="0" Y="0"/>
+    </Canvas.RenderTransform>
+    <Canvas.Resources/>
+    <!--Unknown tag: sodipodi:namedview-->
+    <Canvas Name="layer1">
+      <Rectangle xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Canvas.Left="31.91214" Canvas.Top="31.91214" Width="736.17572" Height="736.17572" RadiusY="44.505539" RadiusX="44.505539" Name="rect846" Fill="#FF65ADFF" StrokeThickness="3.82429" Stroke="#FF1BD3FC" StrokeMiterLimit="8.7" Opacity="0.65"/>
+      <TextBlock xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" FontSize="40" FontWeight="Normal" FontFamily="sans-serif" FontStyle="normal" Foreground="#FF000000" Canvas.Left="117.71484" Canvas.Top="52.8" Name="text8082">
+        <Span whiteSpaceCollapse="preserve" FontSize="40" FontWeight="Normal" FontFamily="Henny Penny" FontStyle="normal">The Photographer's Forecast for</Span>
+      </TextBlock>
+      <TextBlock xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" FontSize="26.6667" FontWeight="Normal" FontFamily="sans-serif" FontStyle="normal" Foreground="#FF000000" Canvas.Left="399.67188" Canvas.Top="112.6" Name="text49708">
+        <Span whiteSpaceCollapse="preserve" FontSize="26.6667" FontWeight="Normal" FontFamily="Henny Penny" FontStyle="normal">Dorchester, Massachusetts, US</Span>
+        <Span whiteSpaceCollapse="preserve" FontSize="18.6667" FontWeight="Normal" FontFamily="Henny Penny" FontStyle="normal">where the local time is: Saturday, August 15, 2026 10:55:31PM</Span>
+      </TextBlock>
+      <Rectangle xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Canvas.Left="87.334686" Canvas.Top="213.5692" Width="625.33063" Height="504.02328" Name="rect103814" Fill="#FFFFFFFF" StrokeThickness="4" Stroke="#FFBEFCA6" StrokeMiterLimit="8.7" Opacity="1"/>
+      <Canvas Name="g165357">
+        <Canvas.RenderTransform>
+          <MatrixTransform Matrix="0.99994844 0 0 0.75761076 -0.22525097 39.246878"/>
+        </Canvas.RenderTransform>
+        <Rectangle xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Canvas.Left="100" Canvas.Top="247.43672" Width="140" Height="140" Name="rect10535634" Fill="#FFFFFFFF" StrokeThickness="4" Stroke="#FFFD0404" StrokeMiterLimit="8.7"/>
+        <TextBlock xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" FontSize="16" FontFamily="sans-serif" Canvas.Left="123.625" Canvas.Top="251.5" Name="text109752">
+          <Span whiteSpaceCollapse="preserve" FontSize="16">Sat, Aug 15</Span>
+        </TextBlock>
+      </Canvas>
+      <Canvas Name="g165362">
+        <Canvas.RenderTransform>
+          <MatrixTransform Matrix="1.0036063 0 0 0.76074912 -1.1660253 38.510291"/>
+        </Canvas.RenderTransform>
+        <Rectangle xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Canvas.Left="253.33299" Canvas.Top="247.43672" Width="140" Height="140" Name="rect10535637" Fill="#FFFFFFFF" StrokeThickness="4" Stroke="#FFBEFCA6" StrokeMiterLimit="8.7"/>
+        <TextBlock xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" FontSize="16" FontFamily="sans-serif" Canvas.Left="274.66113" Canvas.Top="251.5" Name="text1097520">
+          <Span whiteSpaceCollapse="preserve" FontSize="16">Sun, Aug 16</Span>
+        </TextBlock>
+      </Canvas>
+      <Canvas Name="g165352">
+        <Canvas.RenderTransform>
+          <MatrixTransform Matrix="1.0036063 0 0 0.76074912 -0.61306551 74.397919"/>
+        </Canvas.RenderTransform>
+        <Rectangle xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Canvas.Left="100" Canvas.Top="397.43671" Width="140" Height="140" Name="rect105356347" Fill="#FFFFFFFF" StrokeThickness="4" Stroke="#FFBEFCA6" StrokeMiterLimit="8.7"/>
+        <TextBlock xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" FontSize="16" FontFamily="sans-serif" Canvas.Left="119.42578" Canvas.Top="402.2" Name="text10975208">
+          <Span whiteSpaceCollapse="preserve" FontSize="16">Wed, Aug 19</Span>
+        </TextBlock>
+      </Canvas>
+      <Canvas Name="g165347">
+        <Canvas.RenderTransform>
+          <MatrixTransform Matrix="1.0036063 0 0 0.76074912 -1.1660265 74.876421"/>
+        </Canvas.RenderTransform>
+        <Rectangle xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Canvas.Left="253.33333" Canvas.Top="399.43671" Width="140" Height="140" Name="rect105356374" Fill="#FFFFFFFF" StrokeThickness="4" Stroke="#FFBEFCA6" StrokeMiterLimit="8.7"/>
+        <TextBlock xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" FontSize="16" FontFamily="sans-serif" Canvas.Left="275.46222" Canvas.Top="402.2" Name="text109752084">
+          <Span whiteSpaceCollapse="preserve" FontSize="16">Thu, Aug 20</Span>
+        </TextBlock>
+      </Canvas>
+      <Canvas Name="g165342">
+        <Canvas.RenderTransform>
+          <MatrixTransform Matrix="1.0036063 0 0 0.76074912 -1.7189876 74.876494"/>
+        </Canvas.RenderTransform>
+        <Rectangle xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Canvas.Left="406.66666" Canvas.Top="399.43701" Width="140" Height="140" Name="rect10535635" Fill="#FFFFFFFF" StrokeThickness="4" Stroke="#FFBEFCA6" StrokeMiterLimit="8.7"/>
+        <TextBlock xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" FontSize="15.9998" FontFamily="sans-serif" Canvas.Left="433.45236" Canvas.Top="402.2" Name="text109752082">
+          <Span whiteSpaceCollapse="preserve" FontSize="15.9998">Fri, Aug 21</Span>
+        </TextBlock>
+      </Canvas>
+      <Canvas Name="g165372">
+        <Canvas.RenderTransform>
+          <MatrixTransform Matrix="1.0036063 0 0 0.76074912 -2.2719487 38.510291"/>
+        </Canvas.RenderTransform>
+        <Rectangle xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Canvas.Left="560" Canvas.Top="247.43672" Width="140" Height="140" Name="rect105356" Fill="#FFFFFFFF" StrokeThickness="4" Stroke="#FFBEFCA6" StrokeMiterLimit="8.7"/>
+        <TextBlock xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" FontSize="16" FontFamily="sans-serif" Canvas.Left="583.47656" Canvas.Top="251.5" Name="text109752088">
+          <Span whiteSpaceCollapse="preserve" FontSize="16">Tue, Aug 18</Span>
+        </TextBlock>
+      </Canvas>
+      <Canvas Name="g165367">
+        <Canvas.RenderTransform>
+          <MatrixTransform Matrix="1.0036063 0 0 0.76074912 -1.7189888 38.510291"/>
+        </Canvas.RenderTransform>
+        <Rectangle xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Canvas.Left="406.66699" Canvas.Top="247.43672" Width="140" Height="140" Name="rect1053563" Fill="#FFFFFFFF" StrokeThickness="4" Stroke="#FFBEFCA6" StrokeMiterLimit="8.7"/>
+        <TextBlock xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" FontSize="16" FontFamily="sans-serif" Canvas.Left="426.26855" Canvas.Top="251.5" Name="text10975203">
+          <Span whiteSpaceCollapse="preserve" FontSize="16">Mon, Aug 17</Span>
+        </TextBlock>
+      </Canvas>
+      <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Name="path173356" Fill="#FFFFFFFF" StrokeThickness="4" Stroke="#FFBEFCA6" StrokeMiterLimit="8.7" Opacity="1">
+        <Path.Data>
+          <PathGeometry Figures="m 196.61009 290.71096 -19.10674 -3.22136 -13.48558 13.91344 -2.84062 -19.16704 -17.39974 -8.52606 17.35115 -8.62453 2.73195 -19.18284 13.56421 13.8368 19.08818 -3.32959 -8.968 17.17614 z" FillRule="EvenOdd"/>
+        </Path.Data>
+        <Path.RenderTransform>
+          <MatrixTransform Matrix="0.65573748 0 0 0.62026852 28.056373 110.19553"/>
+        </Path.RenderTransform>
+      </Path>
+      <TextBlock xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" FontSize="16" FontFamily="sans-serif" Canvas.Left="181.35007" Canvas.Top="257.3" Name="text176528">
+        <Span whiteSpaceCollapse="preserve" FontSize="16">70*F</Span>
+        <Span whiteSpaceCollapse="preserve" FontSize="16">62*F</Span>
+        <Span whiteSpaceCollapse="preserve" FontSize="16"/>
+      </TextBlock>
+      <TextBlock xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" FontSize="16" FontFamily="sans-serif" Canvas.Left="115.64353" Canvas.Top="306" Name="text191506">
+        <Span whiteSpaceCollapse="preserve" FontSize="16">Partly Cloudy</Span>
+      </TextBlock>
+    </Canvas>
+  </Canvas>
+</Viewbox>

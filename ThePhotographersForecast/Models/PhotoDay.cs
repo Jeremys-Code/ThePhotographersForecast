@@ -1,7 +1,4 @@
-﻿using System.Collections.ObjectModel;
-using System.Text.RegularExpressions;
-
-namespace ThePhotographersForecast.Models;
+﻿namespace ThePhotographersForecast.Models;
 
 // A PhotoDay organizes daily and hourly weather with event data by date.
 public class PhotoDay
@@ -22,13 +19,5 @@ public class PhotoDay
     //  public ObservableCollection<IGrouping<GroupedHourly, Hourly>> Groups { get; set; }
 }
 
-public class TimesOfDay
-{
-    public string TimeOfDay { get; set; }
-    public DateTime StartTime { get; set; }
-    public DateTime EndTime { get; set; }
-
-    public ObservableCollection<EventTime> EventTimes { get; set; }
-}
 
 

@@ -1,0 +1,1 @@
+https://api.ipgeolocation.io/v3/astronomy/timeSeries?apiKey=b3c99c6a0b9e44169fa96b6918495732&dateStart=2026-08-01&dateEnd=2026-08-16&lat=42.35&long=-71.99

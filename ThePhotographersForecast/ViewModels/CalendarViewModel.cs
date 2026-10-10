@@ -4,131 +4,173 @@ using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
 using System.Timers;
 using ThePhotographersForecast.Models;
+using ThePhotographersForecast.Shared;
 
 namespace ThePhotographersForecast.ViewModels
 {
     public partial class CalendarViewModel : ObservableObject
     {
         [ObservableProperty]
-        public partial System.Timers.Timer _timer { get; set; }
+        private System.Timers.Timer _timer;
         [ObservableProperty]
-        public partial string GreetingLine1 { get; set; } = string.Empty;
+        public partial string GreetingLine1 { get; set; }
         [ObservableProperty]
-        public partial string GreetingLine2 { get; set; } = string.Empty;
+        public partial string GreetingLine2 { get; set; }
         [ObservableProperty]
-        public partial string GreetingLine3 { get; set; } = string.Empty;
+        public partial string GreetingLine3 { get; set; }
+        //   [ObservableProperty]
+        //   public partial ObservableCollection<PhotoDay> photoDays { get; set; }
+        //     [ObservableProperty]
+        //     public partial PhotoDay currentPhotoDay { get; set; }
+        public int UtcOffset => SharedSession.SelectedTimeZoneOffset;
         [ObservableProperty]
-        public partial int UtcOffset { get; set; }
+        public partial string SelectedLocationTime { get; set; }
+        //[ObservableProperty]
+        //public partial string currentTime { get; set; }
         [ObservableProperty]
-        public partial string LocationTime { get; set; } = string.Empty;
+        public partial ObservableCollection<DayViewModel> Days { get; set; }
         [ObservableProperty]
-        public partial DateTime CurrentTime { get; set; }
+        public partial NwsDailyForecast SelectedDayDayWeather { get; set; }
         [ObservableProperty]
-        public partial ObservableCollection<PhotoDay> Days { get; set; } = new ObservableCollection<PhotoDay>();
+        public partial NwsHourlyForecast SelectedDayCurrentEventTimeHourlyWeather { get; set; }
         [ObservableProperty]
-        public partial PhotoDay SelectedDay { get; set; }
+        public partial DailyForecast[] DayWeather { get; set; }
         [ObservableProperty]
-        public partial Daily[] SelectedDayDailies { get; set; }
+        public partial EventModel SelectedDayEventModel { get; set; }
         [ObservableProperty]
-        public partial Daily SelectedDayCurrentDaily { get; set; }
+        public partial EventTime[] SelectedDayEventTimes { get; set; }
         [ObservableProperty]
-        public partial Hourly[] SelectedDayHourlies { get; set; }
-        [ObservableProperty]
-        public partial Hourly SelectedDayCurrentHourly { get; set; }
-        [ObservableProperty]
-        public partial ObservableCollection<EventTime> SelectedDayCurrentHourlyEvents { get; set; } = new ObservableCollection<EventTime>();
-        [ObservableProperty]
-        public partial EventTime SelectedDayCurrentHourlyCurrentEvent { get; set; } = new EventTime();
+        public partial EventTime SelectedDayCurrentEventTime { get; set; }
 
         [ObservableProperty]
-        public partial bool IsEventDay { get; set; } = false;
-        [ObservableProperty]
-        public partial bool IsEventWindowDay { get; set; } = false;
-        [ObservableProperty]
-        public partial bool IsToday { get; set; } = false;
-        [ObservableProperty]
-        public partial string LocationName { get; set; } = string.Empty;
-        [ObservableProperty]
-        public partial bool IsWorking { get; set; } = false;
+        public partial DateTime CurrentDate { get; set; }
+
         [ObservableProperty]
         public partial string MonthYear { get; set; }
-        [ObservableProperty]
-        public partial DateTime CurrentDate { get; set; } = new DateTime();
 
         [ObservableProperty]
-        public partial ObservableCollection<PhotoSchedule> Schedules { get; set; } = new ObservableCollection<PhotoSchedule>();
-        //[ObservableProperty]
-        //public partial Hourly SelectedHourly { get; set; }
-        [ObservableProperty]
-        public partial bool IsReady { get; set; }
-        [ObservableProperty]
-        public partial string ProgressMessage { get; set; } = string.Empty;
+        public partial DayViewModel SelectedDay { get; set; }
 
-        private Shared.SessionStore _ss;
+        public IAsyncRelayCommand<DayViewModel> FlipCommand { get; }
+        public Command SelectedDayChangedCommand { get; }
 
-        public IAsyncRelayCommand<PhotoDay> FlipCommand { get; }
-        public Command<PhotoDay> OnDateChangedCommand { get; }
-
-        public CalendarViewModel(Shared.SessionStore ss)
+        public Session SharedSession { get; set; }
+        public CalendarViewModel(Session sharedSession)
         {
-            _ss = ss;
-            LocationName = _ss.SelectedLocation.DisplayName;
-            UtcOffset = _ss.SelectedLocation.TimeZoneOffset;
-            CurrentDate = _ss.StartDateTime;
-            CurrentTime = DateTime.UtcNow.AddHours(UtcOffset);
-            MonthYear = CurrentDate.ToString("MMMM of yyyyy");
-            IsWorking = true;
+            SharedSession = sharedSession;
+            MainThread.BeginInvokeOnMainThread(() => Days = SharedSession.Days.ToObservableCollection());
+            MainThread.BeginInvokeOnMainThread((Action)(() =>
+            {
+                this.Days = [.. SharedSession.Days];
 
-            Days = new ObservableCollection<PhotoDay>(_ss.PhotoDays.OrderBy(x => x.Date));
-            SelectedDay = Days.OrderBy(x => x.Date).First();
-            SelectedDayDailies = SelectedDay.Dailies;
-            SelectedDayCurrentDaily = SelectedDay.Dailies.First();
-            SelectedDayHourlies = SelectedDay.Hourlies;
-            SelectedDayCurrentHourly = SelectedDay.Hourlies.First();
-            SelectedDayCurrentHourlyEvents = SelectedDayCurrentHourly.Events;
-            SelectedDayCurrentHourlyCurrentEvent = SelectedDayCurrentHourlyEvents.First();
+                SelectedDay = Days[0];
+                SelectedDayEventModel = SelectedDay.Events;
+                SelectedDayEventTimes = [.. SelectedDayEventModel.EventTimes];
+                SelectedDayCurrentEventTime = SelectedDayEventTimes[0];
+
+                SelectedDayCurrentEventTimeHourlyWeather = SelectedDayCurrentEventTime.Forecast;
 
 
-            LocationTime = DateTime.UtcNow.AddHours(UtcOffset).ToString("F");
+                //SelectedDayDayWeather = SelectedDay.WeatherDetails.Where(x=>x.Time==
 
-            _timer = new System.Timers.Timer(1000); // 1 second interval
-            _timer.Elapsed += OnTimerElapsed;
-            _timer.Start();
+                CurrentDate = DateTime.Today;
+                SelectedLocationTime = DateTime.UtcNow.AddSeconds(UtcOffset).ToString("F");
+                MonthYear = CurrentDate.ToString("MMMM") + " " + CurrentDate.ToString("yyyy");
 
-            GenerateCalendar();
-            IsWorking = false;
-            FlipCommand = new AsyncRelayCommand<PhotoDay>(OnFlip);
-            OnDateChangedCommand = new Command<PhotoDay>(OnDateChanged);
+
+
+
+
+                GenerateCalendar();
+
+                // The page greeting message.
+                GreetingLine1 = $"Here is your forecast for:";
+                GreetingLine2 = $@"{SharedSession.SelectedLocation.City}, {(SharedSession.SelectedLocation.State != null ? SharedSession.SelectedLocation.State + ", " : "")} {SharedSession.SelectedLocation.Country}";
+                GreetingLine3 = $@"{SharedSession.StartDate.DayOfWeek}, {SharedSession.StartDate.ToString("MMMM d")} - {SharedSession.EndDate.DayOfWeek}, {SharedSession.EndDate.ToString("MMMM d")}";
+
+                // The Local Time of the selected location.
+                SelectedLocationTime = DateTime.UtcNow.AddSeconds(UtcOffset).ToString("F");
+                _timer = new System.Timers.Timer(1000); // 1 second interval
+                _timer.Elapsed += OnTimerElapsed;
+                _timer.Start();
+
+
+            }));
         }
 
-        private void OnDateChanged(PhotoDay changedDay)
-        {
+        //[RelayCommand]
+        //private void OnSelectedDayChanged(DayViewModel Value)
+        //{
+        //    if (Value == null) return;
+        //    //SelectedDayEventModel = Value.EventModel;
+        //    SelectedDayEventTimes = Value.Events.EventTimes;
 
-            SelectedDay = Days.First(d => d.Day == changedDay.Day);
-            SelectedDayDailies = SelectedDay.Dailies;
-            SelectedDayCurrentDaily = SelectedDay.Dailies.First();
-            SelectedDayHourlies = SelectedDay.Hourlies;
-            SelectedDayCurrentHourly = SelectedDay.Hourlies.First();
-            SelectedDayCurrentHourlyEvents = SelectedDayCurrentHourly.Events;
-            SelectedDayCurrentHourlyCurrentEvent = SelectedDayCurrentHourlyEvents.First();
+        //    SelectedDayCurrentEventTime = Value.Events.EventTimes[0];
+        //    if (SelectedDayEventModel != null)
+        //    {
+        //        Value.IsEventWindowDay = true;
+        //    }
 
-        }
+        //    SelectedDayCurrentEventTimeHourlyWeather = SelectedDayCurrentEventTime.Forecast;
+        //    ;
+        //}
+        //[RelayCommand]
+        //private void OnSelectDayChanged(DayViewModel day)
+        //{
+        //    if (day == null) return;
+
+        //    // 1. Assign it directly, no need tdo search the list!
+        //    SelectedDay = day;
+        //    SelectedDayEventTimes = SelectedDay.EventsData;
+        //    SelectedDayCurrentEventModel = SelectedDayEventTimes.First();
+        //    SelectedDayCurrentEventTimeHourlyWeather = SelectedDayCurrentEventModel.HourlyWeather;
+        //    SelectedDayDayWeather = SelectedDay.WeatherDetails;
+        //}
         private void OnTimerElapsed(object? sender, ElapsedEventArgs e)
         {
-            LocationTime = DateTime.UtcNow.AddHours(UtcOffset).ToString("F");
+            SelectedLocationTime = DateTime.UtcNow.AddSeconds(UtcOffset).ToString("F");
+            //            CurrentTime = DateTime.Now.ToString("F");
         }
-
-        private async Task OnFlip(PhotoDay day)
+        private async void Init()
         {
 
-            if (day == null)
+        }
+        private async Task OnFlip(DayViewModel day)
+        {
+            if (day == null || day.IsEmpty || !day.IsEventDay)
                 return;
 
             day.IsFlipped = !day.IsFlipped;
-            SelectedDay = Days.FirstOrDefault(d => d.Day == day.Day) ?? new PhotoDay();
-            if (day.IsFlipped && day.Dailies != null)
+
+            //if (day.IsFlipped && day.EventsTimes != null)
             {
-                var photoDay = Days.FirstOrDefault(p => p.Day == day.Day);
+                SelectedDay = day;
+                SelectedDayEventModel = SelectedDay.Events;
+                SelectedDayEventTimes = SelectedDayEventModel.EventTimes;
+
+                SelectedDayDayWeather = SelectedDay.SelectedDailyForecast;
+                if (SelectedDayCurrentEventTime != null)
+                {
+                    SelectedDayCurrentEventTimeHourlyWeather = SelectedDayCurrentEventTime.Forecast;
+                }
+
+            }
+        }
+
+        private void OnWeatherServiceChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(Days))
+            {
+                //Days = new ObservableCollection<DayViewModel>();
+                //foreach (var day in SharedSession.Days)
+                //{
+                //    Days.Add(day);
+                //}
+                if (Days != null && Days.Any())
+                {
+                    SelectedDay = Days.First();
+                    GenerateCalendar();
+                }
             }
         }
 
@@ -139,82 +181,61 @@ namespace ThePhotographersForecast.ViewModels
             var firstDayOfMonth = new DateTime(CurrentDate.Year, CurrentDate.Month, 1);
             var startingDayOfWeek = (int)firstDayOfMonth.DayOfWeek;
 
+            // Build a lookup of any existing day information from the weather service by date
+            var weatherLookup = (Days ?? new ObservableCollection<DayViewModel>())
+                .Where(d => d != null)
+                .ToDictionary(d => d.Date.Date, d => d);
 
-            if (Days != null)
+            Days.Clear();
+            if (Days.Any(f => f.Day == 1) || Days.First().Date.Month != Days.Last().Date.Month)
             {
-                for (int i = 0; i < Days.Count; i++)
+
+                // Add empty cells for days before the first of the month
+                for (int i = 0; i < startingDayOfWeek; i++)
                 {
-                    var d = Days[i];
-                    if (d == null) continue;
-                    d.IsEventDay = true;
-                    d.IsFlipped = true;
+                    Days.Add(new DayViewModel { IsEmpty = true });
                 }
+
+                // Add each day of the month, prefilling from weatherLookup when available
+                for (int day = 1; day <= daysInMonth; day++)
+                {
+                    var dayDate = new DateTime(CurrentDate.Year, CurrentDate.Month, day);
+
+                    weatherLookup.TryGetValue(dayDate.Date, out var existing);
+
+                    DayViewModel vm = existing != null ? existing : new DayViewModel();
+
+                    vm.Day = day;
+                    vm.Date = dayDate;
+                    vm.IsToday = dayDate.Date == DateTime.Today;
+                    //vm.IsEventDay = existing != null && existing.EventModel != null && existing.EventModel.EventTimes.Any();
+
+                    // Event window: any existing event within +/- 3 days
+                    vm.IsEventWindowDay = false;
+                    if (!vm.IsEventDay && weatherLookup.Keys.Any(k => k != dayDate.Date && Math.Abs((k - dayDate.Date).TotalDays) <= 3))
+                    {
+                        vm.IsEventWindowDay = true;
+                    }
+
+                    Days.Add(vm);
+                }
+
+                // Replace the observable collection so bindings update to the new month
+                Days = Days;
             }
-            ;
-
-            // Add empty cells for days before the first of the month
-            for (int i = 0; i < startingDayOfWeek; i++)
-            {
-                Days.Insert(0, new PhotoDay { IsEmpty = true });
-            }
-
-            var eventDates = new HashSet<DateTime>();
-            if (Days != null)
-            {
-                foreach (var day in Days)
-                {
-                    eventDates.Add(new DateTime(day.Date.Year, day.Date.Month, day.Date.Day, 0, 0, 0));
-                }
-            }
-
-            for (int dayNum = 1; dayNum <= daysInMonth; dayNum++)
-            {
-                var dayDate = new DateTime(CurrentDate.Year, CurrentDate.Month, dayNum, 0, 0, 0);
-
-                // Find a matching PhotoDay by date
-                var dayEntry = Days.FirstOrDefault(d => d != null && d.Date != default && d.Date.Date == dayDate.Date);
-                if (dayEntry == null)
-                {
-                    // No matching PhotoDay for this date - skip
-                    continue;
-                }
-
-                var isEventWindow = false;
-                if (!dayEntry.IsEventDay)
-                {
-                    isEventWindow = Days.Any(pd => pd != null && pd.Date != default &&
-                        ((dayDate.Date >= pd.Date.Date.AddDays(-3) && dayDate.Date < pd.Date.Date) ||
-                         (dayDate.Date > pd.Date.Date && dayDate.Date <= pd.Date.Date.AddDays(3))));
-                }
-                else
-                {
-                    dayEntry.Day = dayNum;
-                    dayEntry.Date = dayDate;
-                    dayEntry.IsToday = dayDate.Date == DateTime.Today;
-                    // if PhotoDay has an IsEventWindow property it can be set here; keep ViewModel-level flag unchanged
-                    dayEntry.IsEventDay = true;
-                    dayEntry.IsEventWindow = isEventWindow;
-                }
-
-
-            }
-
         }
-        [RelayCommand]
+
+
         public void NextMonth()
         {
             CurrentDate = CurrentDate.AddMonths(1);
             GenerateCalendar();
         }
 
-        [RelayCommand]
         public void PreviousMonth()
         {
             CurrentDate = CurrentDate.AddMonths(-1);
             GenerateCalendar();
         }
-
-
-
     }
 }

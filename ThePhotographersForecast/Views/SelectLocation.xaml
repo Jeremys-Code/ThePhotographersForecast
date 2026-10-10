@@ -3,145 +3,247 @@
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:vm="clr-namespace:ThePhotographersForecast.ViewModels"
              xmlns:model="clr-namespace:ThePhotographersForecast.Models" 
-             xmlns:d="http://schemas.microsoft.com/dotnet/2021/maui/design"
+             xmlns:components="clr-namespace:ThePhotographersForecast.Components"
+             xmlns:skia="clr-namespace:SkiaSharp.Extended.UI.Controls;assembly=SkiaSharp.Extended.UI"
+             xmlns:fold="clr-namespace:Microsoft.Maui.Controls.Foldable;assembly=Microsoft.Maui.Controls.Foldable"
              x:Class="ThePhotographersForecast.Views.SelectLocation"
              x:DataType="vm:SelectLocationViewModel"
-             xmlns:cv="clr-namespace:ThePhotographersForecast.ContentViews"
+             BindingContext="{Binding Source={RelativeSource Self}, Path=_vm}"
              BackgroundImageSource="commonwealthmall.jpg"
-             Title="Select Location">
-    <ScrollView x:Name="PageScrollView" Margin="10" HorizontalScrollBarVisibility="Never" VerticalScrollBarVisibility="Default">
-        <VerticalStackLayout x:Name="PageContainer">
-        <cv:TpfHeader/>
-            <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center">
-                <Grid RowSpacing="5" ColumnSpacing="5">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                   
-                    <Grid x:Name="SearchTitle" Grid.ColumnSpan="2" Grid.Row="0">
-                        
-                    </Grid>
-                    <Grid x:Name="DatePickers" Grid.ColumnSpan="2" Grid.Row="1">
-                        <HorizontalStackLayout Margin="20, 0, 20, 0" HorizontalOptions="Center">
-                            <Label Text="Start Date:" Style="{StaticResource Instructions}"/>
-                            <DatePicker x:Name="StartDatePicker" FontFamily="ManFont" TextColor="CornflowerBlue" Date="{Binding StartDate}" MaximumDate="{Binding MaxDate}" MinimumDate="{Binding MinDate}">
-                                <DatePicker.Behaviors>
-                                    <toolkit:EventToCommandBehavior Command="{Binding OnStartDateChangedCommand}"
-                                                                CommandParameter="{Binding .}"
-                                                                EventName="DateSelected"/>
-                                </DatePicker.Behaviors>
-                            </DatePicker>
-                            <Label Text="End Date:" Style="{StaticResource Instructions}"/>
-                            <DatePicker x:Name="EndDatePicker" FontFamily="ManFont" TextColor="CornflowerBlue" Date="{Binding EndDate}" MaximumDate="{Binding MaxDate}" MinimumDate="{Binding MinDate}">
-                                <DatePicker.Behaviors>
-                                    <toolkit:EventToCommandBehavior Command="{Binding OnEndDateChangedCommand}"
-                                        CommandParameter="{Binding .}"
-                                        EventName="DateSelected"/>
-                                </DatePicker.Behaviors>
-                            </DatePicker>
-                        </HorizontalStackLayout>
-                        <Label x:Name="ValidateDatesLabel" Margin="8" TextColor="Red" HorizontalTextAlignment="Center" FontSize="18" Text="{Binding InvalidDates}" IsVisible="{Binding IsInvalidDates}"/>
-                    </Grid>
-                    <Grid x:Name="SearchBar" Grid.Column="0" Grid.Row="2" >
-                        <VerticalStackLayout>
-                            <Entry x:Name="InputLocation" TextChanged="InputLocation_TextChanged"  Placeholder="Please enter the city and state..." Style="{StaticResource AddressEntryStyle}" />
-                            <CollectionView ZIndex="99" x:DataType="vm:SelectLocationViewModel" ItemSizingStrategy="MeasureAllItems" Background="{StaticResource DayTwilight}" IsVisible="{Binding ShowSuggestions}" ItemsSource="{Binding Suggestions}" SelectionMode="Single">
-                            <CollectionView.ItemTemplate>
-                                <DataTemplate>
-                                    <Label Text="{Binding DisplayName}" x:DataType="model:PhotoLocation" HorizontalTextAlignment="Start" LineBreakMode="WordWrap"  FontFamily="Jost">
-                                        <Label.GestureRecognizers>
-                                            <TapGestureRecognizer x:DataType="vm:SelectLocationViewModel" Command="{Binding SuggestionTappedCommand}" CommandParameter="{Binding .}" />
-                                        </Label.GestureRecognizers>
-                                    </Label>
-                                </DataTemplate>
-                            </CollectionView.ItemTemplate>
-                        </CollectionView>
-                        </VerticalStackLayout>
-                    </Grid>
-                    <Grid x:Name="NearBy" Grid.Column="1" Grid.Row="2">
-                        <Button x:Name="GpsButton" Text="GPS"  Style="{StaticResource ButtonStyle}" Command="{Binding UseGpsCommand}"/>
-                    </Grid>
+             Title="The Photographers Forecast - Photo Shoot Location"
+             SizeChanged="OnPageSizeChanged">
+    <fold:TwoPaneView>
+        <fold:TwoPaneView.Pane1>
+            <ScrollView Orientation="Vertical" VerticalOptions="Fill" HorizontalOptions="Fill" Margin="10" VerticalScrollBarVisibility="Never">
+                <VerticalStackLayout HorizontalOptions="Center">
+                    <!-- Progress Overlay -->
+                    <VerticalStackLayout x:Name="WorkingIndicator" 
+                            IsVisible="{Binding IsWorking}" 
+                            IsEnabled="{Binding IsWorking}" 
+                            Background="{AppThemeBinding Light={StaticResource White75}, Dark={StaticResource Black75}}" 
+                            HorizontalOptions="Fill"
+                            VerticalOptions="Fill"
+                            ZIndex="900">
+                        <ActivityIndicator IsVisible="{Binding IsWorking}"
+                                   IsRunning="{Binding IsWorking}"
+                                   IsEnabled="{Binding IsWorking}"
+                                   HorizontalOptions="Center"/>
+                        <Label x:Name="ProgressActivity" Text="{Binding ProgressMessage}" HorizontalOptions="Center" HorizontalTextAlignment="Center" LineBreakMode="WordWrap" IsVisible="{Binding IsWorking}"/>
+                        <ProgressBar x:Name="DataProgressBar" IsVisible="{Binding IsWorking}" Margin="10" Progress="{Binding Progress}"/>
+                        <Label x:Name="PercentComplete" IsVisible="{Binding IsWorking}" HorizontalOptions="Center" Text="{Binding Progress, StringFormat='{}Completed {0}%'}"/>
+                    </VerticalStackLayout>
 
-                </Grid>
-                
-            </VerticalStackLayout>
-        <Border Style="{StaticResource ContentBorder}" HorizontalOptions="Fill" ZIndex="99" VerticalOptions="Fill" IsVisible="{Binding IsWorking}">
-            <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
-                <Label Text="{Binding ProgressMessage}" HorizontalTextAlignment="Center"   Margin="4,20" LineHeight="2.5"  />
-                <Line Stroke="Black" StrokeThickness="12" StrokeLineCap="Round" Margin="10"/>
-                <ActivityIndicator x:Name="ProgressIndicator"  
-                           Grid.RowSpan="3"
-                           Grid.ColumnSpan="3"
-           WidthRequest="100" 
-           HeightRequest="100" 
-           IsEnabled="{Binding IsWorking}"
-           IsVisible="{Binding IsWorking}"
-           IsRunning="{Binding IsWorking}"
-           Style="{StaticResource WaitingSpinner}"
-           ZIndex="100"
-           VerticalOptions="Fill"
-           HorizontalOptions="Fill"/>
-                <!--<Button x:Name="GoToPhotoTimeTrack" Text="Proceed to the Schedule" IsEnabled="{Binding IsComplete}" Style="{StaticResource ButtonStyle}" Command="{Binding NavigateToPhotoTimeTrackCommand}" HorizontalOptions="Center" Margin="8"/>-->
-            </VerticalStackLayout >
-        </Border>
-        <!--<Label x:Name="Name" Text="The Photographer's Forecast" Margin="4,0,4,0"   FontFamily="ManFont" HorizontalTextAlignment="Center" HorizontalOptions="Center" FontSize="Title"/>
-        <Image Source="initials.png" WidthRequest="100" HeightRequest="100" HorizontalOptions="Center"/>-->
 
-            <VerticalStackLayout>
-                <!--<Button x:Name="GoToForecast" Style="{StaticResource ButtonStyle}" Text="Go to the Forecast" IsEnabled="{Binding IsComplete}" HorizontalOptions="Center"/>-->
-                <Label LineBreakMode="WordWrap"  FlexLayout.Basis="100%" Text="All you need to do is provide us with the location of the photo shoot. We have two options, you can either..."/>
-                <Grid x:Name="LocationRequest">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="2*"/>
-                        <ColumnDefinition Width="2*"/>
-                    </Grid.ColumnDefinitions>
-                    <Grid Grid.Column="0">
-                        <VerticalStackLayout>
-                            <toolkit:Expander x:Name="GpsExpander" HorizontalOptions="Fill" Direction="Down">
-                                <toolkit:Expander.Header>
-                                    <Border Style="{StaticResource ContentBorder}" Padding="4" Margin="4">
-                                        <VerticalStackLayout Margin="4">
-                                            <Label Text="Option1" FontSize="Header" HorizontalOptions="Center" HorizontalTextAlignment="Center"/>
-                                            <Label Text="click here to use your device's current location" HorizontalTextAlignment="Center"/>
-                                        </VerticalStackLayout>
+                    <Grid x:Name="Content" RowDefinitions="Auto,Auto" HorizontalOptions="Fill" VerticalOptions="Fill" RowSpacing="10">
+
+                        <!-- Header Title Card -->
+                        <Border x:Name="TitleBorder" Grid.Row="0" Margin="10" Stroke="{StaticResource GpsBorder}" StrokeThickness="8" Background="{StaticResource BlueBorderBackground}">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="30"/>
+                            </Border.StrokeShape>
+                            <VerticalStackLayout x:Name="TitleParameter" HorizontalOptions="Fill" Padding="10">
+                                <Label x:Name="Welcome"  
+                                   HorizontalTextAlignment="Center"
+                                   Shadow="8,8,16,#BEFca6,0.9"
+                                   Text="{Binding WelcomeGreeting}" 
+                                   LineBreakMode="WordWrap" 
+                                   TextColor="Black" 
+                                   FontSize="32" 
+                                   FontFamily="Heading"/>
+                                <Label x:Name="Photographers" 
+                                   LineBreakMode="WordWrap" 
+                                   FontSize="40" 
+                                   Text="The Photographer's Forecast" 
+                                   TextColor="Black" 
+                                   Shadow="8,8,16,#befca6,0.9" 
+                                   HorizontalOptions="Center" 
+                                   HorizontalTextAlignment="Center" 
+                                   FontFamily="Heading"/>
+                            </VerticalStackLayout>
+                        </Border>
+
+                        <!-- Main Two-Column Layout from Redesign Mockup -->
+
+
+                        <!-- LEFT COLUMN: Date Range Selection & Range Calendar -->
+                        <Border Grid.Row="1"
+                                Stroke="{StaticResource GpsBorder}"
+                                StrokeThickness="2"
+                                Background="{StaticResource BlueBorderBackground}"
+                                Padding="16">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="16"/>
+                            </Border.StrokeShape>
+                            <Grid ColumnDefinitions="*,*" 
+                                  RowDefinitions="Auto,Auto"
+                                  ColumnSpacing="10" 
+                                  HorizontalOptions="Center" 
+                                  Margin="0,6,0,10">
+                                <!--960-->
+
+                               
+                                    <Label Text="Please select a date or date range of the photo shoot."
+                                       FontFamily="NotoSans"
+                                           Grid.Column="0" Grid.Row="0"
+                                       FontSize="15"
+                                       FontAttributes="Bold"
+                                       TextColor="{AppThemeBinding Light=Black, Dark=White}"
+                                       HorizontalOptions="Center"
+                                       HorizontalTextAlignment="Center"
+                                           VerticalOptions="Start"
+                                           VerticalTextAlignment="Start"
+                                       LineBreakMode="WordWrap"/>
+
+                                    <!-- New Range Calendar Component replacing the two DatePickers -->
+                                    <components:RangeCalendarView
+                                        Grid.Column="0" Grid.Row="1"
+                                    StartDate="{Binding StartDate, Mode=TwoWay}"
+                                    EndDate="{Binding EndDate, Mode=TwoWay}"
+                                    MinDate="{Binding MinDate}"
+                                    MaxDate="{Binding MaxDate}"
+                                    HorizontalOptions="Fill"/>
+                                
+
+
+                                <!-- RIGHT COLUMN: Location Selection (GPS / Search) -->
+
+                                <!--<Grid Grid.Column="1" Grid.RowSpan="2" ColumnSpacing="10" RowSpacing="10" ColumnDefinitions="Auto,*" RowDefinitions="Auto,*" HorizontalOptions="Fill">-->
+                                    <Label Text="Please provide the location of your photo shoot. Either click on the GPS button or enter a city and select the location from the suggestions list."
+                                       Grid.Row="0" Grid.Column="1"
+                                           VerticalTextAlignment="Start"
+                                           VerticalOptions="Start"
+                                           FontFamily="NotoSans"
+                                       FontSize="14"
+                                       TextColor="{AppThemeBinding Light=Black, Dark=White}"
+                                       HorizontalTextAlignment="Center"
+                                       LineBreakMode="WordWrap"/>
+                                <Grid Grid.Row="1" Grid.Column="1" ColumnDefinitions="Auto,*">
+                                    <!-- GPS Button -->
+                                        <Border x:Name="GpsBttns" 
+                                            Grid.Column="0"
+                                            Style="{StaticResource GpsButton}" 
+                                        StrokeThickness="4" 
+                                        Stroke="{StaticResource GpsCircleBorder}" 
+                                        HorizontalOptions="Center"
+                                        VerticalOptions="Start">
+                                            <Border.StrokeShape>
+                                            <Ellipse />
+                                        </Border.StrokeShape>
+                                        <ImageButton x:Name="GpsButton" 
+                                                 Source="copilotgenmappin.png"
+                                                 WidthRequest="40"
+                                                 HeightRequest="40"
+                                                 VerticalOptions="Start"
+                                                 HorizontalOptions="Start"
+                                                 Command="{Binding GetGpsCommand}">
+                                           </ImageButton>
                                     </Border>
-                                </toolkit:Expander.Header>
-                                <Grid>
-                                    <VerticalStackLayout Margin="4" HorizontalOptions="Fill">
-                                        <Label x:Name="GpsInstructionsLabel" LineBreakMode="WordWrap"  HorizontalTextAlignment="Center" MaximumWidthRequest="300" Style="{StaticResource ContentBorderLabelStyle}" Text="If your outdoor photo shoot is in your current area, you can use your device's current location."/>
-                                        
-                                    </VerticalStackLayout>
+
+                                    <!-- City Search Entry & Suggestions -->
+                                    <Grid Grid.Column="1" RowDefinitions="Auto,*" RowSpacing="0" VerticalOptions="Start">
+                                        <SearchBar x:Name="InputLocation" 
+                                               TextChanged="InputLocation_TextChanged" 
+                                                   Grid.Row="0"
+                                               HeightRequest="50" 
+                                               Background="{StaticResource White75}"
+                                               PlaceholderColor="{StaticResource Gray600}"
+                                                   TextColor="{StaticResource MidnightBlue}"
+                                                   VerticalOptions="Start"
+                                               HorizontalOptions="Fill"
+                                                   IsReadOnly="{Binding ShowForecast}"
+                                                 
+                                                   FontFamily="NotoSans"
+                                               Placeholder="Enter the location here...">
+                                            <SearchBar.GestureRecognizers>
+                                                <TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped"/>
+                                            </SearchBar.GestureRecognizers>
+                                        </SearchBar>
+
+
+                                        <CollectionView x:Name="SuggestionsList"
+                                                        Grid.Row="1"
+                                                    ItemSizingStrategy="MeasureAllItems"
+                                                    IsVisible="{Binding ShowSuggestions}" 
+                                                    ItemsSource="{Binding Suggestions}"  
+                                                    SelectedItem="{Binding SelectedLocation}"
+                                                    SelectionChangedCommand="{Binding SelectedSuggestionCommand}"
+                                                    SelectionChangedCommandParameter="{Binding SelectedLocation}"
+                                                    Background="{StaticResource White75}"
+                                                    SelectionMode="Single"
+                                                    MaximumHeightRequest="220">
+                                            <CollectionView.ItemTemplate>
+                                                <DataTemplate x:DataType="model:PhotoLocation">
+                                                    <VerticalStackLayout Margin="0, 4">
+                                                        <Label Text="{Binding DisplayName}"
+                                                           HorizontalTextAlignment="Start" 
+                                                           VerticalOptions="Center"
+                                                           VerticalTextAlignment="Center"      
+                                                           LineBreakMode="WordWrap"  
+                                                           FontFamily="NotoSans"
+                                                           TextColor="{StaticResource MidnightBlue}"
+                                                           FontSize="11"
+                                                           Margin="4,2"/>
+                                                        <BoxView HeightRequest="1" Color="{StaticResource MidnightBlue}"/>
+                                                    </VerticalStackLayout>
+                                                </DataTemplate>
+                                            </CollectionView.ItemTemplate>
+                                        </CollectionView>
+                                    </Grid>
                                 </Grid>
-                            </toolkit:Expander>
-                        </VerticalStackLayout>
+                            </Grid>
+                        </Border>
                     </Grid>
-                    <Grid x:Name="TypedLocationOption" Grid.Column="1">
-                        <VerticalStackLayout>
-                            <toolkit:Expander HorizontalOptions="Fill" Direction="Down">
-                                <toolkit:Expander.Header>
-                                    <Border Style="{StaticResource ContentBorder}" Padding="4">
-                                        <VerticalStackLayout>
-                                            <Label Text="Option 2" FontSize="Header" HorizontalOptions="Center" HorizontalTextAlignment="Center"/>
-                                            <Label Text="or you can enter the location." HorizontalTextAlignment="Center"/>
-                                        </VerticalStackLayout>
-                                    </Border>
-                                </toolkit:Expander.Header>
-                                <VerticalStackLayout Margin="4" HorizontalOptions="Fill">
-                                    <Label LineBreakMode="WordWrap" VerticalTextAlignment="Center" HorizontalTextAlignment="Start" Text="Start entering the city name. 
-                   After entering the third character, you will see a list of suggested location. Please select the location from the list. If you don't see the location you want, keep typing,"/>
-                                    
-                                </VerticalStackLayout>
-                            </toolkit:Expander>
-                        </VerticalStackLayout>
-                    </Grid>
-                </Grid>
-            </VerticalStackLayout>
-        </VerticalStackLayout>
-    </ScrollView>
+                 
+                </VerticalStackLayout>
+            </ScrollView>
+        </fold:TwoPaneView.Pane1>
+        <fold:TwoPaneView.Pane2>
+            <Grid x:Name="ForecastGrid" HorizontalOptions="Fill" VerticalOptions="Fill">
+                <components:NwsDailyHourlyView x:Name="Forecast"
+                                               Days="{Binding Days}"
+                                               IsVisible="{Binding ShowForecast}"
+                                               VerticalOptions="Fill"/>
+            </Grid>
+            
+            
+            
+            <!--<CollectionView x:Name="ForecastCollectionView"
+                            ItemsSource="{Binding Forecasts}"
+                            SelectionMode="None"
+                            IsVisible="{Binding ShowForecast}">
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout Orientation="Vertical"/>
+                </CollectionView.ItemsLayout>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="model:DayViewModel">
+                        <Border x:Name="FrontView" StrokeThickness="4" Margin="10" Stroke="{StaticResource GpsBorder}" StrokeShape="RoundRectangle 30">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="FrontView_Tapped"/>
+                            </Border.GestureRecognizers>
+                            <Grid x:Name="DailyForecastGrid" RowDefinitions="Auto,Auto,Auto,Auto" ColumnDefinitions="*,*" ColumnSpacing="10" RowSpacing="10">
+                                <Label Text="Here is The Photographer's Forecast for" Grid.Row="0" Grid.ColumnSpan="2" HorizontalOptions="Center"/>
+                                <Label Text="{Binding DisplayName}" Grid.Row="1" Grid.ColumnSpan="2" HorizontalOptions="Center"/>
+                                <HorizontalStackLayout Grid.Row="2" Grid.ColumnSpan="2" HorizontalOptions="Center">
+                                    <Label Text="{Binding StartDate, StringFormat='{}{0:MMM dd, yyyy}'}"/>
+                                    <Label Text=" to "/>
+                                    <Label Text="{Binding EndDate, StringFormat='{}{0:MMM dd, yyyy}'}"/>
+                                </HorizontalStackLayout>
+                                <skia:SKLottieView x:Name="ForecastLottieView" Source="{Binding SKDailyMeteocons}" Grid.Row="3" Grid.Column="0" WidthRequest="200" HeightRequest="200" HorizontalOptions="Center" VerticalOptions="Center"/>
+                                <Label Text="{Binding DailyForecastSummary}" Grid.Row="3" Grid.Column="1" HorizontalOptions="Start" VerticalOptions="Center" LineBreakMode="WordWrap"/>
+                            </Grid>
+                        </Border>
+                        <Border x:Name="BackView" StrokeThickness="4" Margin="10" Stroke="{StaticResource GpsBorder}" StrokeShape="RoundRectangle 30" IsVisible="false">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="BackView_Tapped"/>
+                            </Border.GestureRecognizers>
+                            <Grid x:Name="BackViewGrid" RowDefinitions="Auto,Auto" ColumnDefinitions="*,*" ColumnSpacing="10" RowSpacing="10">
+                                <Label Text="Event Details" Grid.Row="0" Grid.ColumnSpan="2" HorizontalOptions="Center"/>
+                                <Ca
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>-->
+        </fold:TwoPaneView.Pane2>
+    </fold:TwoPaneView>
 </ContentPage>

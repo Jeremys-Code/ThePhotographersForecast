@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:skia="clr-namespace:SkiaSharp.Extended.UI.Controls;assembly=SkiaSharp.Extended.UI"
+             xmlns:model="clr-namespace:ThePhotographersForecast.Models"
+             x:Class="ThePhotographersForecast.Components.MoonPhasesCarouselView">
+    <VerticalStackLayout HorizontalOptions="Center">
+
+        <Border Stroke="{StaticResource PeriodEarlyHours}" StrokeThickness="6" Background="{StaticResource PeriodNight}">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="20"/>
+            </Border.StrokeShape>
+            <VerticalStackLayout HorizontalOptions="Center">
+                <Label Text="The Moon's Schedule" FontAttributes="Bold" FontFamily="ManFont" HorizontalOptions="Center" />
+                <CarouselView
+              ItemsSource="{Binding SelectedUpcomingMoonPhases}" 
+             CurrentItem="{Binding SelectedMoonPhase}"
+             Shadow="5,5,10,#FCFEDA,0.7"
+             IsBounceEnabled="True"
+                      IsEnabled="True"
+                        IsScrollAnimated="True"
+                        IsSwipeEnabled="True"
+                        ItemsUpdatingScrollMode="KeepItemsInView"
+                IndicatorView="{x:Reference indicatorView}"
+                  PeekAreaInsets="60,0"
+              Loop="True">
+                    <CarouselView.ItemTemplate>
+                        <DataTemplate x:DataType="model:FutureMoonPhase">
+                            <Grid>
+                                <VerticalStackLayout Margin="5">
+                                    <Label x:Name="PhaseName" Text="{Binding MoonPhaseName}" FontFamily="ManFont" FontSize="14" HorizontalOptions="Center" HorizontalTextAlignment="Center" Margin="2"/>
+                                    <skia:SKLottieView Source="{Binding SkMoonSource}" HeightRequest="80" WidthRequest="80" HorizontalOptions="Center" Margin="5"/>
+                                    <Label Text="Phase Occurs on:" FontFamily="ManFont" FontSize="14" HorizontalOptions="Start" HorizontalTextAlignment="Start" Margin="2"/>
+                                    <Label x:Name="Date:" Text="{Binding LocalDateString}" FontFamily="ManFont" FontSize="14" HorizontalOptions="Center" HorizontalTextAlignment="Center" Margin="2"/>
+                                    <Label x:Name="Time:" Text="{Binding LocalTimeString}" FontFamily="ManFont" FontSize="14" HorizontalOptions="Center" HorizontalTextAlignment="Center" Margin="2"/>
+                                </VerticalStackLayout>
+                            </Grid>
+                        </DataTemplate>
+                    </CarouselView.ItemTemplate>
+                </CarouselView>
+                <IndicatorView x:Name="indicatorView" 
+                     Grid.Row='2' 
+                      HorizontalOptions="Center" 
+                       IndicatorColor="{StaticResource Gray400}" SelectedIndicatorColor="{StaticResource MoonGlow}"/>
+            </VerticalStackLayout>
+        </Border>
+    </VerticalStackLayout>
+</ContentView>

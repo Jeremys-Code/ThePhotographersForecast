@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Text;
 using ThePhotographersForecast.Models;
 using ThePhotographersForecast.Services.Modules;
 
@@ -12,7 +10,7 @@ namespace ThePhotographersForecast.Services.Narratives
         {
             var bins = new[]
             {
-            agent.Overnight,
+            agent.EarlyHours,
             agent.EarlyMorning,
             agent.Morning,
             agent.Afternoon,
@@ -41,21 +39,21 @@ namespace ThePhotographersForecast.Services.Narratives
             var sb = new StringBuilder();
 
             // Sentence 1 — overall trend
-            sb.Append($"Cloud cover is {overallTrend} through the day, ");
+            sb.Append($"clouds are {overallTrend} through the day, ");
 
             // Sentence 2 — peak cloudiness
-            sb.Append($"with {peakCategory} conditions developing by {peakPeriod.ToLower()}. ");
+            sb.Append($"with {peakCategory} conditions in the {peakPeriod.ToLower()}. ");
 
             // Sentence 3 — clearing window
             sb.Append($"The clearest skies occur during the {clearPeriod.ToLower()}, ");
 
-            // Sentence 4 — sky experience
-            if (means[minIndex] <= 0.10)
-                sb.Append("providing excellent conditions for stargazing.");
-            else if (means[minIndex] <= 0.25)
-                sb.Append("offering good visibility for sunrise and sunset.");
-            else
-                sb.Append("with occasional breaks in the clouds.");
+            //// Sentence 4 — sky experience
+            //if (means[minIndex] <= 0.10)
+            //    sb.Append("providing excellent Visibility.");
+            //else if (means[minIndex] <= 0.25)
+            //    sb.Append("offering good Visibility for sunrise and sunset.");
+            //else
+            //    sb.Append("with occasional breaks in the clouds.");
 
             return sb.ToString();
         }

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using SkiaSharp.Extended.UI.Controls;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ThePhotographersForecast.Models
@@ -12,5 +13,7 @@ namespace ThePhotographersForecast.Models
         public int IsDay { get; set; }
         public string Description { get; set; } = string.Empty;
         public string Icon { get; set; } = string.Empty;
+        public ImageSource IconImage => ImageSource.FromFile(this.Icon);
+        public SKFileLottieImageSource WmoLottie { get; set; }
     }
 }

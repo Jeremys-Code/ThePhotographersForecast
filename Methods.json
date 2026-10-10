@@ -1,0 +1,150 @@
+{
+  "@graph" : [ {
+    "@id" : "_:b0",
+    "foaf:accountName" : "https://plus.google.com/115581513577574118313",
+    "foaf:name" : "nws"
+  }, {
+    "@id" : "_:b1",
+    "reg:entity" : {
+      "@id" : "https://codes.nws.noaa.gov/DataAssimilation/Methods"
+    },
+    "reg:entityVersion" : {
+      "@id" : "https://codes.nws.noaa.gov/DataAssimilation/Methods:1"
+    }
+  }, {
+    "@id" : "_:b2",
+    "reg:entity" : {
+      "@id" : "https://codes.nws.noaa.gov/DataAssimilation/Methods/GDAS13"
+    },
+    "reg:sourceGraph" : {
+      "@id" : "https://codes.nws.noaa.gov/DataAssimilation/Methods/_GDAS13:1#graph"
+    }
+  }, {
+    "@id" : "_:b3",
+    "foaf:accountName" : "https://plus.google.com/115581513577574118313",
+    "foaf:name" : "nws"
+  }, {
+    "@id" : "https://codes.nws.noaa.gov/DataAssimilation/Methods",
+    "@type" : [ "ldp:Container", "reg:Register", "skos:Collection" ],
+    "dct:description" : "Tables and codes that help document Data Assimilation Methods",
+    "dct:modified" : {
+      "@type" : "xsd:dateTime",
+      "@value" : "2016-11-21T18:47:10.154Z"
+    },
+    "reg:notation" : "Methods",
+    "rdfs:label" : "Data Assimilation Methods",
+    "rdfs:member" : {
+      "@id" : "https://codes.nws.noaa.gov/DataAssimilation/Methods/GDAS13"
+    },
+    "owl:versionInfo" : {
+      "@type" : "xsd:integer",
+      "@value" : "3"
+    }
+  }, {
+    "@id" : "https://codes.nws.noaa.gov/DataAssimilation/Methods/GDAS13",
+    "@type" : "skos:Concept",
+    "dct:description" : "The EMC GSI analysis system is used for the operational NOAA/NWS/NCEP/EMC global, regional, mesoscale, rapid refresh, Real-Time Mesoscale Analysis (RTMA) and hurricane forecast systems.   For more information, see http://www.emc.ncep.noaa.gov/gmb/gdas/",
+    "reg:notation" : "GDAS13",
+    "rdfs:label" : "Global Data Assimilation System v13",
+    "skos:notation" : "GDAS13"
+  }, {
+    "@id" : "https://codes.nws.noaa.gov/DataAssimilation/Methods/_GDAS13",
+    "@type" : "reg:RegisterItem",
+    "dct:dateAccepted" : {
+      "@type" : "xsd:dateTime",
+      "@value" : "2016-11-21T19:46:23.039Z"
+    },
+    "dct:dateSubmitted" : {
+      "@type" : "xsd:dateTime",
+      "@value" : "2016-11-21T18:47:10.138Z"
+    },
+    "dct:description" : "The EMC GSI analysis system is used for the operational NOAA/NWS/NCEP/EMC global, regional, mesoscale, rapid refresh, Real-Time Mesoscale Analysis (RTMA) and hurricane forecast systems.   For more information, see http://www.emc.ncep.noaa.gov/gmb/gdas/",
+    "reg:definition" : {
+      "@id" : "_:b2"
+    },
+    "reg:itemClass" : {
+      "@id" : "skos:Concept"
+    },
+    "reg:notation" : "GDAS13",
+    "reg:register" : {
+      "@id" : "https://codes.nws.noaa.gov/DataAssimilation/Methods"
+    },
+    "reg:status" : {
+      "@id" : "reg:statusStable"
+    },
+    "reg:submitter" : {
+      "@id" : "_:b3"
+    },
+    "rdfs:label" : "Global Data Assimilation System v13",
+    "owl:versionInfo" : {
+      "@type" : "xsd:integer",
+      "@value" : "2"
+    }
+  }, {
+    "@id" : "https://codes.nws.noaa.gov/DataAssimilation/_Methods",
+    "@type" : "reg:RegisterItem",
+    "dct:dateAccepted" : {
+      "@type" : "xsd:dateTime",
+      "@value" : "2016-11-21T19:42:47.553Z"
+    },
+    "dct:dateSubmitted" : {
+      "@type" : "xsd:dateTime",
+      "@value" : "2016-11-21T18:43:18.066Z"
+    },
+    "dct:description" : "Tables and codes that help document Data Assimilation Methods",
+    "reg:definition" : {
+      "@id" : "_:b1"
+    },
+    "reg:itemClass" : [ {
+      "@id" : "skos:Collection"
+    }, {
+      "@id" : "reg:Register"
+    } ],
+    "reg:notation" : "Methods",
+    "reg:register" : {
+      "@id" : "https://codes.nws.noaa.gov/DataAssimilation"
+    },
+    "reg:status" : {
+      "@id" : "reg:statusStable"
+    },
+    "reg:submitter" : {
+      "@id" : "_:b0"
+    },
+    "rdfs:label" : "Data Assimilation Methods",
+    "owl:versionInfo" : {
+      "@type" : "xsd:integer",
+      "@value" : "2"
+    }
+  } ],
+  "@context" : {
+    "owl" : "http://www.w3.org/2002/07/owl#",
+    "ssd" : "http://www.w3.org/ns/sparql-service-description#",
+    "xsd" : "http://www.w3.org/2001/XMLSchema#",
+    "skos" : "http://www.w3.org/2004/02/skos/core#",
+    "rdfs" : "http://www.w3.org/2000/01/rdf-schema#",
+    "qb" : "http://purl.org/linked-data/cube#",
+    "dgu" : "http://reference.data.gov.uk/def/reference/",
+    "dct" : "http://purl.org/dc/terms/",
+    "ui" : "http://purl.org/linked-data/registry-ui#",
+    "reg" : "http://purl.org/linked-data/registry#",
+    "api" : "http://purl.org/linked-data/api/vocab#",
+    "vann" : "http://purl.org/vocab/vann/",
+    "prov" : "http://www.w3.org/ns/prov#",
+    "foaf" : "http://xmlns.com/foaf/0.1/",
+    "cc" : "http://creativecommons.org/ns#",
+    "void" : "http://rdfs.org/ns/void#",
+    "odrs" : "http://schema.theodi.org/odrs#",
+    "org" : "http://www.w3.org/ns/org#",
+    "env-ui" : "http://environment.data.gov.uk/registry/structure/ui/",
+    "version" : "http://purl.org/linked-data/version#",
+    "rdf" : "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "ldp" : "http://www.w3.org/ns/ldp#",
+    "time" : "http://www.w3.org/2006/time#",
+    "vs" : "http://www.w3.org/2003/06/sw-vocab-status/ns#",
+    "dc" : "http://purl.org/dc/elements/1.1/"
+  }
+}
+
+
+
+https://api.open-meteo.com/v1/forecast?latitude=42.31180257000093&longitude=-71.05905849302854&daily=sunrise,sunset,daylight_duration,sunshine_duration,weather_code,temperature_2m_max,temperature_2m_min,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant,precipitation_probability_max,precipitation_probability_min,rain_sum,showers_sum,snowfall_sum,precipitation_sum,dew_point_2m_mean,uv_index_max,apparent_temperature_max,apparent_temperature_min,wet_bulb_temperature_2m_min,wet_bulb_temperature_2m_max&hourly=temperature_2m,dew_point_2m,precipitation_probability,precipitation,rain,showers,snowfall,snow_depth,weather_code,cloud_cover,visibility,wind_speed_10m,wind_direction_10m,wind_gusts_10m,is_day,sunshine_duration,relative_humidity_2m,apparent_temperature,uv_index,wet_bulb_temperature_2m&models=gfs_seamless&timezone=auto&wind_speed_unit=mph&temperature_unit=fahrenheit&precipitation_unit=inch&start_date=2026-08-31&end_date=2026-09-07

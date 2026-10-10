@@ -1,18 +1,13 @@
-﻿using Newtonsoft.Json;
-using System.Text.Json.Serialization;
-
-namespace ThePhotographersForecast.Data;
+﻿namespace ThePhotographersForecast.Data;
 
 public class GridHourlyData
 {
 
     public class Rootobject
     {
-        public object[]? context { get; set; }
+        public object[] context { get; set; }
         public string type { get; set; }
-        [JsonProperty("geometry")]
         public Geometry geometry { get; set; }
-        [JsonProperty("properties")]
         public Properties properties { get; set; }
     }
 
@@ -36,44 +31,32 @@ public class GridHourlyData
     public class Elevation
     {
         public string unitCode { get; set; }
-        public float value { get; set; }
+        public double? value { get; set; }
     }
 
     public class Period
     {
-        [JsonProperty("number")]
         public int number { get; set; }
-        [JsonProperty("name")]
         public string name { get; set; }
-        [JsonProperty("startTime")]
         public DateTime startTime { get; set; }
-        [JsonProperty("endTime")]
         public DateTime endTime { get; set; }
-        [JsonProperty("isDaytime")]
         public bool isDaytime { get; set; }
-        [JsonProperty("temperature")]
-        public double temperature { get; set; }
-        [JsonProperty("temperatureUnit")]
-        public string temperatureUnit { get; set; }
-
-        [JsonProperty("temperatureTrend")]
-        public string? temperatureTrend { get; set; }
-        [JsonProperty("probabilityOfPrecipitation")]
+        public Temperature temperature { get; set; }
         public Probabilityofprecipitation probabilityOfPrecipitation { get; set; }
-        [JsonProperty("dewpoint")]
         public Dewpoint dewpoint { get; set; }
-        [JsonProperty("relativeHumidity")]
         public Relativehumidity relativeHumidity { get; set; }
-        [JsonProperty("windSpeed")]
-        public string windSpeed { get; set; }
-        [JsonProperty("windDirection")]
+        public Windspeed windSpeed { get; set; }
+        public Windgust? windGust { get; set; }
         public string windDirection { get; set; }
-
-        [JsonProperty("hourlyIcon")]
         public string icon { get; set; }
-        [JsonProperty("shortForecast")]
         public string shortForecast { get; set; }
+        public string? detailedForecast { get; set; }
+    }
 
+    public class Temperature
+    {
+        public string unitCode { get; set; }
+        public double value { get; set; }
     }
 
     public class Probabilityofprecipitation
@@ -85,10 +68,22 @@ public class GridHourlyData
     public class Dewpoint
     {
         public string unitCode { get; set; }
-        public float value { get; set; }
+        public double value { get; set; }
     }
 
     public class Relativehumidity
+    {
+        public string unitCode { get; set; }
+        public double value { get; set; }
+    }
+
+    public class Windspeed
+    {
+        public string unitCode { get; set; }
+        public double value { get; set; }
+    }
+
+    public class Windgust
     {
         public string unitCode { get; set; }
         public double value { get; set; }

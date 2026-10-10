@@ -1,169 +1,153 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using System.Collections.ObjectModel;
+using SkiaSharp.Extended.UI.Controls;
 
 namespace ThePhotographersForecast.Models
 {
     public partial class WeatherForecast : ObservableObject
     {
         [ObservableProperty]
-        private DateOnly date;
+        public partial DailyForecast[] DailyForecasts { get; set; }
         [ObservableProperty]
-        private double latitude;
-        [ObservableProperty]
-        private double longitude;
-        [ObservableProperty]
-        private double generationTimeMs;
-        [ObservableProperty]
-        private int utcOffsetSeconds;
-        [ObservableProperty]
-        private string timeZone;
-        [ObservableProperty]
-        private double elevation;
-        [ObservableProperty]
-        private DailyForecast dayForecast;
-        [ObservableProperty]
-        private HourlyForecast[] hourlyForecasts;
+        public partial HourlyForecast[] HourlyForecasts { get; set; }
+        public WeatherForecast()
+        {
+            this.DailyForecasts = Array.Empty<DailyForecast>();
+            this.HourlyForecasts = Array.Empty<HourlyForecast>();
+        }
+        public WeatherForecast(WeatherForecast weather)
+        {
+            if (weather == null)
+                throw new ArgumentNullException(nameof(weather), "Source object cannot be null.");
+
+            this.DailyForecasts = weather.DailyForecasts.ToArray();
+            this.HourlyForecasts = weather.HourlyForecasts.ToArray();
+        }
     }
-    public partial class HourlyForecast : ObservableObject
+    public class HourlyForecast
     {
-        public string Name => String.Concat(this.Time.ToString("dddd"), " ", Services.GetTimeOfDay.TimeOfDay(this.Time.Hour), " @ ", this.Time.ToString("h tt"));
-        [ObservableProperty]
-        private DateTime time;
-        public DateOnly Date => DateOnly.FromDateTime(this.Time);
-        public string TimeOfDay => Services.GetTimeOfDay.TimeOfDay(this.Time.Hour);
-        [ObservableProperty]
-        private Measurement temperature2m;
-        [ObservableProperty]
-        private Measurement dewPoint2m;
-        [ObservableProperty]
-        private Measurement precipitationProbability;
-        [ObservableProperty]
-        private Measurement precipitation;
-        [ObservableProperty]
-        private Measurement rain;
-        [ObservableProperty]
-        private Measurement showers;
-        [ObservableProperty]
-        private Measurement snowfall;
-        [ObservableProperty]
-        private Measurement snowDepth;
-        [ObservableProperty]
-        private int weatherCode;
-        [ObservableProperty]
-        private string weatherCodeDescription;
-        [ObservableProperty]
-        private ImageSource hourlyIcon;
-        [ObservableProperty]
-        private Measurement cloudCover;
-        [ObservableProperty]
-        private Measurement visibility;
-        [ObservableProperty]
-        private Measurement windSpeed10m;
-        [ObservableProperty]
-        private Measurement2 windDirection10m;
-        [ObservableProperty]
-        private Measurement windGusts10m;
-        [ObservableProperty]
-        private int isDay;
-        [ObservableProperty]
-        private Measurement sunshineDuration;
-        [ObservableProperty]
-        private Measurement relativeHumidity2m;
-        [ObservableProperty]
-        private Measurement apparentTemperature;
-        [ObservableProperty]
-        private Measurement uvIndex;
-        [ObservableProperty]
-        private Measurement wetBulbTemperature2m;
-        [ObservableProperty]
-        private string weatherSummary;
-        [ObservableProperty]
-        private string weatherImage;
-        [ObservableProperty]
-        private string healthSafetySummary;
-        [ObservableProperty]
-        private string precipitationSummary;
+        public string Name => String.Concat(this.HourlyTime.ToString("dddd"), " ", Services.TimeOfDayService.CalcTimeOfDay(this.HourlyTime.Hour), " @ ", this.HourlyTime.ToString("h tt"));
+        public DateTime HourlyTime { get; set; }
+        public DateTime Date => this.HourlyTime;
+        public string TimeOfDay => String.Concat(Services.TimeOfDayService.CalcTimeOfDay(this.HourlyTime.Hour));
+        public DoubleUnitValue Temperature2m { get; set; }
+        public DoubleUnitValue DewPoint2m { get; set; }
+        public DoubleUnitValue PrecipitationProbability { get; set; }
+        public DoubleUnitValue Precipitation { get; set; }
+        public DoubleUnitValue Rain { get; set; }
+        public DoubleUnitValue Showers { get; set; }
+        public DoubleUnitValue Snowfall { get; set; }
+        public DoubleUnitValue SnowDepth { get; set; }
+        public int WeatherCode { get; set; }
+        public string WeatherCodeDescription { get; set; }
+        public ImageSource HourlyIcon { get; set; }
+        public SkyCoverValue CloudCover { get; set; }
+        public DoubleUnitValue DistanceVisible { get; set; }
+        public DoubleUnitValue WindSpeed10m { get; set; }
+        public IntUnitValue WindDirection10m { get; set; }
+        public DoubleUnitValue WindGusts10m { get; set; }
+        public int IsDay { get; set; }
+        public DoubleUnitValue SunshineDuration { get; set; }
+        public DoubleUnitValue RelativeHumidity2m { get; set; }
+        public DoubleUnitValue ApparentTemperature { get; set; }
+        public DoubleUnitValue UvIndex { get; set; }
+        public DoubleUnitValue WetBulbTemperature2m { get; set; }
+        public string WeatherImage { get; set; }
+        public SKFileLottieImageSource SkHourlyMeteocon { get; set; }
+        public ForecastSummaries HourlyForecastSummary { get; set; }
     }
-    public partial class Measurement : ObservableObject
+    public class DoubleUnitValue
     {
-        [ObservableProperty]
-        private double value;
-        [ObservableProperty]
-        private string unit;
+        public double Value { get; set; }
+        public string Description { get; set; }
+        public string Unit { get; set; }
     }
-    public partial class Measurement2 : ObservableObject
+    public class IntUnitValue
     {
-        [ObservableProperty]
-        private int value;
-        [ObservableProperty]
-        private string description;
-        [ObservableProperty]
-        private string unit;
+        public int Value { get; set; }
+        public string Description { get; set; }
+        public string Unit { get; set; }
     }
-    public partial class DailyForecast : ObservableObject
+    public class StringUnitValue
+    {
+        public string Value { get; set; }
+        public string Description { get; set; }
+        public string Unit { get; set; }
+    }
+    public class DailyForecast
     {
         public string TimePeriod => String.Concat(this.Date.ToString("dddd, MMMM dd, yyyy"));
-        [ObservableProperty]
-        private DateOnly date;
-        [ObservableProperty]
-        private DateTime sunrise;
-        [ObservableProperty]
-        private DateTime sunset;
-        [ObservableProperty]
-        private Measurement dayLightDuration;
-        [ObservableProperty]
-        private Measurement sunshineDuration;
-        [ObservableProperty]
-        private int weatherCode;
-        [ObservableProperty]
-        private string weatherCodeDescription;
-        [ObservableProperty]
-        private ImageSource dailyIcon;
-        [ObservableProperty]
-        private Measurement temperature2mMax;
-        [ObservableProperty]
-        private Measurement temperature2mMin;
-        [ObservableProperty]
-        private Measurement windSpeed10mMax;
-        [ObservableProperty]
-        private Measurement windGusts10mMax;
-        [ObservableProperty]
-        private Measurement2 windDirection10mDominant;
-        [ObservableProperty]
-        private Measurement precipitationProbabilityMax;
-        [ObservableProperty]
-        private Measurement precipitationProbabilityMin;
-        [ObservableProperty]
-        private Measurement rainSum;
-        [ObservableProperty]
-        private Measurement showersSum;
-        [ObservableProperty]
-        private Measurement snowfallSum;
-        [ObservableProperty]
-        private Measurement precipitationSum;
-        [ObservableProperty]
-        private Measurement dewPoint2mMean;
-        [ObservableProperty]
-        private Measurement apparentTemperatureMax;
-        [ObservableProperty]
-        private Measurement apparentTemperatureMin;
-        [ObservableProperty]
-        private Measurement uvIndexMax;
-        [ObservableProperty]
-        private Measurement wetBulbTemperature2mMin;
-        [ObservableProperty]
-        private Measurement wetBulbTemperature2mMax;
-        [ObservableProperty]
-        private string weatherSummary;
-        [ObservableProperty]
-        private string healthSafetySummary;
-        [ObservableProperty]
-        private string precipitationSummary;
-        [ObservableProperty]
-        private ObservableCollection<EventTime> dailyEvents;
-        [ObservableProperty]
-        private DailyAstronomicalData astronomicalData;
-        [ObservableProperty]
-        private ObservableCollection<HourlyForecast> hourlyForecasts;
+        public DateOnly Date { get; set; }
+        public DateTime Sunrise { get; set; }
+        public DateTime Sunset { get; set; }
+        public DoubleUnitValue DayLightDuration { get; set; }
+        public DoubleUnitValue SunshineDuration { get; set; }
+        public int WeatherCode { get; set; }
+        public string WeatherCodeDescription { get; set; }
+        public ImageSource DailyIcon { get; set; }
+        public DoubleUnitValue Temperature2mMax { get; set; }
+        public string TimeTempMax { get; set; }
+        public DoubleUnitValue Temperature2mMin { get; set; }
+        public string TimeTempMin { get; set; }
+        public DoubleUnitValue WindSpeed10mMax { get; set; }
+        public DoubleUnitValue WindGusts10mMax { get; set; }
+        public IntUnitValue WindDirection10mDominant { get; set; }
+        public DoubleUnitValue PrecipitationProbabilityMax { get; set; }
+        public DoubleUnitValue PrecipitationProbabilityMin { get; set; }
+        public DoubleUnitValue RainSum { get; set; }
+        public DoubleUnitValue ShowersSum { get; set; }
+        public DoubleUnitValue SnowfallSum { get; set; }
+        public DoubleUnitValue PrecipitationSum { get; set; }
+        public DoubleUnitValue DewPoint2mMean { get; set; }
+        public DoubleUnitValue ApparentTemperatureMax { get; set; }
+        public DoubleUnitValue ApparentTemperatureMin { get; set; }
+        public DoubleUnitValue UvIndexMax { get; set; }
+        public DoubleUnitValue WetBulbTemperature2mMin { get; set; }
+        public DoubleUnitValue WetBulbTemperature2mMax { get; set; }
+        public EventModel DailyEvents { get; set; } = new EventModel();
+        public HourlyForecast[] HourlyForecasts { get; set; }
+        public SKFileLottieImageSource SkDailyMeteocon { get; set; }
+        public ForecastSummaries DailyForecastSummary { get; set; }
+        public SKFileLottieImageSource SkUvIndexIcon => GetSkUvIndex();
+        private SKFileLottieImageSource GetSkUvIndex()
+        {
+            return new SKFileLottieImageSource
+            {
+                File =
+            this.UvIndexMax.Value switch
+            {
+                1 => "uv_index_1.json",
+                2 => "uv_index_2.json",
+                3 => "uv_index_3.json",
+                4 => "uv_index_4.json",
+                5 => "uv_index_5.json",
+                6 => "uv_index_6.json",
+                7 => "uv_index_7.json",
+                8 => "uv_index_8.json",
+                9 => "uv_index_9.json",
+                10 => "uv_index_10.json",
+                11 => "uv_index_11.json",
+                > 11 => "uv_index_11_plus.json",
+                _ => "uv_index.json",
+            }
+            };
+        }
+    }
+    public class ForecastSummaries
+    {
+        public DateTime Time { get; set; }
+        public bool IsDaily { get; set; }
+        public string WeatherSummary { get; set; } = string.Empty;
+        public string HealthSafetySummary { get; set; } = string.Empty;
+        public string StormSummary { get; set; } = string.Empty;
+        public string DailyHighAndTime { get; set; }
+        public string DailyLowAndTime { get; set; }
+        public Color UVIndexColor
+        {
+            get => field;
+            set
+            {
+                field = value;
+            }
+        } = Colors.Green;
     }
 }

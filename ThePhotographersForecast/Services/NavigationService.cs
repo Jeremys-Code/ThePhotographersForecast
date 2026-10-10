@@ -4,35 +4,35 @@ namespace ThePhotographersForecast.Services;
 
 public static class NavigationService
 {
-    private static IServiceProvider? _service;
-
-
-    private static IServiceProvider Service => _service ?? throw new InvalidOperationException("NavigationService not initialized. Call Initialize(IServiceProvider) first.");
+    private static IServiceProvider _service;
 
     public static void Initialize(IServiceProvider service)
     {
         _service = service;
     }
 
+    public static async Task InitializeAsync()
+    {
+        var firstPage = (Preferences.Default.ContainsKey("FirstRun") ? "SelectLocation" : "Settings");
+        await Shell.Current.GoToAsync(firstPage);
+        return;
+    }
     public static async Task NavigateToSelectLocationAsync()
     {
-        var vm = Service.GetService<ViewModels.SelectLocationViewModel>();
-        var page = new SelectLocation(vm);
-        await Shell.Current.Navigation.PushAsync(page);
+        await Shell.Current.Navigation.PushAsync(ServiceHelper.GetService<SelectLocation>(), true);
         return;
+
     }
     public static async Task NavigateToForecastAsync()
     {
-        var vm = Service.GetService<ViewModels.SelectLocationViewModel>();
-        var page = new Forecast(vm);
-        await Shell.Current.Navigation.PushAsync(page);
+
+        await Shell.Current.Navigation.PushAsync(ServiceHelper.GetService<Forecast>(), true);
         return;
+
     }
     public static async Task NavigateToSettingsAsync()
     {
-        var vm = Service.GetService<ViewModels.SettingsViewModel>();
-        var page = new Settings(vm);
-        await Shell.Current.Navigation.PushAsync(page);
+        await Shell.Current.Navigation.PushAsync(ServiceHelper.GetService<Settings>(), true);
         return;
     }
     public static async Task PopAsync()
@@ -46,11 +46,13 @@ public static class NavigationService
         return;
     }
 
-    public static async Task NavigateToAsync(string route, IDictionary<string, object>? parameters)
+    public static async Task NavigateToAsync(Page route, IDictionary<string, object>? parameters)
     {
         if (parameters != null)
-            await Shell.Current.GoToAsync(route, parameters);
+            await Shell.Current.Navigation.PushAsync(route, true);
         else
-            await Shell.Current.GoToAsync(route);
+            await Shell.Current.Navigation.PushAsync(route);
     }
+
+
 }
