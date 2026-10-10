@@ -262,6 +262,7 @@ namespace ThePhotographersForecast.ViewModels
                 SharedSession.NwsData.HourlySupplementals = new NwsHourlySupplemental[nwsResults.HourlySupplementals.Length];
                 await MainThread.InvokeOnMainThreadAsync(async () =>
                 {
+
                     NwsData = new NwsWeatherModel(nwsResults);
                     SharedSession.NwsData = new NwsWeatherModel(nwsResults);
                     SelectedLocation = SharedSession.SelectedLocation;
@@ -323,8 +324,8 @@ namespace ThePhotographersForecast.ViewModels
                 //    ProgressMessage = "All done.";
                 //}
                 //    });
-                Debug.WriteLine($"SharedSession.WeatherForecasts Count: {SharedSession.WeatherForecast.DailyForecasts.Length}");
-                Debug.WriteLine($"SharedSession.WeatherForecast Hours Count: {SharedSession.WeatherForecast.HourlyForecasts.Length}");
+                Debug.WriteLine($"SharedSession.WeatherForecasts Count: {SharedSession.WeatherForecasts.DailyForecasts.Length}");
+                Debug.WriteLine($"SharedSession.WeatherForecasts Hours Count: {SharedSession.WeatherForecasts.HourlyForecasts.Length}");
                 Debug.WriteLine($"SharedSession.Days Count: {SharedSession.Days.Length}");
                 Debug.WriteLine($"SharedSession.EventModels Count: {SharedSession.EventsData.Length}");
                 Debug.WriteLine($"SharedSession.NwsData.DailyForecasts Count: {SharedSession.NwsData.DailyForecasts?.Length ?? 0}");
@@ -665,8 +666,8 @@ namespace ThePhotographersForecast.ViewModels
                 //    ProgressMessage = "All done.";
                 //}
                 //    });
-                Debug.WriteLine($"SharedSession.WeatherForecasts Count: {SharedSession.WeatherForecast.DailyForecasts.Length}");
-                Debug.WriteLine($"SharedSession.WeatherForecast Hours Count: {SharedSession.WeatherForecast.HourlyForecasts.Length}");
+                Debug.WriteLine($"SharedSession.WeatherForecasts Count: {SharedSession.WeatherForecasts.DailyForecasts.Length}");
+                Debug.WriteLine($"SharedSession.WeatherForecasts Hours Count: {SharedSession.WeatherForecasts.HourlyForecasts.Length}");
                 Debug.WriteLine($"SharedSession.Days Count: {SharedSession.Days.Length}");
                 Debug.WriteLine($"SharedSession.EventModels Count: {SharedSession.EventsData.Length}");
                 Debug.WriteLine($"SharedSession.NwsData.DailyForecasts Count: {SharedSession.NwsData.DailyForecasts?.Length ?? 0}");
@@ -995,7 +996,7 @@ namespace ThePhotographersForecast.ViewModels
 //    return default;
 //}
 //#6 Get Open-Meteo Data
-//private async Task<(ObservableCollection<WeatherForecast>, ObservableCollection<DayViewModel>)> FetchDailyWeatherAsync()
+//private async Task<(ObservableCollection<WeatherForecasts>, ObservableCollection<DayViewModel>)> FetchDailyWeatherAsync()
 //{
 //    //try
 //    //{
@@ -1005,8 +1006,8 @@ namespace ThePhotographersForecast.ViewModels
 //          var result = await _weatherService.BuildWeatherForecastsAsync(eventResults.Item1,eventResults.Item2);
 //          if (result.Item1 != null)
 //          {
-//              SharedSession.WeatherForecasts = new ObservableCollection<WeatherForecast>(result.Item1);
-//              Debug.WriteLine($"WeatherForecast count {SharedSession.WeatherForecasts.Count}");
+//              SharedSession.WeatherForecasts = new ObservableCollection<WeatherForecasts>(result.Item1);
+//              Debug.WriteLine($"WeatherForecasts count {SharedSession.WeatherForecasts.Count}");
 //          }
 //          if (result.Item2 != null)
 //          {
@@ -1061,7 +1062,7 @@ namespace ThePhotographersForecast.ViewModels
 //}
 
 //#6: Call Weather Service
-//private async Task<(ObservableCollection<WeatherForecast>, ObservableCollection<DayViewModel>)> GetWeatherDataAsync()
+//private async Task<(ObservableCollection<WeatherForecasts>, ObservableCollection<DayViewModel>)> GetWeatherDataAsync()
 //{
 
 //    ProgressMessage = $"Calling the station in {SharedSession.SelectedLocation.City} for the weather...";

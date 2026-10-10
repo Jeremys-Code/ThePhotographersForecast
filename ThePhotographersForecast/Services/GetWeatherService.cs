@@ -184,8 +184,8 @@ namespace ThePhotographersForecast.Services
                 {
                     //  SharedSession.EventsData = [.. eventModelsArray];
                     // Debug.WriteLine($"Session.EventData created and filled with {SharedSession.EventsData.Length} event models.");
-                    SharedSession.WeatherForecast = new WeatherForecast(weatherForecast);
-                    Debug.WriteLine($"Session.WeatherForecast created and filled with {SharedSession.WeatherForecast.DailyForecasts.Length} daily weather forecasts and {SharedSession.WeatherForecast.HourlyForecasts.Length} hourly weather forecasts.");
+                    SharedSession.WeatherForecasts = new WeatherForecast(weatherForecast);
+                    Debug.WriteLine($"Session.WeatherForecasts created and filled with {SharedSession.WeatherForecasts.DailyForecasts.Length} daily weather forecasts and {SharedSession.WeatherForecasts.HourlyForecasts.Length} hourly weather forecasts.");
                     SharedSession.Days = [.. daysList.OrderBy(o => o.Date).ToArray()];
                     Debug.WriteLine($"Session.Days created and filled with {SharedSession.Days.Length} day view models.");
                 });

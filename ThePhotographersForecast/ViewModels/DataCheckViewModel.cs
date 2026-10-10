@@ -75,7 +75,7 @@ namespace ThePhotographersForecast.ViewModels
                 SelectedDailyHourlies = SelectedDaily.HourlyWeathers;
                 SelectedDailyHourly = SelectedDailyHourlies[0];
                 Days = SharedSession.Days.ToArray();
-                MeteoDailies = SharedSession.WeatherForecast.DailyForecasts;
+                MeteoDailies = SharedSession.WeatherForecasts.DailyForecasts;
                 EventModels = SharedSession.EventsData.ToArray();
                 StartDate = SharedSession.StartDate.ToString("F");
                 EndDate = SharedSession.EndDate.ToString("F");

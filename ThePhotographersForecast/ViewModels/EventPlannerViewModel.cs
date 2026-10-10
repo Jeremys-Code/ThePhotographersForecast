@@ -93,7 +93,7 @@ namespace ThePhotographersForecast.ViewModels
                 SelectedDayEventModel = SharedSession.EventsData[0];
                 SelectedDayEventTimes = SelectedDayEventModel.EventTimes;
                 SelectedDayEventTime = SelectedDayEventTimes[0];
-                SelectedDayAdditionalMetrics = SharedSession.WeatherForecast.DailyForecasts[0];
+                SelectedDayAdditionalMetrics = SharedSession.WeatherForecasts.DailyForecasts[0];
                 SelectedDayAdditionalMetricsHourlyForecasts = SelectedDayAdditionalMetrics.HourlyForecasts;
                 SelectedDayAdditionalMetricsForecastSummary = SelectedDayAdditionalMetrics.DailyForecastSummary;
                 var high = SharedSession.NwsData.HourlyForecasts.Where(x => x.StartTime.Date == SelectedDate.Date).MaxBy(h => h.Temperature.Value);
@@ -115,7 +115,7 @@ namespace ThePhotographersForecast.ViewModels
             SelectedDayEventModel = SharedSession.EventsData.Where(e => e.Date == DateOnly.FromDateTime(SelectedDate)).FirstOrDefault<EventModel>();
             SelectedDayEventTimes = SelectedDayEventModel.EventTimes;
             SelectedDayEventTime = SelectedDayEventTimes[0];
-            SelectedDayAdditionalMetrics = SharedSession.WeatherForecast.DailyForecasts.Where(w => w.Date == DateOnly.FromDateTime(SelectedDate)).FirstOrDefault();
+            SelectedDayAdditionalMetrics = SharedSession.WeatherForecasts.DailyForecasts.Where(w => w.Date == DateOnly.FromDateTime(SelectedDate)).FirstOrDefault();
             SelectedDayAdditionalMetricsHourlyForecasts = SelectedDayAdditionalMetrics.HourlyForecasts;
             SelectedDayAdditionalMetricsForecastSummary = SelectedDayAdditionalMetrics.DailyForecastSummary;
             //      SelectedDayDayPeriods = SharedSession.Periods;

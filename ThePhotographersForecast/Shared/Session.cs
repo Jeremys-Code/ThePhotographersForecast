@@ -15,9 +15,9 @@ namespace ThePhotographersForecast.Shared
         private IServiceProvider _service;
 
         //Gfs weather model from open-meteo. Contains DailyForecasts, SelectedDailyHourlyForecasts, Grouped Event TImes, and moon phases.
-        // private ObservableCollection<WeatherForecast> _weatherForecasts = new();
+        // private ObservableCollection<WeatherForecasts> _weatherForecasts = new();
         [ObservableProperty]
-        public partial WeatherForecast WeatherForecast { get; set; }
+        public partial WeatherForecast WeatherForecasts { get; set; }
         [ObservableProperty]
         public partial EventModel[] EventsData { get; set; }
         [ObservableProperty]
@@ -79,7 +79,7 @@ namespace ThePhotographersForecast.Shared
         public Session(IServiceProvider service)
         {
             _service = service;
-            WeatherForecast = new WeatherForecast();
+            WeatherForecasts = new WeatherForecast();
             EventsData = Array.Empty<EventModel>();
             EventTimes = Array.Empty<EventTime>();
             SelectedLocation = new PhotoLocation();

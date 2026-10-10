@@ -95,7 +95,7 @@ public partial class ForecastViewModel : ObservableObject
         //    BackgroundGradient = DailyGradients.TryGetValue(DateOnly.FromDateTime(Dates[0].Time)) ? background : (LinearGradientBrush)Application.Current.Resources["Noon"];
         //});
 
-        SelectedDaily = SharedSession.WeatherForecast.DailyForecasts.Where(w => w.Date == DateOnly.FromDateTime(SelectedDate)).SingleOrDefault();
+        SelectedDaily = SharedSession.WeatherForecasts.DailyForecasts.Where(w => w.Date == DateOnly.FromDateTime(SelectedDate)).SingleOrDefault();
 
         SelectedTimeOfDay = TimeOfDayService.GetTimeOfDay(DateTime.UtcNow.AddSeconds(SharedSession.SelectedTimeZoneOffset).Hour);
 
@@ -263,7 +263,7 @@ public partial class ForecastViewModel : ObservableObject
     {
         SelectedDate = date;
         //    BackgroundGradient = DailyGradients.TryGetValue(DateOnly.FromDateTime(Dates[0].Time)) : (LinearGradientBrush)Application.Current.Resources["Noon"];
-        var forecast = SharedSession.WeatherForecast.DailyForecasts.Where(x => x.Date == DateOnly.FromDateTime(SelectedDate)).SingleOrDefault();
+        var forecast = SharedSession.WeatherForecasts.DailyForecasts.Where(x => x.Date == DateOnly.FromDateTime(SelectedDate)).SingleOrDefault();
         SelectedDaily = forecast;
 
         if (SelectedDaily == null)
@@ -460,7 +460,7 @@ public partial class ForecastViewModel : ObservableObject
 //        if (Session.WeatherForecasts?.Select(x => x.DailyForecasts.SelectedDailyHourlyForecasts) == null || Session.NwsData?.SelectedDailyHourlyForecasts == null) return;
 //  LocationName = SharedSession.SelectedLocation.DisplayName;
 
-//     MainThread.BeginInvokeOnMainThread(() => WeatherForecasts = new ObservableCollection<WeatherForecast>(SharedSession.WeatherForecasts.ToList()));
+//     MainThread.BeginInvokeOnMainThread(() => WeatherForecasts = new ObservableCollection<WeatherForecasts>(SharedSession.WeatherForecasts.ToList()));
 //    MainThread.BeginInvokeOnMainThread(() => Dates = new ObservableCollection<DateItem>(SharedSession.Dates));
 //WeatherForecasts.CollectionChanged += (s, e) => MainThread.BeginInvokeOnMainThread(() =>
 //{

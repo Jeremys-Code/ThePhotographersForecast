@@ -52,7 +52,7 @@ namespace ThePhotographersForecast.ViewModels
             if (Dailies != null || Dailies?.Length != SharedSession.NwsData.DailyForecasts.Length) return;
             SelectedDate = SharedSession.Dates[0].Date;
             SelectedDaily = Dailies[0];
-            SelectedGfsDaily = SharedSession.WeatherForecast.DailyForecasts.Where(d => d.Date == DateOnly.FromDateTime(SelectedDate)).SingleOrDefault();
+            SelectedGfsDaily = SharedSession.WeatherForecasts.DailyForecasts.Where(d => d.Date == DateOnly.FromDateTime(SelectedDate)).SingleOrDefault();
             SelectedDailyEventModel = SharedSession.EventsData.Where(d => d.Date == DateOnly.FromDateTime(SelectedDate)).SingleOrDefault();
             SelectedDailyHourlies = [.. SelectedDaily.HourlyWeathers];
             SelectedDailyHour = SelectedDailyHourlies[0];

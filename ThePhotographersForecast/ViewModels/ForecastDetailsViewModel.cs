@@ -6,7 +6,7 @@ namespace ThePhotographersForecast.ViewModels
 {
     public partial class ForecastDetailsViewModel : ObservableObject
     {
-        public string LocationName => _session.SelectedLocation.DisplayName;
+        public string LocationName => SharedSession.SelectedLocation.DisplayName;
         [ObservableProperty]
         public partial NwsDailyForecast[] DailyForecasts { get; set; }
         [ObservableProperty]
@@ -19,16 +19,16 @@ namespace ThePhotographersForecast.ViewModels
 
         //protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
         //    => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        [ObservableProperty]
+        public partial Session SharedSession { get; set; }
 
-        public ISession _session;
-
-        public ForecastDetailsViewModel(ISession session)
+        public ForecastDetailsViewModel(Session sharedSession)
         {
 
-            _session = session;
+            SharedSession = sharedSession;
             // Use the Session collection directly so the ViewModel observes updates when the Session is populated
-            if (_session.NwsData.DailyForecasts == null || _session.NwsData.DailyForecasts.Length == 0) return;
-            MainThread.BeginInvokeOnMainThread(() => DailyForecasts = [.. _session.NwsData.DailyForecasts]);
+            if (SharedSession.NwsData.DailyForecasts == null || SharedSession.NwsData.DailyForecasts.Length == 0) return;
+            MainThread.BeginInvokeOnMainThread(() => DailyForecasts = [.. SharedSession.NwsData.DailyForecasts]);
             SelectedDailyForecast = DailyForecasts[0];
             SelectedDailyHourlyForecasts = SelectedDailyForecast.HourlyWeathers;
 

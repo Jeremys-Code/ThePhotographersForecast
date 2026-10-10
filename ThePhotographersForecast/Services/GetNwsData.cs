@@ -112,7 +112,7 @@ public partial class GetNwsData : ObservableObject, IGetNwsData
             //var nwsDailies = dailyTask.Result;
             //var nwsHourlies = hourlyTask.Result;
             //var nwsHourlySupplementals = supplementalTask.Result;
-            nwsData = await BuildTheNwsWeatherModelAsync(nwsDailies, nwsHourlies, nwsHourlySupplementals);
+            nwsData = await BuildTheNwsWeatherModelAsync(nwsDailies, nwsHourlies, nwsHourlySupplementals).ConfigureAwait(ConfigureAwaitOptions.ForceYielding);
         }
         else
         {
@@ -248,7 +248,7 @@ public partial class GetNwsData : ObservableObject, IGetNwsData
         // {
         //    SharedSession.NwsData.SelectedDailyHourlyForecasts = new NwsHourlyForecast[nwsHourlies.Length];
         nwsData.HourlyForecasts = new NwsHourlyForecast[nwsHourlies.Length];
-        var taskSupp = Parallel.ForAsync(0, nwsHourlies.Length, async (s, cancellationToken) =>
+        for (int s = 0; s < nwsHourlies.Length; s++)
         {
             var supplemental = supplementals.Where(d => d.Time == nwsHourlies[s].StartTime).First() ?? new NwsHourlySupplemental();
             nwsHourlies[s].DetailedForecast = CreateHourlyDetailDescription(nwsHourlies[s]);
@@ -257,13 +257,14 @@ public partial class GetNwsData : ObservableObject, IGetNwsData
             Debug.WriteLine($"{s}Adding supplemental to hourly");
             //      SharedSession.NwsData.SelectedDailyHourlyForecasts[s] = nwsHourlies[s];
             nwsData.HourlyForecasts[s] = nwsHourlies[s];
-        });
+        }
+        ;
         //});
         //await MainThread.InvokeOnMainThreadAsync(async () =>
         //{
         //  SharedSession.NwsData.DailyForecasts = new NwsDailyForecast[nwsDailies.Length];
         nwsData.DailyForecasts = new NwsDailyForecast[nwsDailies.Length];
-        var taskHour = Parallel.ForAsync(0, nwsDailies.Length, async (i, cancellationToken) =>
+        for (int i = 0; i < nwsDailies.Length; i++)
         {
             var hours = nwsHourlies.Where(h => h.StartTime >= nwsDailies[i].StartTime && h.EndTime <= nwsDailies[i].EndTime).OrderBy(o => o.StartTime).ToArray();
             nwsDailies[i].HourlyWeathers = [.. hours];
@@ -272,8 +273,8 @@ public partial class GetNwsData : ObservableObject, IGetNwsData
 
             //    SharedSession.NwsData.DailyForecasts[i] = nwsDailies[i];
 
-        });
-        await Task.WhenAll(taskSupp, taskHour).ConfigureAwait(ConfigureAwaitOptions.ForceYielding);
+        }
+        ;
 
         //await BuildSuperDuperForecastAsync(nwsData.DailyForecasts);
         // });
