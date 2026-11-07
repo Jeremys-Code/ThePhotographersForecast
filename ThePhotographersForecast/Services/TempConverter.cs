@@ -1,4 +1,6 @@
-﻿namespace ThePhotographersForecast.Services
+﻿using static ThePhotographersForecast.Data.NwsSupplementalData;
+
+namespace ThePhotographersForecast.Services
 {
     public static class TempConverter
     {
@@ -20,9 +22,18 @@
             var globalTemp = Preferences.Get("TemperatureUnit", "fahrenheit");
             if (globalTemp == "fahrenheit")
             {
-                fTemp = Math.Round((temp + 32) * 1.8, 0);
+                fTemp = Math.Round(temp * 1.8 + 32, 0);
             }
             return fTemp;
+        }
+
+        public static double MphToKmh(double speed)
+        {
+            return Math.Round(speed*1.609344, 1);
+        }
+        public static double StoredToMs(double speed)
+        {
+            return Math.Round(speed / 2.23693629, 1);
         }
     }
 }

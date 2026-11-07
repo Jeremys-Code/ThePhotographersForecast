@@ -14,34 +14,34 @@ namespace ThePhotographersForecast.ViewModels
 
         //        private IDbContextFactory<PfContext> _db;
         [ObservableProperty]
-        private ObservableCollection<UnitsModel>? temperatureUnits;
+        public partial ObservableCollection<UnitsModel> TemperatureUnits { get; set; }
 
         [ObservableProperty]
-        private UnitsModel selectedTemperatureUnit;
+        public partial UnitsModel SelectedTemperatureUnit { get; set; }
         [ObservableProperty]
-        private ObservableCollection<UnitsModel>? windSpeedUnits;
+        public partial ObservableCollection<UnitsModel> WindSpeedUnits { get; set; }
         [ObservableProperty]
-        private UnitsModel selectedWindSpeedUnit;
+        public partial UnitsModel SelectedWindSpeedUnit { get; set; }
         [ObservableProperty]
-        private ObservableCollection<UnitsModel>? precipitationUnits;
+        public partial ObservableCollection<UnitsModel> PrecipitationUnits { get; set; }
         [ObservableProperty]
-        private UnitsModel selectedPrecipitationUnit;
+        public partial UnitsModel SelectedPrecipitationUnit { get; set; }
         [ObservableProperty]
-        private string saveStatusMessage;
+        public partial string SaveStatusMessage { get; set; }
         [ObservableProperty]
-        private bool isSaved;
+        public partial bool IsSaved { get; set; }
         [ObservableProperty]
-        private bool preferencesChanged;
+        public partial bool PreferencesChanged { get; set; }
         [ObservableProperty]
-        private UnitsModel originalTemp;
+        public partial UnitsModel OriginalTemp { get; set; }
         [ObservableProperty]
-        private UnitsModel originalPrecipitation;
+        public partial UnitsModel OriginalPrecipitation { get; set; }
         [ObservableProperty]
-        private UnitsModel originalWindSpeed;
+        public partial UnitsModel OriginalWindSpeed { get; set; }
 
-        private Session _session;
+        private ISession _session;
 
-        public SettingsViewModel(Session session)
+        public SettingsViewModel(ISession session)
         {
             _session = session;
             PreferencesChanged = false;
@@ -92,7 +92,7 @@ namespace ThePhotographersForecast.ViewModels
                 await _session.ResetSessionAsync();
             }
             await Task.Delay(1000);
-            await Shell.Current.GoToAsync("//SelectLocation");
+            await Shell.Current.GoToAsync("SelectLocation");
             // TODO: Use a navigation service to navigate to the AddressPage.
             //MainThread.BeginInvokeOnMainThread(async () =>
             //{

@@ -1,18 +1,14 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using SkiaSharp;
 using System.Collections.ObjectModel;
 using ThePhotographersForecast.Components;
 using ThePhotographersForecast.Models;
 
 namespace ThePhotographersForecast.Shared
 {
-    public partial class Session : ObservableObject
+    public partial class Session : ObservableObject, ISession
     {
-        public Session()
-        {
+        //private IServiceProvider _service;
 
-        }
-        private IServiceProvider _service;
 
         //Gfs weather model from open-meteo. Contains DailyForecasts, SelectedDailyHourlyForecasts, Grouped Event TImes, and moon phases.
         // private ObservableCollection<WeatherForecasts> _weatherForecasts = new();
@@ -37,7 +33,7 @@ namespace ThePhotographersForecast.Shared
         [ObservableProperty]
         public partial bool IsComplete { get; set; } = false;
         [ObservableProperty]
-        public partial Dictionary<DateOnly, SKColor[]> SkyColors { get; set; }
+        public partial Dictionary<DateOnly, LinearGradientBrush> SkyColors { get; set; }
         [ObservableProperty]
         public partial Dictionary<string, ObservableCollection<EventTime>> EventsByPeriod { get; set; }
         [ObservableProperty]
@@ -51,7 +47,7 @@ namespace ThePhotographersForecast.Shared
         [ObservableProperty]
         public partial FutureMoonPhase[] MoonPhases { get; set; }
         [ObservableProperty]
-        public partial DayViewModel[] Days { get; set; }
+        public partial ObservableCollection<DayViewModel> Days { get; set; }
         private void SetProperty<Type>(ref Type backingStore, Type Value)
         {
             if (Equals(backingStore, Value))
@@ -76,9 +72,9 @@ namespace ThePhotographersForecast.Shared
         }
 
         // Initialize the properties of the session state
-        public Session(IServiceProvider service)
+        public Session()
         {
-            _service = service;
+            //_service = service;
             WeatherForecasts = new WeatherForecast();
             EventsData = Array.Empty<EventModel>();
             EventTimes = Array.Empty<EventTime>();
@@ -86,11 +82,10 @@ namespace ThePhotographersForecast.Shared
             StartDate = DateTime.UtcNow.Date;
             EndDate = DateTime.UtcNow.AddDays(6);
             Dates = Array.Empty<CalendarDayModel>();
-            SkyColors = new Dictionary<DateOnly, SKColor[]>();
+            SkyColors = new Dictionary<DateOnly, LinearGradientBrush>();
             EventsByPeriod = new Dictionary<string, ObservableCollection<EventTime>>();
-            Periods = new ObservableCollection<DayPeriod>();
             NwsData = new NwsWeatherModel();
-            Days = Array.Empty<DayViewModel>();
+            Days = new ObservableCollection<DayViewModel>();
         }
         public async Task ResetSessionAsync()
         {

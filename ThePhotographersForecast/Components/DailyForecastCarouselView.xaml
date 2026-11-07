@@ -69,16 +69,16 @@
                                                 <Label x:Name="CardTitle" 
                                                Text="{Binding Name}" 
                                                FontAutoScalingEnabled="True" 
-                                               FontFamily="ManFont" 
+                                               FontFamily="NotoThick" 
                                                HorizontalOptions="Center"
                                                HorizontalTextAlignment="Center"
                                                FontAttributes="Bold"/>
                                                 <!-- Date -->
                                                 <HorizontalStackLayout>
                                                     <Label Text="Start TIme:"/>
-                                                    <Label Text="{Binding StartTime, StringFormat='{}{0:F}'}"/>
+                                                    <Label Text="{Binding SelectedDailyForecast.StartTime, StringFormat='{}{0:F}'}"/>
                                                     <Label Text=" End TIme:"/>
-                                                    <Label Text="{Binding EndTime, StringFormat='{}{1:F}'}"/>
+                                                    <Label Text="{Binding SelectedDailyForecast.EndTime, StringFormat='{}{1:F}'}"/>
                                                 </HorizontalStackLayout>
 
 
@@ -93,7 +93,7 @@
                                       Padding="20">
                                             <Border Grid.Row="0" Grid.Column="0" HorizontalOptions="Fill" HeightRequest="210" StrokeShape="RoundRectangle 15" Stroke="{StaticResource Noon}" Margin="10" VerticalOptions="Start">
                                                 <Label x:Name="CardSubTitle" 
-                                                   Text="{Binding ShortForecast}" 
+                                                   Text="{Binding SelectedDailyForecast.ShortForecast}" 
                                                     LineBreakMode="WordWrap"
                                                     HorizontalTextAlignment="Start"
                                                     HorizontalOptions="Start"
@@ -113,11 +113,11 @@
                                                         <Grid ColumnDefinitions="*,*" HorizontalOptions="Fill" VerticalOptions="Fill">
 
                                                             <VerticalStackLayout Grid.Column="0" Margin="8">
-                                                                <Label Text="The High" FontAttributes="Bold" FontFamily="ManFont" HorizontalOptions="Center" HorizontalTextAlignment="Center" Margin="2" TextColor="#701705"/>
-                                                                <Label Text="{Binding SelectedTimeHighTemp}" HorizontalOptions="Center" HorizontalTextAlignment="Center" LineBreakMode="WordWrap" TextColor="#701705" Margin="2" FontFamily="NotoSans"/>
+                                                                <Label Text="The High" FontAttributes="Bold" FontFamily="NotoThick" HorizontalOptions="Center" HorizontalTextAlignment="Center" Margin="2" TextColor="#701705"/>
+                                                                <Label Text="{Binding DailyHighStatement}" HorizontalOptions="Center" HorizontalTextAlignment="Center" LineBreakMode="WordWrap" TextColor="#701705" Margin="2" FontFamily="NotoSans"/>
                                                             </VerticalStackLayout>
                                                             <Grid Grid.Column="1" Margin="8">
-                                                                <skia:SKLottieView Source="{Binding DailyHighAnimation}" RepeatCount="-1" RepeatMode="Restart" HorizontalOptions="Fill" VerticalOptions="Fill" Margin="10,5,10,5"/>
+                                                                <skia:SKLottieView Source="thermometer_warmer.json" RepeatCount="-1" RepeatMode="Restart" HorizontalOptions="Fill" VerticalOptions="Fill" Margin="10,5,10,5"/>
                                                             </Grid>
                                                         </Grid>
                                                     </Border>
@@ -134,12 +134,12 @@
                                                             </Grid.ColumnDefinitions>
                                                             <Grid Grid.Column="0">
                                                                 <VerticalStackLayout Margin="8">
-                                                                    <Label Text="The Low" FontAttributes="Bold" VerticalOptions="Center" FontFamily="ManFont" HorizontalOptions="Start" FontSize="24" HorizontalTextAlignment="Start" Margin="2" TextColor="#FFF6F3C0"/>
-                                                                    <Label Text="{Binding SelectedTimeLowTemp}" HorizontalOptions="Start" HorizontalTextAlignment="Start" LineBreakMode="WordWrap" VerticalOptions="Center" TextColor="#F6F3C0" Margin="2" FontSize="24" FontFamily="ManFont"/>
+                                                                    <Label Text="The Low" FontAttributes="Bold" VerticalOptions="Center" FontFamily="NotoThick" HorizontalOptions="Start" FontSize="24" HorizontalTextAlignment="Start" Margin="2" TextColor="#FFF6F3C0"/>
+                                                                    <Label Text="{Binding DailyLowStatement}" HorizontalOptions="Start" HorizontalTextAlignment="Start" LineBreakMode="WordWrap" VerticalOptions="Center" TextColor="#F6F3C0" Margin="2" FontSize="24" FontFamily="NotoThick"/>
                                                                 </VerticalStackLayout>
                                                             </Grid>
                                                             <Grid Grid.Column="1" Margin="8">
-                                                                <skia:SKLottieView Source="{Binding DailyLowAnimation}" HeightRequest="80" RepeatCount="-1" RepeatMode="Restart"  WidthRequest="80" HorizontalOptions="Center" VerticalOptions="Center"/>
+                                                                <skia:SKLottieView Source="thermometer_colder.json" HeightRequest="80" RepeatCount="-1" RepeatMode="Restart"  WidthRequest="80" HorizontalOptions="Center" VerticalOptions="Center"/>
                                                             </Grid>
                                                         </Grid>
                                                     </Border>
@@ -197,7 +197,7 @@
                                                 <!--Back Header -->
                                                 <Grid Grid.Row="0" Padding="16"
                                       Background="{StaticResource ForecastBackground}">
-                                                    <Label x:Name="BackHeader" Text="Time Of Day" FontAttributes="Bold" FontFamily="ManFont" HorizontalTextAlignment="Center"/>
+                                                    <Label x:Name="BackHeader" Text="Time Of Day" FontAttributes="Bold" FontFamily="NotoThick" HorizontalTextAlignment="Center"/>
                                                 </Grid>
                                                 <!-- Back Details -->
                                                 <VerticalStackLayout Grid.Row="1" Padding="20" Spacing="10">

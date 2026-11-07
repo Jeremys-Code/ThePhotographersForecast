@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ThePhotographersForecast.Views.LottieParade"
+             xmlns:skia="clr-namespace:SkiaSharp.Extended.UI.Controls;assembly=SkiaSharp.Extended.UI"
+             xmlns:svc="clr-namespace:ThePhotographersForecast.Services"
+             xmlns:model="clr-namespace:ThePhotographersForecast.Models"
+             xmlns:behaviors="clr-namespace:ThePhotographersForecast.Views.Behaviors"                
+             Title="LottieParade">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <svc:ToSkiaLottieConverter x:Key="ToSkiaLottie" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
+    <VerticalStackLayout>
+        <Label 
+            Text="Welcome to The Lottie Parade"
+            VerticalOptions="Center" 
+            HorizontalOptions="Center" />
+        <Border Stroke="{StaticResource Moon}" StrokeThickness="8" StrokeShape="RoundRectangle 16" Padding="10">
+            <Grid HorizontalOptions="Center" 
+              VerticalOptions="Center"
+              WidthRequest="450"
+              HeightRequest="450">
+
+                <CarouselView x:Name="LottieParadeView"
+                                    
+                WidthRequest="400"
+                          HeightRequest="400"
+                          HorizontalOptions="Center"
+                          VerticalOptions="Center"
+                    Loop="True"
+                          IsScrollAnimated="True">
+                <CarouselView.ItemTemplate>
+                    <DataTemplate x:DataType="model:LottieAnimation">
+                        <Grid HeightRequest="450" WidthRequest="450" RowDefinitions="Auto,Auto,*,Auto" RowSpacing="5">
+                            <Label x:Name="Time" Text="{Binding TimeString}" Grid.Row="0" FontAttributes="Bold" FontFamily="NotoThick" HorizontalOptions="Center"/>
+                            <Label x:Name="Temp" Text="{Binding Temperature}" Grid.Row="1" FontAttributes="Italic" FontFamily="NotoSans" HorizontalOptions="Center"/>
+                            <skia:SKLottieView x:Name="Lottie" Source="{Binding ParadeFloat, Converter={StaticResource ToSkiaLottie}}" Grid.Row="2" RepeatCount="-1" RepeatMode="Restart" HorizontalOptions="Center" VerticalOptions="Center"/>
+                            <Label x:Name="Forecast" Text="{Binding Forecast}" Grid.Row="3" FontFamily="NotoSans" LineBreakMode="WordWrap" HorizontalOptions="Center" HorizontalTextAlignment="Center"/>
+                            <Grid.Behaviors>
+                                <behaviors:LottieParadeItemBehavior />
+                            </Grid.Behaviors>
+                        </Grid>
+                    </DataTemplate>
+                </CarouselView.ItemTemplate>
+            </CarouselView>
+        </Grid>
+        </Border>
+    </VerticalStackLayout>
+</ContentPage>

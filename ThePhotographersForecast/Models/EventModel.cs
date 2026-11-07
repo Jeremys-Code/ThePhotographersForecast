@@ -5,13 +5,24 @@ namespace ThePhotographersForecast.Models
 
     public class EventModel
     {
-        public DateOnly Date { get; set; }
+        public EventModel()
+        {
+
+        }
+
+        public EventModel(EventModel eventModel)
+        {
+            this.Date = eventModel.Date;
+            this.AstronomicalData = new Astronomical(eventModel.AstronomicalData);
+            this.EventTimes = new EventTime[eventModel.EventTimes.Length];
+            this.EventTimes = [.. eventModel.EventTimes];
+        }
+        public DateTime Date { get; set; }
         public EventTime[] EventTimes { get; set; }
         public Astronomical AstronomicalData { get; set; } = new Astronomical();
     }
     public class EventTime
     {
-        public DateOnly Date { get; set; }
         public string EventName { get; set; } = string.Empty;
         public string TimeOfDay => Services.TimeOfDayService.CalcTimeOfDay(this.WeatherHour.Hour);
         public string TimeLabel => (OtherTime == null ? $"Time: {this.AstroTime.ToString("h:mm tt")}" : $"Start Time: {this.AstroTime.ToString("h:mm tt")}");
@@ -51,7 +62,20 @@ namespace ThePhotographersForecast.Models
 
     public class Astronomical
     {
-        public DateOnly Date { get; set; }
+        public Astronomical()
+        {
+
+        }
+
+        public Astronomical(Astronomical astro)
+        {
+            this.DayLength = astro.DayLength;
+            this.SunAltitude = astro.SunAltitude;
+            this.SunAzimuth = astro.SunAzimuth;
+            this.MoonPhase = astro.MoonPhase;
+            this.MoonImage = astro.MoonImage;
+            this.SkMoon = astro.SkMoon;
+        }
         public TimeSpan DayLength { get; set; }
         public double SunAltitude { get; set; }
         //public double SunDistance { get; set; }

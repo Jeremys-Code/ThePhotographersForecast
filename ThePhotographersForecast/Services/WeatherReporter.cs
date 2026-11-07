@@ -38,11 +38,11 @@ namespace ThePhotographersForecast.Services
     {
 
         private IImageCacheService _cacheService;
-        private Session SharedSession;
-        public WeatherReporter(Session sharedSession, IImageCacheService cacheService)
+        private ISession _session;
+        public WeatherReporter(ISession session, IImageCacheService cacheService)
         {
 
-            SharedSession = sharedSession;
+            _session = session;
             _cacheService = cacheService;
         }
         /// <summary>
@@ -72,7 +72,7 @@ namespace ThePhotographersForecast.Services
             string firstStatement = dailyForecast.WeatherCode < 10 ? dailyForecast.WeatherCodeDescription : GetDailyPrecipitation(dailyForecast);
             string gustStatement = dailyForecast.WindGusts10mMax.Value > dailyForecast.WindSpeed10mMax.Value * 1.5 ? $" and wind gusts up to {dailyForecast.WindGusts10mMax.Value}{dailyForecast.WindGusts10mMax.Unit.Replace(@"/", "")}." : ".";
 
-            fs.WeatherSummary = $"Here's your daily forecast at {SharedSession.SelectedLocation.City} on {dailyForecast.Date.ToString("DDDD, MMMM DD")} : {firstStatement} " +
+            fs.WeatherSummary = $"Here's your daily forecast at {_session.SelectedLocation.City} on {dailyForecast.Date.ToString("DDDD, MMMM DD")} : {firstStatement} " +
                $"The high temperature is {dailyForecast.Temperature2mMax.Value}{dailyForecast.Temperature2mMax.Unit} and the low is {dailyForecast.Temperature2mMin.Value}{dailyForecast.Temperature2mMin.Unit}. " +
                 //  $"{CloudCoverSummary.BuildCondensedSummary(BuildDailyBins(dailyForecast))} " +
                 $"Winds from the {dailyForecast.WindDirection10mDominant.Description} at {dailyForecast.WindSpeed10mMax.Value} {(dailyForecast.WindSpeed10mMax.Unit == "mp/h" ? "mph" : dailyForecast.WindSpeed10mMax.Unit)}{gustStatement}";

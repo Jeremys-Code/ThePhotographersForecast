@@ -17,7 +17,7 @@
         <VerticalStackLayout Spacing="5">
             <!-- Header: Month and Year Range -->
             <Label Text="{Binding MonthRangeText, Source={x:Reference ThisControl}}"
-                   FontFamily="ManFont"
+                   FontFamily="NotoThick"
                    FontSize="14"
                    FontAttributes="Bold"
                    HorizontalTextAlignment="Center"
@@ -63,7 +63,7 @@
                             <Label Text="{Binding DayText}"
                                    FontFamily="NotoSans"
                                    FontSize="9"
-                                   TextColor="{StaticResource MidnightBlue}"
+                                   TextColor="{Binding TextColor}"
                                    HorizontalOptions="Center"
                                    VerticalOptions="Center"
                                    HorizontalTextAlignment="Center"

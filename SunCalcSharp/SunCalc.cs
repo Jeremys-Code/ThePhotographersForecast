@@ -87,9 +87,11 @@ namespace SunCalcSharp
         {
             new SunAngleTime(-0.833, (t, v) => t.Sunrise = v, (t, v) => t.Sunset = v),
             new SunAngleTime(-0.3, (t, v) => t.SunriseEnd = v, (t, v) => t.SunsetBegins = v),
-            new SunAngleTime(6, (t, v) => t.GoldenHourEnds= v, (t, v) => t.GoldenHourBegins= v),
-            new SunAngleTime(-4, (t, v) => t.BlueHourEnds= v, (t, v) => t.BlueHourBegins= v),
+            new SunAngleTime(6, (t, v) => t.MorningGoldenHourEnds= v, (t, v) => t.EveningGoldenHourBegins= v),
+            new SunAngleTime(-4, (t, v) => t.MorningBlueHourEnds= v, (t, v) => t.EveningBlueHourBegins= v),
+            new SunAngleTime(-6, (t, v) => t.MorningGoldenHourBegins= v, (t, v) => t.EveningGoldenHourEnds= v),
             new SunAngleTime(-6, (t, v) => t.CivilTwilightBegins = v, (t, v) => t.CivilTwilightEnds= v),
+            new SunAngleTime(-8, (t, v) => t.MorningBlueHourBegins = v, (t, v) => t.EveningBlueHourEnds = v),
             new SunAngleTime(-12, (t, v) => t.NauticalTwilightBegins= v, (t, v) => t.NauticalTwilightEnds= v),
             new SunAngleTime(-18, (t, v) => t.AstronomicalTwilightBegins= v, (t, v) => t.AstronomicalTwilightEnds= v)
 

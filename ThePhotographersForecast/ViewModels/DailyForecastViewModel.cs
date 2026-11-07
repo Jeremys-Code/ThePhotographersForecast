@@ -8,7 +8,7 @@ namespace ThePhotographersForecast.ViewModels
     public partial class DailyForecastViewModel : ObservableObject
     {
         [ObservableProperty]
-        public partial Session SharedSession { get; set; }
+        public partial ISession _session { get; set; }
         [ObservableProperty]
         public partial CalendarDayModel[] RunDates { get; set; }
         [ObservableProperty]
@@ -19,7 +19,7 @@ namespace ThePhotographersForecast.ViewModels
             get => field;
             set
             {
-                field = [.. SharedSession.NwsData.DailyForecasts];
+                field = [.. _session.NwsData.DailyForecasts];
                 OnPropertyChanged();
             }
         }
@@ -45,15 +45,15 @@ namespace ThePhotographersForecast.ViewModels
         [ObservableProperty]
         public partial NwsHourlyForecast SelectedDailyEventTimeForecast { get; set; }
 
-        public DailyForecastViewModel(Session sharedSession)
+        public DailyForecastViewModel(ISession _session)
         {
-            SharedSession = sharedSession;
+            _session = _session;
             Initialize();
-            if (Dailies != null || Dailies?.Length != SharedSession.NwsData.DailyForecasts.Length) return;
-            SelectedDate = SharedSession.Dates[0].Date;
+            if (Dailies != null || Dailies?.Length != _session.NwsData.DailyForecasts.Length) return;
+            SelectedDate = _session.Dates[0].Date;
             SelectedDaily = Dailies[0];
-            SelectedGfsDaily = SharedSession.WeatherForecasts.DailyForecasts.Where(d => d.Date == DateOnly.FromDateTime(SelectedDate)).SingleOrDefault();
-            SelectedDailyEventModel = SharedSession.EventsData.Where(d => d.Date == DateOnly.FromDateTime(SelectedDate)).SingleOrDefault();
+            SelectedGfsDaily = _session.WeatherForecasts.DailyForecasts.Where(d => d.Date == DateOnly.FromDateTime(SelectedDate)).SingleOrDefault();
+            SelectedDailyEventModel = _session.EventsData.Where(d => d.Date == SelectedDate.Date).SingleOrDefault();
             SelectedDailyHourlies = [.. SelectedDaily.HourlyWeathers];
             SelectedDailyHour = SelectedDailyHourlies[0];
 
@@ -63,7 +63,7 @@ namespace ThePhotographersForecast.ViewModels
         {
             await MainThread.InvokeOnMainThreadAsync(async () =>
             {
-                Dailies = SharedSession.NwsData.DailyForecasts.ToArray();
+                Dailies = _session.NwsData.DailyForecasts.ToArray();
             });
 
         }

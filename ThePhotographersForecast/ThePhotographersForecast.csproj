@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net10.0-android;net10.0-ios;net10.0-maccatalyst</TargetFrameworks>
+		<TargetFrameworks>net10.0-maccatalyst;net10.0-ios;net10.0-android</TargetFrameworks>
 		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net10.0-windows10.0.26100.0</TargetFrameworks>
 
 		<!-- Uncomment to also build the tizen app. You will need to install tizen by following this: https://github.com/Samsung/Tizen.NET -->
@@ -101,7 +101,28 @@
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net10.0-windows10.0.26100.0|AnyCPU'">
 	  <Optimize>False</Optimize>
 	</PropertyGroup>
-
+	<ItemGroup>
+		<Compile Remove="Controls - Copy\**" />
+		<Compile Remove="Resources\Images\icon\**" />
+		<Compile Remove="Resources\Images\moons\**" />
+		<Compile Remove="Views\Components\**" />
+		<EmbeddedResource Remove="Controls - Copy\**" />
+		<EmbeddedResource Remove="Resources\Images\icon\**" />
+		<EmbeddedResource Remove="Resources\Images\moons\**" />
+		<EmbeddedResource Remove="Views\Components\**" />
+		<MauiCss Remove="Controls - Copy\**" />
+		<MauiCss Remove="Resources\Images\icon\**" />
+		<MauiCss Remove="Resources\Images\moons\**" />
+		<MauiCss Remove="Views\Components\**" />
+		<MauiXaml Remove="Controls - Copy\**" />
+		<MauiXaml Remove="Resources\Images\icon\**" />
+		<MauiXaml Remove="Resources\Images\moons\**" />
+		<MauiXaml Remove="Views\Components\**" />
+		<None Remove="Controls - Copy\**" />
+		<None Remove="Resources\Images\icon\**" />
+		<None Remove="Resources\Images\moons\**" />
+		<None Remove="Views\Components\**" />
+	</ItemGroup>
 	<!--<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net10.0-windows10.0.22621.0|AnyCPU'">
 	  <ApplicationDisplayVersion>5.0.0</ApplicationDisplayVersion>
 	  <ApplicationVersion>5</ApplicationVersion>
@@ -224,13 +245,8 @@
 		<MauiImage Include="Resources\Images\moons\waxinggibbous.png" />
 		
 		<!-- Custom Fonts -->
-		<MauiFont Include="Resources\Fonts\hennypenny.ttf" />
-		<MauiFont Include="Resources\Fonts\jost.ttf" />
-		<MauiFont Include="Resources\Fonts\notosans.ttf" />
 		<MauiFont Include="Resources\Fonts\NotoSansBlack.ttf" />
-		<MauiFont Include="Resources\Fonts\notosansitalic.ttf" />
-		<MauiFont Include="Resources\Fonts\NotoSansLight.ttf" />
-		<MauiFont Include="Resources\Fonts\segoefluenticons.ttf" />
+		<MauiFont Include="Resources\Fonts\NotoSansECLight.ttf" />
 
 		<!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
 		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
@@ -238,135 +254,106 @@
 	
 	
 	<ItemGroup>
-	  <AndroidResource Remove="Controls\**" />
-	  <AndroidResource Remove="Resources\Images\moons\**" />
-	  <AndroidResource Remove="Resources\Raw\meteocons\**" />
-	  <Compile Remove="Controls\**" />
-	  <Compile Remove="Resources\Images\moons\**" />
-	  <Compile Remove="Resources\Raw\meteocons\**" />
-	  <EmbeddedResource Remove="Controls\**" />
-	  <EmbeddedResource Remove="Resources\Images\moons\**" />
-	  <EmbeddedResource Remove="Resources\Raw\meteocons\**" />
-	  <MauiAsset Remove="Resources\Raw\meteocons\**" />
-	  <MauiCss Remove="Controls\**" />
-	  <MauiCss Remove="Resources\Images\moons\**" />
-	  <MauiCss Remove="Resources\Raw\meteocons\**" />
+	  <MauiImage Remove="Resources\Images\icon\**" />
 	  <MauiImage Remove="Resources\Images\moons\**" />
-	  <MauiXaml Remove="Controls\**" />
-	  <MauiXaml Remove="Resources\Images\moons\**" />
-	  <MauiXaml Remove="Resources\Raw\meteocons\**" />
-	  <None Remove="Controls\**" />
-	  <None Remove="Resources\Images\moons\**" />
-	  <None Remove="Resources\Raw\meteocons\**" />
 	</ItemGroup>
 	
 	
-	<ItemGroup>
-	  <Compile Remove="ApiClients\GetApi.cs" />
-	  <Compile Remove="ApiClients\IGetApi.cs" />
-	  <Compile Remove="ApiClients\IIpGeolocationApiClient.cs" />
-	  <Compile Remove="ApiClients\INwsApiClient.cs" />
-	  <Compile Remove="ApiClients\IOpenMeteoApiClient.cs" />
-	  <Compile Remove="ApiClients\IpGeolocationApiClient.cs" />
-	  <Compile Remove="ApiClients\NwsApiClient.cs" />
-	  <Compile Remove="ApiClients\OpenMeteoApiClient.cs" />
-	  <Compile Remove="Models\ILottie.cs" />
-	  <Compile Remove="Models\Meteocon.cs" />
-	  <Compile Remove="Models\NwsHour.cs" />
-	  <Compile Remove="Services\HttpClientConverter.cs" />
-	  <Compile Remove="Services\NavigationService.cs" />
-	  <Compile Remove="Shared\VerifySession.cs" />
-	  <Compile Remove="ViewModels\Compnents\TempHightsLows.xaml.cs" />
-	</ItemGroup>
+
 	
 	
-	<ItemGroup>
-	  <MauiImage Remove="Resources\Images\greenplane.svg.2026_08_20_23_56_27.1.svg" />
-	</ItemGroup>
-	
-	
-	<ItemGroup>
-	  <MauiXaml Remove="ViewModels\Compnents\TempHightsLows.xaml" />
-	</ItemGroup>
-	
-	
+
+
 	<ItemGroup>
 		<PackageReference Include="CommunityToolkit.Maui" Version="15.0.1" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.12" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.12">
-		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		  <PrivateAssets>all</PrivateAssets>
-		</PackageReference>
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.12" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.12">
-		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		  <PrivateAssets>all</PrivateAssets>
-		</PackageReference>
-		<PackageReference Include="Microsoft.Extensions.Http" Version="10.0.12" />
+		<PackageReference Include="Microsoft.Extensions.Http" Version="10.0.13" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.110" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.12" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.13" />
 		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="10.0.110" />
 		<PackageReference Include="Microsoft.Maui.Controls.Foldable" Version="10.0.110" />
 		<PackageReference Include="Microsoft.Maui.Controls.Maps" Version="10.0.110" />
+		<PackageReference Include="Microsoft.Maui.Essentials" Version="10.0.110" />
+		<PackageReference Include="Microsoft.Maui.Graphics.Skia" Version="10.0.110" />
 		<PackageReference Include="Microsoft.Maui.Maps" Version="10.0.110" />
-		<PackageReference Include="NReco.Logging.File" Version="1.4.0" />
-		<PackageReference Include="Serilog" Version="4.4.0" />
-		<PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1" />
-		<PackageReference Include="Serilog.Extensions.Logging" Version="10.0.0" />
-		<PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
 		<PackageReference Include="SkiaSharp" Version="4.153.1" />
 		<PackageReference Include="SkiaSharp.Extended.UI.Maui" Version="3.0.0" />
 		<PackageReference Include="SkiaSharp.Views" Version="4.153.1" />
 		<PackageReference Include="SkiaSharp.Views.Maui.Controls" Version="4.153.1" />
 		<PackageReference Include="SkiaSharp.Views.Maui.Controls.Compatibility" Version="2.88.9" />
-		<PackageReference Include="SQLitePCLRaw.lib.e_sqlite3" Version="3.53.3" />
-		<PackageReference Include="SQLitePCLRaw.lib.e_sqlite3.android" Version="2.1.13" />
-		<PackageReference Include="SQLitePCLRaw.lib.e_sqlite3.ios" Version="2.1.13" />
+		<PackageReference Include="System.ObjectModel" Version="4.3.0" />
 	</ItemGroup>
 
 	<ItemGroup>
+		<Compile Update="Components\MoonPhasesCarouselView.xaml.cs">
+	    <DependentUpon>SelectLocation.xaml</DependentUpon>
+	  </Compile>
 	  <MauiXaml Update="Components\MoonPhasesCarouselView.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+		<Compile Update="Components\DailyForecastCarouselView.xaml.cs">
+	    <DependentUpon>DailyForecastCarouselView.xaml</DependentUpon>
+	  </Compile>
 	  <MauiXaml Update="Components\DailyForecastCarouselView.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+		<Compile Update="Views\Calendar.xaml.cs">
+	    <DependentUpon>Calendar.xaml</DependentUpon>
+	  </Compile>
 	  <MauiXaml Update="Views\Calendar.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+		<Compile Update="Components\NwsDailyHourlyView.xaml.cs">
+	    <DependentUpon>NwsDailyHourlyView.xaml</DependentUpon>
+	  </Compile>
 	  <MauiXaml Update="Components\NwsDailyHourlyView.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+		<Compile Update="Components\RangeCalendarView.xaml.cs">
+	    <DependentUpon>RangeCalendarView.xaml</DependentUpon>
+	  </Compile>
 	  <MauiXaml Update="Components\RangeCalendarView.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
-	  <MauiXaml Update="Views\EventPlanner.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </MauiXaml>
+		<Compile Update="Views\EventPlanner.xaml.cs">
+	    <DependentUpon>EventPlanner.xaml</DependentUpon>
+	  </Compile>
+		<Compile Update="Views\Forecast.xaml.cs">
+	    <DependentUpon>Forecast.xaml</DependentUpon>
+	  </Compile>
+		<MauiXaml Update="Views\EventPlanner.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
 	  <MauiXaml Update="Views\Forecast.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+		<Compile Update="Views\ForecastDetails.xaml.cs">
+	    <DependentUpon>ForecastDetails.xaml</DependentUpon>
+	  </Compile>
 		<MauiXaml Update="Views\ForecastDetails.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+		<Compile Update="Views\DataCheck.xaml.cs">
+	    <DependentUpon>DataCheck.xaml</DependentUpon>
+	  </Compile>
 		<MauiXaml Update="Views\DataCheck.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
+		<Compile Update="Views\SelectLocation.xaml.cs">
+	    <DependentUpon>SelectLocation.xaml</DependentUpon>
+	  </Compile>
+		<MauiXaml Update="Views\LottieParade.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 	  <MauiXaml Update="Views\SelectLocation.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+		<Compile Update="Views\Settings.xaml.cs">
+	    <DependentUpon>Settings.xaml</DependentUpon>
+	  </Compile>
 	  <MauiXaml Update="Views\Settings.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="Views\Components\" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <MauiAsset Include="Data\openmeteo.json" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -379,15 +366,14 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Compile Update="Components\DailyForecastCarouselView.xaml.cs">
-	    <DependentUpon>DailyForecastCarouselView.xaml</DependentUpon>
-	  </Compile>
-	  <Compile Update="Views\DataCheck.xaml.cs">
-	    <DependentUpon>DataCheck.xaml</DependentUpon>
-	  </Compile>
+	  <MauiImage Update="Resources\Images\clear_day.json">
+	    <LogicalName>%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
+	  </MauiImage>
 	</ItemGroup>
+
+
 	<PropertyGroup>
 		<NoWarn>$(NoWarn);MAUIAI0001</NoWarn>
 	</PropertyGroup>
-
+	
 </Project>

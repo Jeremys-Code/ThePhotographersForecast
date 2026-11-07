@@ -9,11 +9,11 @@ namespace ThePhotographersForecast.Services;
 
 public partial class GetEventService : IGetEventService
 {
-    private ISession Session;
+    private ISession ISession;
     private HttpClient _client;
     public GetEventService(ISession session, IHttpClientFactory client)
     {
-        Session = session;
+        ISession = session;
         _client = client.CreateClient("astroClient");
     }
     private async Task<T?> GetDataAsync<T>(HttpRequestMessage request, CancellationToken cancellationToken = default)
@@ -97,7 +97,7 @@ public partial class GetEventService : IGetEventService
         var json = new EventTimeSeriesData.Rootobject();
         try
         {
-            var request = new HttpRequestMessage(HttpMethod.Get, $"https://api.ipgeolocation.io/v3/astronomy/timeSeries?apiKey=b3c99c6a0b9e44169fa96b6918495732&dateStart={Session.StartDate.ToString("yyyy-MM-dd")}&dateEnd={Session.EndDate.ToString("yyyy-MM-dd")}&lat={Session.SelectedLocation.Latitude}&long={Session.SelectedLocation.Longitude}");
+            var request = new HttpRequestMessage(HttpMethod.Get, $"https://api.ipgeolocation.io/v3/astronomy/timeSeries?apiKey=b3c99c6a0b9e44169fa96b6918495732&dateStart={ISession.StartDate.ToString("yyyy-MM-dd")}&dateEnd={ISession.EndDate.ToString("yyyy-MM-dd")}&lat={ISession.SelectedLocation.Latitude}&long={ISession.SelectedLocation.Longitude}");
             json = await GetDataAsync<EventTimeSeriesData.Rootobject>(request);
 
 
@@ -118,7 +118,7 @@ public partial class GetEventService : IGetEventService
             await GetSelectedLocationInformationAsync(json.location);
             //Task Check    
             //
-            Debug.WriteLine($"Did the city update: {Session.SelectedLocation.City}");
+            Debug.WriteLine($"Did the city update: {ISession.SelectedLocation.City}");
 
             for (int i = 0; i < json.astronomy.Length; i++)
             {
@@ -127,12 +127,11 @@ public partial class GetEventService : IGetEventService
                 var astro = json.astronomy[i];
                 var eventModel = new EventModel();
                 var date = json.astronomy[i].date;
-                eventModel.Date = date;
+                eventModel.Date = new DateTime(date, TimeOnly.MinValue);
                 TextInfo phase = CultureInfo.CurrentCulture.TextInfo;
                 //Extract the Astronomical data from the json
                 eventModel.AstronomicalData = new Astronomical
                 {
-                    Date = date,
                     DayLength = json.astronomy[i].day_length,
                     MoonPhase = phase.ToTitleCase(json.astronomy[i].moon_phase.Replace("_", " ").ToLowerInvariant()),
                     MoonImage = ImageSource.FromFile(json.astronomy[i].moon_phase.Replace("_", "").ToLowerInvariant() + ".png"),
@@ -224,12 +223,12 @@ public partial class GetEventService : IGetEventService
     {
         await MainThread.InvokeOnMainThreadAsync(() =>
         {
-            Session.SelectedLocation.Country = json.country_name;
+            ISession.SelectedLocation.Country = json.country_name;
             if (json.locality != null)
             {
-                Session.SelectedLocation.City = json.locality;
+                ISession.SelectedLocation.City = json.locality;
             }
-            if (Session.SelectedLocation.State == null) Session.SelectedLocation.State = json.state_prov;
+            if (ISession.SelectedLocation.State == null) ISession.SelectedLocation.State = json.state_prov;
         });
         return;
     }
@@ -238,7 +237,7 @@ public partial class GetEventService : IGetEventService
         EventTime newEvent = new EventTime
         {
             EventName = eventName,
-            Date = date
+
         };
         string sStr = Selector.Invoke(astroItem);
         try
@@ -268,7 +267,7 @@ public partial class GetEventService : IGetEventService
         EventTime newEvent = new EventTime
         {
             EventName = eventName,
-            Date = date
+
 
         };
         string sStr = startSelector.Invoke(astroItem);
@@ -301,7 +300,7 @@ public partial class GetEventService : IGetEventService
 
     public async Task<EventModel> GetSelectedDayEventModelAsync(DateTime date)
     {
-        var selectedEventModel = Session.EventsData.Where(d => d.Date == DateOnly.FromDateTime(date)).FirstOrDefault<EventModel>();
+        var selectedEventModel = ISession.EventsData.Where(d => d.Date == date.Date).FirstOrDefault<EventModel>();
         if (selectedEventModel != null)
         {
             return selectedEventModel;
@@ -310,7 +309,7 @@ public partial class GetEventService : IGetEventService
         {
             var result = await GetDayEventsAsync();
         }
-        var model = Session.EventsData.Where(d => d.Date == DateOnly.FromDateTime(date)).FirstOrDefault<EventModel>();
+        var model = ISession.EventsData.Where(d => d.Date == date.Date).FirstOrDefault<EventModel>();
         return model;
     }
 }

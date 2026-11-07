@@ -124,7 +124,7 @@
         <GradientStop Color="#FFFFFF" Offset="1.0" />
     </LinearGradientBrush>
 
-    <LinearGradientBrush x:Key="Noon" StartPoint="0,0" EndPoint="0,1">
+    <LinearGradientBrush x:Key="Noon" StartPoint="0,1" EndPoint="1,0">
         <GradientStop Color="#FFF4AF" Offset="0.0" />
         <GradientStop Color="#E3D092" Offset="0.33" />
         <GradientStop Color="#4388B1" Offset="0.66" />
@@ -154,7 +154,7 @@
         <GradientStop Color="#750068CC" Offset="1.0" />
     </LinearGradientBrush>
 
-    <LinearGradientBrush x:Key="Sunset" StartPoint="1,0" EndPoint="0,0">
+    <LinearGradientBrush x:Key="Sunset" StartPoint="0,0" EndPoint="1,1">
         <GradientStop Color="#4577AF" Offset="0.0" />
         <GradientStop Color="#AF5F84" Offset="0.33" />
         <GradientStop Color="#FFD075" Offset="0.66" />
@@ -246,6 +246,10 @@
         <GradientStop Color="#0D297A" Offset="0.5"/>
         <GradientStop Color="#081F43" Offset="1.0"/>
     </LinearGradientBrush>
-
+    <LinearGradientBrush x:Key="NightBackground" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#203AA4" Offset="0.0"/>
+        <GradientStop Color="#0D297A" Offset="0.5"/>
+        <GradientStop Color="#081F43" Offset="1.0"/>
+    </LinearGradientBrush>
 
 </ResourceDictionary>

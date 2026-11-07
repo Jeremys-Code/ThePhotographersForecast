@@ -1,4 +1,5 @@
 ﻿using SkiaSharp.Extended.UI.Controls;
+using ThePhotographersForecast.Models;
 
 namespace ThePhotographersForecast.Services
 {
@@ -15,13 +16,10 @@ namespace ThePhotographersForecast.Services
     {
         public static SKFileLottieImageSource GetLottieFromRawResources(string assetName)
         {
-            if (!assetName.StartsWith("meteocons"))
-            {
-                assetName = String.Concat("meteocons", Path.DirectorySeparatorChar, assetName);
-            }
             return new SKFileLottieImageSource { File = assetName };
         }
 
+        
         //    try
         //    {
         //        using var outputStream = await FileSystem.Current.OpenAppPackageFileAsync(assetName);

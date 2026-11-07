@@ -6,31 +6,37 @@ namespace ThePhotographersForecast.ViewModels
 {
     public partial class ForecastDetailsViewModel : ObservableObject
     {
-        public string LocationName => SharedSession.SelectedLocation.DisplayName;
+        [ObservableProperty]
+        public partial string LocationName { get; set; }
         [ObservableProperty]
         public partial NwsDailyForecast[] DailyForecasts { get; set; }
         [ObservableProperty]
         public partial NwsDailyForecast SelectedDailyForecast { get; set; }
         [ObservableProperty]
         public partial NwsHourlyForecast[] SelectedDailyHourlyForecasts { get; set; }
+        [ObservableProperty]
+        public partial FutureMoonPhase[] MoonPhases { get; set; }
+        [ObservableProperty]
+        public partial FutureMoonPhase SelectedMoonPhase { get; set; }
 
 
         //public event PropertyChangedEventHandler PropertyChanged;
 
         //protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
         //    => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        [ObservableProperty]
-        public partial Session SharedSession { get; set; }
 
-        public ForecastDetailsViewModel(Session sharedSession)
+        private ISession _session;
+
+        public ForecastDetailsViewModel(ISession session)
         {
 
-            SharedSession = sharedSession;
-            // Use the Session collection directly so the ViewModel observes updates when the Session is populated
-            if (SharedSession.NwsData.DailyForecasts == null || SharedSession.NwsData.DailyForecasts.Length == 0) return;
-            MainThread.BeginInvokeOnMainThread(() => DailyForecasts = [.. SharedSession.NwsData.DailyForecasts]);
-            SelectedDailyForecast = DailyForecasts[0];
-            SelectedDailyHourlyForecasts = SelectedDailyForecast.HourlyWeathers;
+            _session = session;
+            DailyForecasts = _session.NwsData.DailyForecasts.ToArray();
+            //MoonPhases = _session.MoonPhases.ToArray();
+            SelectedDailyForecast = DailyForecasts.FirstOrDefault();
+            SelectedDailyHourlyForecasts = SelectedDailyForecast.HourlyWeathers.ToArray();
+            //SelectedMoonPhase = MoonPhases.FirstOrDefault();
+            LocationName = _session.NwsData.SelectedLocation.DisplayName;
 
 
         }

@@ -1,6 +1,5 @@
 ﻿using SkiaSharp;
 using System.Diagnostics;
-using System.Net.Sockets;
 using System.Text.Json;
 using ThePhotographersForecast.Data;
 using ThePhotographersForecast.Models;
@@ -12,21 +11,22 @@ namespace ThePhotographersForecast.Services.Modules
     public class SkyColorEngine : ISkyColorEngine
     {
         private readonly HttpClient _client;
-        public Session SharedSession { get; set; }
-        private IGetEventService _eventService;
+        private ISession _session;
 
-        public SkyColorEngine(IHttpClientFactory client, Session sharedSession, IGetEventService eventService)
+
+
+        public SkyColorEngine(HttpClient client, ISession session)
         {
-            _client = client.CreateClient("skyClient");
-            SharedSession = sharedSession;
-            _eventService = eventService;
+            _client = client;
+            _session = session;
+
         }
-        private async Task<T?> GetDataAsync<T>(HttpRequestMessage request)
+        private async Task<T?> GetDataAsync<T>(HttpRequestMessage request, string name, CancellationToken cancellationToken = default)
         {
             try
             {
                 // ensure response is disposed so connection returns to pool promptly
-                using var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
+                using var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -34,13 +34,26 @@ namespace ThePhotographersForecast.Services.Modules
                     return default;
                 }
 
-                await using var stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
+                using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
                 var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
                 options.Converters.Add(new NullNumberConverterFactory());
-                var result = await JsonSerializer.DeserializeAsync<T>(stream, options).ConfigureAwait(false);
+
+                // pass the cancellation token to DeserializeAsync so the read can be cancelled cleanly
+                var result = await JsonSerializer.DeserializeAsync<T>(stream, options, cancellationToken);
+                string jsonFileContent = JsonSerializer.Serialize(result, new JsonSerializerOptions
+                {
+                    WriteIndented = true // optional: for readable output
+                });
+
+                File.WriteAllText(Path.Combine(FileSystem.Current.CacheDirectory, $"sky_{DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss")}_{name}.json"), jsonFileContent);
                 return result;
             }
-            catch (Exception ex) when (ex is HttpRequestException || ex is IOException || ex is ObjectDisposedException || ex is SocketException)
+            catch (OperationCanceledException)
+            {
+                Debug.WriteLine("Request cancelled.");
+                return default;
+            }
+            catch (Exception ex) //handle transient IO/HTTP/Socket/ObjectDisposed etc.
             {
                 Debug.WriteLine($"Transient error: {ex.GetType().Name} - {ex.Message}");
                 return default;
@@ -50,13 +63,14 @@ namespace ThePhotographersForecast.Services.Modules
         // ------------------------------------------------------------
         // PUBLIC ENTRY POINT
         // ------------------------------------------------------------
-        public async Task<Dictionary<DateOnly, SKColor[]>> GetDailySkyColorGradientsAsync()
+        public async Task<Dictionary<DateOnly, LinearGradientBrush>> GetDailySkyColorGradientsAsync(double latitude, double longitude)
         {
-            var sky = await GetSkyCompositionAsync();
+            var sky = await GetSkyCompositionAsync(latitude, longitude);
             if (sky == null)
-                return new Dictionary<DateOnly, SKColor[]>();
+                return new Dictionary<DateOnly, LinearGradientBrush>();
 
             var daily = new Dictionary<DateOnly, SKColor[]>();
+            var dayGradient = new Dictionary<DateOnly, LinearGradientBrush>();
 
             var grouped = sky.GroupBy(s => DateOnly.FromDateTime(s.Time));
 
@@ -70,14 +84,14 @@ namespace ThePhotographersForecast.Services.Modules
 
                 // Build a 4‑stop gradient using your signature palette
                 var gradient = BuildGradientArray(dailyColor);
-                //                var dailyBrush = ToLinearGradientBrush(gradient, new Point(0, 0), new Point(0, 1));
+                var dailyBrush = ToLinearGradientBrush(gradient, new Point(0, 0), new Point(0, 1));
                 daily[day] = gradient;
-
+                dayGradient[day] = dailyBrush;
 
 
             }
 
-            return daily;
+            return dayGradient;
         }
         private LinearGradientBrush ToLinearGradientBrush(SKColor[] colors,
                                                           Microsoft.Maui.Graphics.Point startPoint,
@@ -103,24 +117,22 @@ namespace ThePhotographersForecast.Services.Modules
         // ------------------------------------------------------------
         // FETCH AIR QUALITY + WEATHER + SUN/MOON
         // ------------------------------------------------------------
-        private async Task<SkyColor[]> GetSkyCompositionAsync()
+        private async Task<SkyColor[]> GetSkyCompositionAsync(double latitude, double longitude)
         {
             try
             {
                 // AIR QUALITY API
                 string aqUrl =
-                    $"https://air-quality-api.open-meteo.com/v1/air-quality?latitude={SharedSession.SelectedLocation.Latitude}&longitude={SharedSession.SelectedLocation.Longitude}&hourly=pm10,pm2_5,nitrogen_dioxide,sulphur_dioxide,ozone,dust,uv_index,uv_index_clear_sky,aerosol_optical_depth,carbon_monoxide&timezone=auto&start_date={DateTime.Now.Date.ToString("yyyy-MM-dd")}&end_date={DateTime.Now.AddDays(3).Date.ToString("yyyy-MM-dd")}";
+                    $"https://air-quality-api.open-meteo.com/v1/air-quality?latitude={latitude}&longitude={longitude}&hourly=pm10,pm2_5,nitrogen_dioxide,sulphur_dioxide,ozone,dust,uv_index,uv_index_clear_sky,aerosol_optical_depth,carbon_monoxide&timezone=auto&start_date={DateTime.Now.Date.ToString("yyyy-MM-dd")}&end_date={DateTime.Now.AddDays(3).Date.ToString("yyyy-MM-dd")}";
                 var aqRequest = new HttpRequestMessage(HttpMethod.Get, aqUrl);
-                aqRequest.Headers.UserAgent.Add(new System.Net.Http.Headers.ProductInfoHeaderValue("ThePhotographersForecast", "6.0"));
-                var aqResult = await GetDataAsync<SkyCompositionData.Rootobject>(aqRequest);
+                var aqResult = await GetDataAsync<SkyCompositionData.Rootobject>(aqRequest, "airquality");
                 if (aqResult == null) return null;
 
                 // WEATHER API
                 string weatherUrl =
-                    $"https://api.open-meteo.com/v1/forecast?latitude={SharedSession.SelectedLocation.Latitude}&longitude={SharedSession.SelectedLocation.Longitude}&hourly=surface_pressure,cloud_cover,direct_normal_irradiance,diffuse_radiation,shortwave_radiation&models=gfs_seamless&timezone=auto&start_date={DateTime.Now.Date.ToString("yyyy-MM-dd")}&end_date={DateTime.Now.AddDays(3).ToString("yyyy-MM-dd")}";
+                    $"https://api.open-meteo.com/v1/forecast?latitude={latitude}&longitude={longitude}&hourly=surface_pressure,cloud_cover,direct_normal_irradiance,diffuse_radiation,shortwave_radiation&models=gfs_seamless&timezone=auto&start_date={DateTime.Now.Date.ToString("yyyy-MM-dd")}&end_date={DateTime.Now.AddDays(3).ToString("yyyy-MM-dd")}";
                 var weatherRequest = new HttpRequestMessage(HttpMethod.Get, weatherUrl);
-                weatherRequest.Headers.UserAgent.Add(new System.Net.Http.Headers.ProductInfoHeaderValue("ThePhotographersForecast", "6.0"));
-                var airQ = await GetDataAsync<SkyColorAttributesData.Rootobject>(weatherRequest);
+                var airQ = await GetDataAsync<SkyColorAttributesData.Rootobject>(weatherRequest, "airattributes");
                 if (airQ == null) return null;
 
 
@@ -132,7 +144,7 @@ namespace ThePhotographersForecast.Services.Modules
                 {
                     var t = airQ.hourly.time[i];
 
-                    var eventDay = await _eventService.GetSelectedDayEventModelAsync(t);
+                    var eventDay = _session.EventsData.Where(e => e.Date.Date == t.Date).FirstOrDefault() ?? new EventModel();
                     if (eventDay == null)
                         return null;
 
@@ -159,8 +171,8 @@ namespace ThePhotographersForecast.Services.Modules
                         ShortwaveRadiation = airQ.hourly.shortwave_radiation[i],
 
                         // Solar geometry
-                        // SunAltitudeDeg = eventDay.AstronomicalData.SunAltitude,
-                        //  SunAzimuthDeg = eventDay.AstronomicalData.SunAzimuth,
+                        SunAltitudeDeg = eventDay.AstronomicalData.SunAltitude,
+                        SunAzimuthDeg = eventDay.AstronomicalData.SunAzimuth,
                         Sunrise = eventDay.EventTimes.Where(s => s.EventName == "Sunrise").First().AstroTime,
                         Sunset = eventDay.EventTimes.Where(s => s.EventName == "Sunset").First().AstroTime,
                         SolarNoon = eventDay.EventTimes.Where(s => s.EventName == "Solar Noon").First().AstroTime

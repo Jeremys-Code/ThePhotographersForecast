@@ -18,8 +18,8 @@
             </Border.StrokeShape>
                 <VerticalStackLayout HorizontalOptions="Fill">
                     <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Start">
-                        <Label Text="The Photographer's forecast for:" HorizontalTextAlignment="Center" LineBreakMode="NoWrap" HorizontalOptions="Fill" FontFamily="ManFont" FontSize="32" />
-                        <Label Text="{Binding LocationName}"  HorizontalOptions="Center" HorizontalTextAlignment="Center" LineBreakMode="WordWrap" FontFamily="ManFont" FontSize="30" />
+                        <Label Text="The Photographer's forecast for:" HorizontalTextAlignment="Center" LineBreakMode="NoWrap" HorizontalOptions="Fill" FontFamily="NotoThick" FontSize="32" />
+                        <Label Text="{Binding LocationName}"  HorizontalOptions="Center" HorizontalTextAlignment="Center" LineBreakMode="WordWrap" FontFamily="NotoThick" FontSize="30" />
                         <Label Text="{Binding LocationTime}" HorizontalOptions="Center" HorizontalTextAlignment="Center" Margin="0,0,0,8"  FontFamily="NotoSans" FontSize="18"/>
                     </VerticalStackLayout>
 
@@ -75,7 +75,7 @@
                                     <RoundRectangle CornerRadius="20"/>
                                 </Border.StrokeShape>
                                 <VerticalStackLayout>
-                                    <Label VerticalOptions="Start" VerticalTextAlignment="Start" x:Name="SunMoonSummaryLabel" Text="Sun and Moon Summary:" FontFamily="ManFont" FontSize="18" HorizontalOptions="Center" HorizontalTextAlignment="Center" Margin="4,4,5,4"/>
+                                    <Label VerticalOptions="Start" VerticalTextAlignment="Start" x:Name="SunMoonSummaryLabel" Text="Sun and Moon Summary:" FontFamily="NotoThick" FontSize="18" HorizontalOptions="Center" HorizontalTextAlignment="Center" Margin="4,4,5,4"/>
                                     <HorizontalStackLayout Margin="4" VerticalOptions="Start" HorizontalOptions="Start">
                                         <Label Text="Day Length:" FontFamily="NotoSans" VerticalOptions="Start" VerticalTextAlignment="Start" HorizontalOptions="Start" HorizontalTextAlignment="Start" FontSize="14"/>
                                         <Label Text="{Binding SelectedDayLength}" FontSize="14" VerticalOptions="Start" VerticalTextAlignment="Start" HorizontalOptions="Start" HorizontalTextAlignment="Start" FontFamily="NotoSans"/>
@@ -94,7 +94,7 @@
 
                             <!-- Moon Phases Carousel -->
 
-                            <jt:MoonPhasesCarouselView Grid.Column="2"/>
+                            <!--<jt:MoonPhasesCarouselView Grid.Column="2"/>-->
                         </Grid>
                     </VerticalStackLayout>
 
@@ -117,10 +117,10 @@
                                         </Border.StrokeShape>
                                         <Grid>
                                             <VerticalStackLayout>
-                                                <Label Text="{Binding TimeOfDayName}" TextColor="#FFFF00" FontAttributes="Bold"  FontFamily="ManFont" FontAutoScalingEnabled="True"  TextDecorations="Underline" HorizontalTextAlignment="Center" HorizontalOptions="Center" Margin="5" />
+                                                <Label Text="{Binding TimeOfDayName}" TextColor="#FFFF00" FontAttributes="Bold"  FontFamily="NotoThick" FontAutoScalingEnabled="True"  TextDecorations="Underline" HorizontalTextAlignment="Center" HorizontalOptions="Center" Margin="5" />
                                                 <skia:SKLottieView x:Name="TimeOfDayAnimation" Source="{Binding TimeOfDayImage}" RepeatCount="-1" RepeatMode="Restart" WidthRequest="80" HeightRequest="80" HorizontalOptions="Center"/>
-                                                <Label Text="The forecast for" TextColor="#FFFF00" FontFamily="ManFont" FontAutoScalingEnabled="True" TextDecorations="Underline" FontAttributes="Bold" HorizontalTextAlignment="Center" HorizontalOptions="Center" Margin="5" />
-                                                <Label Text="{Binding HourlyName}" TextColor="#FFFF00" FontFamily="ManFont" FontAutoScalingEnabled="True"  FontAttributes="Bold" TextDecorations="Underline" HorizontalTextAlignment="Center" HorizontalOptions="Center" Margin="5" />
+                                                <Label Text="The forecast for" TextColor="#FFFF00" FontFamily="NotoThick" FontAutoScalingEnabled="True" TextDecorations="Underline" FontAttributes="Bold" HorizontalTextAlignment="Center" HorizontalOptions="Center" Margin="5" />
+                                                <Label Text="{Binding HourlyName}" TextColor="#FFFF00" FontFamily="NotoThick" FontAutoScalingEnabled="True"  FontAttributes="Bold" TextDecorations="Underline" HorizontalTextAlignment="Center" HorizontalOptions="Center" Margin="5" />
                                                 <skia:SKLottieView x:Name="TimeOfDaySkWeatherMeteocon" HeightRequest="80" WidthRequest="80" RepeatCount="-1" RepeatMode="Restart" Source="{Binding TimeOfDayWeatherImage}" HorizontalOptions="Center" Margin="5"/>
                                                 <Label Text="{Binding TimeOfDayStormSummary}" TextColor="#FF004D" Shadow="1,1,2,White,0.9" FontAutoScalingEnabled="True"  FontFamily="NotoSans" FontAttributes="Bold" LineBreakMode="WordWrap" />
                                                 <Label Text="{Binding TimeOfDaySummary}" LineBreakMode="WordWrap" MaxLines="5" FontAutoScalingEnabled="True" FontFamily="NotoSans" TextColor="#FE0194" HorizontalOptions="Center" Margin="5" />
@@ -128,14 +128,14 @@
                                                     <CollectionView.ItemTemplate>
                                                         <DataTemplate x:DataType="model:EventTime">
                                                             <VerticalStackLayout Margin="5">
-                                                                <Label Text="{Binding EventName}" LineBreakMode="WordWrap" FontFamily="ManFont" FontAttributes="Bold" TextColor="#26f629" HorizontalOptions="Center" HorizontalTextAlignment="Center" />
+                                                                <Label Text="{Binding EventName}" LineBreakMode="WordWrap" FontFamily="NotoThick" FontAttributes="Bold" TextColor="#26f629" HorizontalOptions="Center" HorizontalTextAlignment="Center" />
                                                                 <HorizontalStackLayout HorizontalOptions="Center">
-                                                                    <Label Text="{Binding TimeLabel}"  HorizontalOptions="Fill" HorizontalTextAlignment="Justify" FontAttributes="Bold" FontAutoScalingEnabled="True" TextColor="#FF01FB" FontFamily="ManFont" />
-                                                                    <Label Text="{Binding AstroTime, StringFormat='{}{0:h:mm tt}'}" TextColor="#FAFF00" HorizontalOptions="Fill" HorizontalTextAlignment="Justify" FontAutoScalingEnabled="True" FontAttributes="Bold" FontFamily="ManFont" />
+                                                                    <Label Text="{Binding TimeLabel}"  HorizontalOptions="Fill" HorizontalTextAlignment="Justify" FontAttributes="Bold" FontAutoScalingEnabled="True" TextColor="#FF01FB" FontFamily="NotoThick" />
+                                                                    <Label Text="{Binding AstroTime, StringFormat='{}{0:h:mm tt}'}" TextColor="#FAFF00" HorizontalOptions="Fill" HorizontalTextAlignment="Justify" FontAutoScalingEnabled="True" FontAttributes="Bold" FontFamily="NotoThick" />
                                                                 </HorizontalStackLayout>
                                                                 <HorizontalStackLayout HorizontalOptions="Center">
-                                                                    <Label Text="{Binding OtherTimeLabel}" TextColor="#00F556" FontFamily="ManFont" HorizontalOptions="Fill" HorizontalTextAlignment="Justify" FontAttributes="Bold" FontAutoScalingEnabled="True"/>
-                                                                    <Label Text="{Binding OtherTime, StringFormat='{}{0:h:mm tt}'}" TextColor="#EE1717" FontFamily="ManFont" HorizontalOptions="Fill" FontAttributes="Bold" HorizontalTextAlignment="Justify" FontAutoScalingEnabled="True"/>
+                                                                    <Label Text="{Binding OtherTimeLabel}" TextColor="#00F556" FontFamily="NotoThick" HorizontalOptions="Fill" HorizontalTextAlignment="Justify" FontAttributes="Bold" FontAutoScalingEnabled="True"/>
+                                                                    <Label Text="{Binding OtherTime, StringFormat='{}{0:h:mm tt}'}" TextColor="#EE1717" FontFamily="NotoThick" HorizontalOptions="Fill" FontAttributes="Bold" HorizontalTextAlignment="Justify" FontAutoScalingEnabled="True"/>
                                                                 </HorizontalStackLayout>
                                                             </VerticalStackLayout>
                                                         </DataTemplate>
@@ -166,18 +166,18 @@
                                 </Border.StrokeShape>
                                 <Grid>
                                     <VerticalStackLayout HorizontalOptions="Fill" VerticalOptions="Start">
-                                        <Label x:Name="SunMoonSummaryLabel" Text="Sun and Moon Summary:" FontFamily="ManFont" FontSize="18" HorizontalOptions="Center" HorizontalTextAlignment="Center" Margin="4,4,5,4"/>
+                                        <Label x:Name="SunMoonSummaryLabel" Text="Sun and Moon Summary:" FontFamily="NotoThick" FontSize="18" HorizontalOptions="Center" HorizontalTextAlignment="Center" Margin="4,4,5,4"/>
                                         <HorizontalStackLayout HorizontalOptions="Center">
-                                            <Label Text="Day Length:" FontFamily="ManFont" HorizontalOptions="Start" FontSize="16"/>
+                                            <Label Text="Day Length:" FontFamily="NotoThick" HorizontalOptions="Start" FontSize="16"/>
                                             <Label Text="{Binding SelectedDayLength}" FontSize="14" FontFamily="NotoSans"/>
                                         </HorizontalStackLayout>
                                         <HorizontalStackLayout HorizontalOptions="Center">
-                                            <Label Text="Sunshine Length:" FontFamily="ManFont" HorizontalOptions="Start" FontSize="16"/>
+                                            <Label Text="Sunshine Length:" FontFamily="NotoThick" HorizontalOptions="Start" FontSize="16"/>
                                             <Label  Text="{Binding SelectedSunshine}" FontSize="14" FontFamily="NotoSans"/>
                                         </HorizontalStackLayout>
 
-                                        <Label Text="Current Moon Phase" FontFamily="ManFont" FontSize="16" HorizontalOptions="Center" HorizontalTextAlignment="Center"/>
-                                        <Label Text="{Binding SelectedMoonPhase}" FontSize="14" FontFamily="ManFont" HorizontalOptions="Center" HorizontalTextAlignment="Center"/>
+                                        <Label Text="Current Moon Phase" FontFamily="NotoThick" FontSize="16" HorizontalOptions="Center" HorizontalTextAlignment="Center"/>
+                                        <Label Text="{Binding SelectedMoonPhase}" FontSize="14" FontFamily="NotoThick" HorizontalOptions="Center" HorizontalTextAlignment="Center"/>
                                         <skia:SKLottieView x:Name="SkMoonPhase" RepeatCount="-1" RepeatMode="Restart"  HeightRequest="100" WidthRequest="100" Source="{Binding SelectedMoonImage}" Margin="5,10"/>
                                         <Image Source="{Binding SelectedMoonImage}" HeightRequest="100" WidthRequest="100" HorizontalOptions="Center" Margin="5,10,5,10"/>
                                     </VerticalStackLayout>
@@ -212,8 +212,8 @@
                                             </Grid.ColumnDefinitions>
                                             <Grid Grid.Column="0">
                                                 <VerticalStackLayout Margin="8">
-                                                    <Label Text="The High" FontAttributes="Bold" VerticalOptions="Center" FontFamily="ManFont" HorizontalOptions="Start" FontSize="24" HorizontalTextAlignment="Start" Margin="2" TextColor="#701705"/>
-                                                    <Label Text="{Binding SelectedTimeHighTemp}" HorizontalOptions="Start" HorizontalTextAlignment="Start" LineBreakMode="WordWrap" VerticalOptions="Center" TextColor="#701705" Margin="2" FontSize="24" FontFamily="ManFont"/>
+                                                    <Label Text="The High" FontAttributes="Bold" VerticalOptions="Center" FontFamily="NotoThick" HorizontalOptions="Start" FontSize="24" HorizontalTextAlignment="Start" Margin="2" TextColor="#701705"/>
+                                                    <Label Text="{Binding SelectedTimeHighTemp}" HorizontalOptions="Start" HorizontalTextAlignment="Start" LineBreakMode="WordWrap" VerticalOptions="Center" TextColor="#701705" Margin="2" FontSize="24" FontFamily="NotoThick"/>
                                                 </VerticalStackLayout>
                                             </Grid>
                                             <Grid Grid.Column="1" Margin="8">
@@ -234,8 +234,8 @@
                                             </Grid.ColumnDefinitions>
                                             <Grid Grid.Column="0">
                                                 <VerticalStackLayout Margin="8">
-                                                    <Label Text="The Low" FontAttributes="Bold" VerticalOptions="Center" FontFamily="ManFont" HorizontalOptions="Start" FontSize="24" HorizontalTextAlignment="Start" Margin="2" TextColor="#FFF6F3C0"/>
-                                                    <Label Text="{Binding SelectedTimeLowTemp}" HorizontalOptions="Start" HorizontalTextAlignment="Start" LineBreakMode="WordWrap" VerticalOptions="Center" TextColor="#F6F3C0" Margin="2" FontSize="24" FontFamily="ManFont"/>
+                                                    <Label Text="The Low" FontAttributes="Bold" VerticalOptions="Center" FontFamily="NotoThick" HorizontalOptions="Start" FontSize="24" HorizontalTextAlignment="Start" Margin="2" TextColor="#FFF6F3C0"/>
+                                                    <Label Text="{Binding SelectedTimeLowTemp}" HorizontalOptions="Start" HorizontalTextAlignment="Start" LineBreakMode="WordWrap" VerticalOptions="Center" TextColor="#F6F3C0" Margin="2" FontSize="24" FontFamily="NotoThick"/>
                                                 </VerticalStackLayout>
                                             </Grid>
                                             <Grid Grid.Column="1" Margin="8">
@@ -255,9 +255,9 @@
                                     <RoundRectangle CornerRadius="12"/>
                                 </Border.StrokeShape>
                                 <VerticalStackLayout HorizontalOptions="Center" Margin="15">
-                                    <Label Text="Summary:" FontSize="18" VerticalOptions="Center" HorizontalOptions="Start" HorizontalTextAlignment="Start" FontFamily="ManFont" Margin="5,0,0,0"/>
+                                    <Label Text="Summary:" FontSize="18" VerticalOptions="Center" HorizontalOptions="Start" HorizontalTextAlignment="Start" FontFamily="NotoThick" Margin="5,0,0,0"/>
                                     <Label Text="{Binding SelectedSummary}" VerticalOptions="Center" LineBreakMode="WordWrap" FontFamily="NotoSans" FontSize="12" HorizontalOptions="Start" HorizontalTextAlignment="Start" Margin="5"/>
-                                    <Label x:Name="StormLabel" Text="Storm Summary:" FontFamily="ManFont" FontSize="18" HorizontalOptions="Start" HorizontalTextAlignment="Start" Margin="5,10,5,4" />
+                                    <Label x:Name="StormLabel" Text="Storm Summary:" FontFamily="NotoThick" FontSize="18" HorizontalOptions="Start" HorizontalTextAlignment="Start" Margin="5,10,5,4" />
                                     <Label x:Name="StormInfo" Text="{Binding SelectedDailyStormSummary}" LineBreakMode="WordWrap" FontFamily="NotoSans" FontSize="12" HorizontalOptions="Start" HorizontalTextAlignment="Start" Margin="5"/>
                                 </VerticalStackLayout>
                             </Border>
@@ -270,7 +270,7 @@
                                     <RoundRectangle CornerRadius="12"/>
                                 </Border.StrokeShape>
                                 <VerticalStackLayout>
-                                    <Label x:Name="HeatRiskLabel" Text="Heat Risk:" FontFamily="ManFont" FontAttributes="Bold" FontSize="20" HorizontalOptions="Start" HorizontalTextAlignment="Start" Margin="5,10,5,4" />
+                                    <Label x:Name="HeatRiskLabel" Text="Heat Risk:" FontFamily="NotoThick" FontAttributes="Bold" FontSize="20" HorizontalOptions="Start" HorizontalTextAlignment="Start" Margin="5,10,5,4" />
                                     <Label x:Name="HeatRiskInfo" Text="{Binding SelectedDayHeatriskSummary}" LineBreakMode="WordWrap" FontFamily="NotoSans" FontSize="12" HorizontalOptions="Start" HorizontalTextAlignment="Start" Margin="5"/>
                                     <Label x:Name="HyperlinkToHeatRisk"  LineBreakMode="WordWrap" FontFamily="NotoSans" FontSize="12" HorizontalOptions="Start" HorizontalTextAlignment="Start" Margin="5">
                                         <Label.FormattedText>
@@ -283,7 +283,7 @@
                                             </FormattedString>
                                         </Label.FormattedText>
                                     </Label>
-                                    <Label x:Name="HealthLabel" Text="Health and Safety Summary:" TextColor="{Binding SelectedUvRiskColor}" FontAttributes="Bold" FontFamily="ManFont" FontSize="20" HorizontalOptions="Start" HorizontalTextAlignment="Start" Margin="5,10,5,4"/>
+                                    <Label x:Name="HealthLabel" Text="Health and Safety Summary:" TextColor="{Binding SelectedUvRiskColor}" FontAttributes="Bold" FontFamily="NotoThick" FontSize="20" HorizontalOptions="Start" HorizontalTextAlignment="Start" Margin="5,10,5,4"/>
                                     <Label x:Name="Health" Text="{Binding SelectedSafetySummary}" LineBreakMode="WordWrap"  FontFamily="NotoSans" FontSize="12" HorizontalOptions="Start" HorizontalTextAlignment="Start" Margin="5"/>
                                 </VerticalStackLayout>
                             </Border>
@@ -300,28 +300,28 @@
                                                                 <RoundRectangle CornerRadius="12"/>
                                                             </Border.StrokeShape>-->
 <!--<HorizontalStackLayout>
-                                                    <Label Text="Temp: " FontFamily="ManFont" FontSize="12" TextColor="#befca6" HorizontalOptions="Start" Margin="4" />
-                                                    <Label Text="{Binding TimeOfDayTemperature}" FontSize="12" TextColor="#befca6" FontFamily="ManFont" HorizontalOptions="Start" Margin="4" />
+                                                    <Label Text="Temp: " FontFamily="NotoThick" FontSize="12" TextColor="#befca6" HorizontalOptions="Start" Margin="4" />
+                                                    <Label Text="{Binding TimeOfDayTemperature}" FontSize="12" TextColor="#befca6" FontFamily="NotoThick" HorizontalOptions="Start" Margin="4" />
                                                 </HorizontalStackLayout>
                                                 <HorizontalStackLayout>
-                                                    <Label Text="Dewpoint: " FontFamily="ManFont" FontSize="12" TextColor="#befca6" HorizontalOptions="Start" Margin="4" />
-                                                    <Label Text="{Binding TimeOfDayDewpoint}" FontSize="12" TextColor="#befca6" FontFamily="ManFont" HorizontalOptions="Start" Margin="4" />
+                                                    <Label Text="Dewpoint: " FontFamily="NotoThick" FontSize="12" TextColor="#befca6" HorizontalOptions="Start" Margin="4" />
+                                                    <Label Text="{Binding TimeOfDayDewpoint}" FontSize="12" TextColor="#befca6" FontFamily="NotoThick" HorizontalOptions="Start" Margin="4" />
                                                 </HorizontalStackLayout>
                                                 <HorizontalStackLayout>
-                                                    <Label Text="Feels Like: " FontFamily="ManFont" TextColor="#befca6" FontSize="12" HorizontalOptions="Start" Margin="4" />
-                                                    <Label Text="{Binding TimeOfDayApparentTemperature}" TextColor="#befca6" FontSize="12" FontFamily="ManFont" HorizontalOptions="Start" Margin="4" />
+                                                    <Label Text="Feels Like: " FontFamily="NotoThick" TextColor="#befca6" FontSize="12" HorizontalOptions="Start" Margin="4" />
+                                                    <Label Text="{Binding TimeOfDayApparentTemperature}" TextColor="#befca6" FontSize="12" FontFamily="NotoThick" HorizontalOptions="Start" Margin="4" />
                                                 </HorizontalStackLayout>
                                                 <HorizontalStackLayout>
-                                                    <Label Text="Cloud Cover: " FontFamily="ManFont" TextColor="#befca6" FontSize="12" HorizontalOptions="Start" Margin="4" />
-                                                    <Label Text="{Binding TimeOfDayCloudCover}" TextColor="#befca6" FontSize="12" FontFamily="ManFont" HorizontalOptions="Start" Margin="4" />
+                                                    <Label Text="Cloud Cover: " FontFamily="NotoThick" TextColor="#befca6" FontSize="12" HorizontalOptions="Start" Margin="4" />
+                                                    <Label Text="{Binding TimeOfDayCloudCover}" TextColor="#befca6" FontSize="12" FontFamily="NotoThick" HorizontalOptions="Start" Margin="4" />
                                                 </HorizontalStackLayout>
                                                 <HorizontalStackLayout>
-                                                    <Label Text="Winds: " FontFamily="ManFont" TextColor="#befca6" FontSize="12" HorizontalOptions="Start" Margin="4" />
-                                                    <Label Text="{Binding TimeOfDayWind}" TextColor="#befca6" FontSize="12" FontFamily="ManFont" HorizontalOptions="Start" Margin="4" />
+                                                    <Label Text="Winds: " FontFamily="NotoThick" TextColor="#befca6" FontSize="12" HorizontalOptions="Start" Margin="4" />
+                                                    <Label Text="{Binding TimeOfDayWind}" TextColor="#befca6" FontSize="12" FontFamily="NotoThick" HorizontalOptions="Start" Margin="4" />
                                                 </HorizontalStackLayout>
                                                 <HorizontalStackLayout>
-                                                    <Label Text="Gusts: " FontFamily="ManFont" TextColor="#befca6" FontSize="12" HorizontalOptions="Start" Margin="4" />
-                                                    <Label Text="{Binding TimeOfDayGust}" TextColor="#befca6" FontSize="12" FontFamily="ManFont" HorizontalOptions="Start" Margin="4" />
+                                                    <Label Text="Gusts: " FontFamily="NotoThick" TextColor="#befca6" FontSize="12" HorizontalOptions="Start" Margin="4" />
+                                                    <Label Text="{Binding TimeOfDayGust}" TextColor="#befca6" FontSize="12" FontFamily="NotoThick" HorizontalOptions="Start" Margin="4" />
                                                 </HorizontalStackLayout>
                                                     </VerticalStackLayout>-->
 

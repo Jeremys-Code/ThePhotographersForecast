@@ -1,5 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using SkiaSharp.Extended.UI.Controls;
+using System.Collections.ObjectModel;
+using System.Text;
 using ThePhotographersForecast.Services;
 
 namespace ThePhotographersForecast.Models;
@@ -8,11 +10,24 @@ namespace ThePhotographersForecast.Models;
 public partial class NwsWeatherModel : ObservableObject
 {
     [ObservableProperty]
-    public partial NwsDailyForecast[] DailyForecasts { get; set; }
+    public partial PhotoLocation SelectedLocation { get; set; } = new PhotoLocation();
     [ObservableProperty]
-    public partial NwsHourlyForecast[] HourlyForecasts { get; set; }
+    public partial TimeZoneInfo Timezone { get; set; }
     [ObservableProperty]
-    public partial NwsHourlySupplemental[] HourlySupplementals { get; set; }
+    public partial int TimezoneOffsetSeconds { get; set; }
+
+    public double HourlyTemperatureChangeRate { get; set; }
+    [ObservableProperty]
+    public partial NwsDailyForecast[] DailyForecasts { get; set; } = Array.Empty<NwsDailyForecast>();
+    [ObservableProperty]
+    public partial NwsHourlyForecast[] HourlyForecasts { get; set; } = Array.Empty<NwsHourlyForecast>();
+    [ObservableProperty]
+    public partial NwsHourlySupplemental[] HourlySupplementals { get; set; } = Array.Empty<NwsHourlySupplemental>();
+    [ObservableProperty]
+    public partial NwsTimeOfDayForecast[]? TimeOfDayForecasts { get; set; }
+    [ObservableProperty]
+    public partial ObservableCollection<WeatherStatementsValue> StormSummary { get; set; } = new ObservableCollection<WeatherStatementsValue>();
+
 
     public NwsWeatherModel()
     {
@@ -24,9 +39,22 @@ public partial class NwsWeatherModel : ObservableObject
         if (_nwsData == null)
             throw new ArgumentNullException(nameof(_nwsData), "Source object cannot be null.");
 
-        DailyForecasts = _nwsData.DailyForecasts.ToArray();
-        HourlyForecasts = _nwsData.HourlyForecasts.ToArray();
-        HourlySupplementals = _nwsData.HourlySupplementals.ToArray();
+        SelectedLocation = _nwsData.SelectedLocation;
+        Timezone = _nwsData.Timezone;
+        TimezoneOffsetSeconds = _nwsData.TimezoneOffsetSeconds;
+        DailyForecasts = new NwsDailyForecast[_nwsData.DailyForecasts.Length];
+        for (int i = 0; i < _nwsData.DailyForecasts.Length; i++) { DailyForecasts[i] = _nwsData.DailyForecasts[i]; }
+        ;
+        HourlyForecasts = new NwsHourlyForecast[_nwsData.HourlyForecasts.Length];
+        for (int h = 0; h < _nwsData.HourlyForecasts.Length; h++) { HourlyForecasts[h] = _nwsData.HourlyForecasts[h]; }
+        ;
+        HourlySupplementals = new NwsHourlySupplemental[_nwsData.HourlySupplementals.Length];
+        for (int h = 0; h < _nwsData.HourlySupplementals.Length; h++) { HourlySupplementals[h] = _nwsData.HourlySupplementals[h]; }
+        if (_nwsData.TimeOfDayForecasts != null)
+        {
+            TimeOfDayForecasts = _nwsData.TimeOfDayForecasts != null ? _nwsData.TimeOfDayForecasts.ToArray() : Array.Empty<NwsTimeOfDayForecast>();
+        }
+
     }
 }
 public class NwsDailyForecast
@@ -42,8 +70,16 @@ public class NwsDailyForecast
     public string Name { get; set; }
 
     public bool IsDaytime { get; set; }
-    public double Temperature { get; set; }
-    public string TemperatureUnit { get; set; }
+
+    public double Temperature
+    {
+        get => field;
+        set
+        {
+            field = (int)Math.Round(value * 1.8 + 32);
+        }
+    }
+    public string TemperatureUnit => "°F";
 
     public string TempAndUnit => GetTempString();
     public double ChanceOfPrecipitation { get; set; }
@@ -56,7 +92,7 @@ public class NwsDailyForecast
 
     public string DetailForecast { get; set; }
 
-    public WindSpeedValue WindSpeed { get; set; }
+    public DailyWindSpeedValue WindSpeed { get; set; }
 
     public string WindDirection { get; set; }
     public WindGustValue? WindGusts { get; set; }
@@ -66,8 +102,13 @@ public class NwsDailyForecast
 
     public SKFileLottieImageSource SkDailyAnimation { get; set; }
 
+    public string HighTemperature { get; set; }
+    public string LowTemperature { get; set; }
+
     public NwsHourlyForecast[] HourlyWeathers { get; set; }
+    public NwsTimeOfDayForecast[] TimeOfDayForecasts { get; set; }
     public NwsHourlySupplemental[] SupplementalData { get; set; }
+    public LinearGradientBrush? SkyColor { get; set; }
 
     public string EnrichedForecast { get; set; }
 
@@ -85,7 +126,7 @@ public class NwsDailyForecast
     }
     private string GetTempString()
     {
-        return $"{(int)Math.Round(this.Temperature, 0)}{this.TemperatureUnit ?? string.Empty}";
+        return $"{this.Temperature}{this.TemperatureUnit}";
     }
 
     //private string GetHighLowStatement()
@@ -118,7 +159,6 @@ public class NwsHourlyForecast
     public RelativeHumidityHourly RelativeHumidity { get; set; }
     public WindSpeedHourly WindSpeed { get; set; }
     public WindGustHourly? WindGust { get; set; }
-
     public string WindDirection { get; set; }
     public string Icon { get; set; }
     public string ShortForecast { get; set; }
@@ -128,24 +168,31 @@ public class NwsHourlyForecast
     public string TimeOfDay => TimeOfDayService.CalcTimeOfDay(this.StartTime.Hour).ToString();
     public string TempAndUnit => GetTempString();
     public bool IsHigh { get; set; } = false;
-
     public bool IsLow { get; set; } = false;
-
+    public ProbabilityOfThunderValue ProbabilityOfThunder { get; set; }
+    public QuantitativePrecipitationValue QuantitativePrecipitation { get; set; }
+    public WeatherStatementsValue WeatherStatement { get; set; }
+    public SkyCoverValue SkyCover { get; set; }
     public NwsHourlySupplemental? Supplemental { get; set; }
     public SKFileLottieImageSource SkHourlyAnimation { get; set; }
     public string WindStatement => BuildWindStatement();
-
     public string IntroTimeOfDay => TimeOfDayService.TimesOfDayGreeting(this.StartTime.Hour);
-
     private string GetTempString()
     {
-        return $"{(int)Math.Round(this.Temperature.Value, 0)}{this.Temperature.UnitCode}";
+        return $"{this.Temperature.Value}{this.Temperature.UnitCode}";
     }
 
     public class TemperatureHourly
     {
-        public string UnitCode { get; set; }
-        public double Value { get; set; }
+        public string UnitCode => "°F";
+        public double Value
+        {
+            get => field;
+            set
+            {
+                field = (int)Math.Round(value * 1.8 + 32);
+            }
+        }
     }
 
     public class ProbabilityOfPrecipitationHourly
@@ -157,7 +204,14 @@ public class NwsHourlyForecast
     public class DewPointHourly
     {
         public string UnitCode { get; set; }
-        public double Value { get; set; }
+        public double Value
+        {
+            get => field;
+            set
+            {
+                field = Math.Round(value * 1.8 + 32);
+            }
+        }
     }
 
     public class RelativeHumidityHourly
@@ -168,36 +222,132 @@ public class NwsHourlyForecast
 
     public class WindSpeedHourly
     {
-        public string UnitCode { get; set; }
-        public double Value { get; set; }
+        public string UnitCode => "mph";
+        public double Value
+        {
+            get => field;
+            set
+            {
+                field = Math.Round((value / 1.609344), 1);
+            }
+        }
     }
 
     public class WindGustHourly
     {
-        public string GustStatement { get; set; }
-        public string UnitCode { get; set; }
-        public double Value { get; set; }
+        public string GustStatement => $", and gusts up to {Value}{UnitCode}";
+        public string UnitCode => "mph";
+        public double Value
+        {
+            get => field;
+            set
+            {
+                field = Math.Round((value / 1.609344), 1);
+            }
+        }
     }
 
     private string BuildWindStatement()
     {
-
-        return String.Concat("Winds from the ", this.WindDirection, " at ", this.WindSpeed.Value, " mph");
+        var wind = this.WindDirection.Substring(0, 1).ToUpperInvariant() + this.WindDirection.Substring(1, this.WindDirection.Length - 1).ToLowerInvariant();
+        string intensity = this.WindSpeed.Value switch
+        {
+            >= 0 and <= 1 => "calm winds",
+            >= 1 and <= 3 => "light airy winds",
+            >= 4 and <= 7 => "light winds",
+            >= 8 and <= 12 => "gentle winds",
+            >= 13 and <= 18 => "moderate winds",
+            >= 19 and <= 24 => "steady winds",
+            >= 25 and <= 31 => "strong winds",
+            >= 32 and <= 38 => "near gale force winds",
+            >= 39 and <= 46 => "gale force winds",
+            >= 47 and <= 54 => "severe gale force winds",
+            >= 55 and <= 63 => "storm winds",
+            >= 64 and <= 72 => "violent storm winds",
+            >= 73 => "hurricane force winds",
+            _ => null
+        };
+        var wb = new StringBuilder();
+        wb.Append($"There are {intensity} coming from the {this.WindDirection} at {this.WindSpeed.Value}{this.WindSpeed.UnitCode}");
+        if (this.WindGust != null && this.WindGust.Value > 0)
+        {
+            wb.Append($", and wind gusts up to {this.WindGust.Value}{this.WindGust.UnitCode}.");
+            return wb.ToString();
+        }
+        wb.Append(".");
+        return wb.ToString();
     }
 }
-
 public class NwsTimeOfDayForecast
 {
     public NwsHourlyForecast[] Forecasts { get; set; }
-    public string Condition { get; set; }
+    public string TimeOfDayName => $"Forecast for {this.StartTime.ToString("dddd, MMMM dd")} {this.TimeOfDay}";
     public DateTime StartTime { get; set; }
     public DateTime EndTime { get; set; }
-    public TimeOfDayService.TimeOfDay TimeOfDay => TimeOfDayService.GetTimeOfDay(this.StartTime.Hour);
+    public string TimeOfDayForecast { get; set; }
+    public string TimeOfDay { get; set; }
+    public LinearGradientBrush TimeOfDayGradientBrush { get; set; }
+    public SKFileLottieImageSource SKTimeOfDayAnimation { get; set; }
+    public ObservableCollection<LottieAnimation> SkLottieCollection { get; set; }
+    public ObservableCollection<EventTime> TimeOfDayEvents { get; set; }
+    public string TimeOfDayTemperature { get; set; }
+    public ObservableCollection<WeatherStatementsValue> Weathers { get; set; }
+    public Color TimeOfDayTextColor => TimeOfDayService.GetTimeOfDayTextColor(StartTime.Hour);
+}
+
+// Layers: Storm (Thunder & Precipitation) Weather; Sky Cover; Wind; Outdoors (Temperature, Dew Point, Relative Humidity); HeatIndex, WindChill 
+public partial class ForecastLayers : ObservableObject
+{
+    [ObservableProperty]
+    public partial string LayerName { get; set; }
+    [ObservableProperty]
+    public partial string Statement { get; set; }
+    [ObservableProperty]
+    public partial TimeAndQuantity Mean { get; set; }
+    [ObservableProperty]
+    public partial TimeAndQuantity Min { get; set; }
+    [ObservableProperty]
+    public partial TimeAndQuantity Max { get; set; }
+    [ObservableProperty]
+    public partial double Total { get; set; }
+    [ObservableProperty]
+    public partial TimeAndQuantity BeginStorm { get; set; }
+    [ObservableProperty]
+    public partial TimeAndQuantity EndStorm { get; set; }
+    [ObservableProperty]
+    public partial int Duration { get; set; }
+}
+
+public class TimeAndQuantity
+{
+    public double Quantity { get; set; }
+    public string Intensity { get; set; }
+    public DateTime Time { get; set; }
+}
+
+public partial class ForecastItem : ObservableObject
+{
+    [ObservableProperty]
+    public partial int Order { get; set; }
+    [ObservableProperty]
+    public partial string Statement { get; set; }
+    [ObservableProperty]
+    public partial string Condition { get; set; }
+    [ObservableProperty]
+    public partial double Thunder { get; set; }
+    [ObservableProperty]
+    public partial double Precipitation { get; set; }
+    [ObservableProperty]
+    public partial DateTime StartTime { get; set; }
+    [ObservableProperty]
+    public partial DateTime EndTime { get; set; }
 }
 
 public class NwsHourlySupplemental
 {
     public DateTime Time { get; set; }
+    public string[] Weathers { get; set; }
+    public string SupplementalWeatherStatement { get; set; }
     public string TimeOfDay => Services.TimeOfDayService.CalcTimeOfDay(this.Time.Hour);
     public TemperatureValue? Temperature { get; set; }
     public ApparentTemperatureValue? ApparentTemperature { get; set; }
@@ -208,8 +358,10 @@ public class NwsHourlySupplemental
     public HeatRiskValue? HeatRisk { get; set; }
     public SkyCoverValue? Skycover { get; set; }
     public WindchillValue? WindChill { get; set; }
+    public WindDirectionValue? WindDirection { get; set; }
+    public WindSpeedValue? WindSpeed { get; set; }
     public WindGustValue? WindGust { get; set; }
-    public WeatherStatementsValue? Weather { get; set; }
+    public WeatherStatementsValue?[] Weather { get; set; }
     public MinTemperatureValue? MinTemperature { get; set; }
     public MaxTemperatureValue? MaxTemperature { get; set; }
     public RelativeHumidityValue? RelativeHumidity { get; set; }
@@ -232,63 +384,126 @@ public class NwsLayer
 
 public class TemperatureValue
 {
-    public string UnitCode { get; set; }
-    public double Value { get; set; }
+    public int Duration { get; set; }
+    public string UnitCode => "°F";
+    public double Value
+    {
+        get => field;
+        set
+        {
+            field = Math.Round(value * 1.8 + 32);
+        }
+    }
 }
 
 public class DewPointValue
 {
-    public string UnitCode { get; set; }
-    public double Value { get; set; }
+    public int Duration { get; set; }
+    public string UnitCode => "°F";
+    public double Value
+    {
+        get => field;
+        set
+        {
+            field = Math.Round(value * 1.8 + 32);
+        }
+    }
 }
 
 public class MaxTemperatureValue
 {
-    public string UnitCode { get; set; }
-    public double Value { get; set; }
+    public int Duration { get; set; }
+    public string UnitCode => "°F";
+    public double Value
+    {
+        get => field;
+        set
+        {
+            field = Math.Round(value * 1.8 + 32);
+        }
+    }
 }
 public class MinTemperatureValue
 {
-    public string UnitCode { get; set; }
-    public double Value { get; set; }
+    public int Duration { get; set; }
+    public string UnitCode => "°F";
+    public double Value
+    {
+        get => field;
+        set
+        {
+            field = Math.Round(value * 1.8 + 32);
+        }
+    }
 }
 
 public class RelativeHumidityValue
 {
+    public int Duration { get; set; }
     public string UnitCode { get; set; }
     public double Value { get; set; }
 }
 
 public class ApparentTemperatureValue
 {
-    public string UnitCode { get; set; }
-    public double Value { get; set; }
+    public int Duration { get; set; }
+    public string UnitCode => "°F";
+    public double Value
+    {
+        get => field;
+        set
+        {
+            field = Math.Round(value * 1.8 + 32);
+        }
+    }
 }
 
 public class WetBulbGlobeTemperatureValue
 {
+    public int Duration { get; set; }
     public string UnitCode { get; set; }
-    public double Value { get; set; }
+    public double Value
+    {
+        get => field;
+        set
+        {
+            field = Math.Round(value * 1.8 + 32);
+        }
+    }
 
 }
 
 public class HeatIndexValue
 {
+    public int Duration { get; set; }
     public string UnitCode { get; set; }
-    public double Value { get; set; }
+    public double Value
+    {
+        get => field;
+        set
+        {
+            field = Math.Round(value * 1.8 + 32);
+        }
+    }
 }
 
 public class WindchillValue
 {
-    public string UnitCode { get; set; }
-    public double Value { get; set; }
-    public string StatementC => $"{Math.Round(Value, 0)}{UnitCode}";
-    public string StatementF => $"{Math.Round((Value) * 1.8 + 32, 0)}°F";
-    public double ValueF => (Value) * 1.8 + 32;
+    public int Duration { get; set; }
+    public string UnitCode => "°F";
+    public double Value
+    {
+        get => field;
+        set
+        {
+            field = Math.Round(value * 1.8 + 32);
+        }
+    }
 }
 
 public class SkyCoverValue
 {
+    public int Duration { get; set; }
     public string UnitCode { get; set; }
     public double Value { get; set; }
     public DateTime Time { get; set; }
@@ -299,7 +514,7 @@ public class SkyCoverValue
         string desc = string.Empty;
         if (this.Value is double s)
         {
-            if (s < 10) desc = $"A clear{(this.Time.Hour >= 6 || this.Time.Hour < 18 ? " sunny day" : " stary night")}.";
+            if (s < 10) desc = $"Look up to the sky and see a clear{(this.Time.Hour >= 6 || this.Time.Hour < 18 ? " sunny day" : " stary night")}.";
             if (10 <= s && s < 30) desc = $"A mostly {(this.Time.Hour >= 6 || this.Time.Hour < 18 ? "sunny day" : "stary night")}.";
             if (30 <= s && s < 70) desc = $"A partly cloudy {(this.Time.Hour >= 6 || this.Time.Hour < 18 ? "day" : " night")}.";
             if (70 <= s && s < 90) desc = $"A mostly cloudy {(this.Time.Hour >= 6 || this.Time.Hour < 18 ? "day" : " night")}.";
@@ -311,22 +526,124 @@ public class SkyCoverValue
 
 public class WindDirectionValue
 {
+    public int Duration { get; set; }
     public string UnitCode { get; set; }
     public int Value { get; set; }
+    public string Description => WindDirection(Value);
+    private string WindDirection(int windDirection)
+    {
+        string direction = string.Empty;
+        switch (windDirection)
+        {
+            case >= 349 or < 11:
+                direction = "North";
+                break;
+            case >= 11 and < 34:
+                direction = "North-Northeast";
+                break;
+            case >= 34 and < 56:
+                direction = "Northeast";
+                break;
+            case >= 56 and < 79:
+                direction = "East-Northeast";
+                break;
+            case >= 79 and < 101:
+                direction = "East";
+                break;
+            case >= 101 and < 124:
+                direction = "East-Southeast";
+                break;
+            case >= 124 and < 146:
+                direction = "Southeast";
+                break;
+            case >= 146 and < 169:
+                direction = "South-Southeast";
+                break;
+            case >= 169 and < 191:
+                direction = "South";
+                break;
+            case >= 191 and < 214:
+                direction = "South-Southwest";
+                break;
+            case >= 214 and < 236:
+                direction = "Southwest";
+                break;
+            case >= 236 and < 259:
+                direction = "West-Southwest";
+                break;
+            case >= 259 and < 281:
+                direction = "West";
+                break;
+            case >= 281 and < 304:
+                direction = "West-Northwest";
+                break;
+            case >= 304 and < 326:
+                direction = "Northwest";
+                break;
+            case >= 326 and < 349:
+                direction = "North-Northwest";
+                break;
+        }
+        return direction;
+    }
 }
-
 public class WindSpeedValue
 {
-    public string UnitCode { get; set; }
-    public double Value { get; set; }
-    public double Max { get; set; }
-    public double Min { get; set; }
+    public int Duration { get; set; }
+    public string WindSpeedStatment => $" winds around {Value}{UnitCode}";
+    public string UnitCode => "mph";
+    public double Value
+    {
+        get => field;
+        set
+        {
+            field = Math.Round((value / 1.609344), 1);
+        }
+    }
+}
+public class DailyWindSpeedValue
+{
+    public string WindSpeedStatment => Value > 0 ? $" winds around {Value}{UnitCode}" : $" winds from {Min} to {Max}{UnitCode}";
+    public string UnitCode => "mph";
+    public double Value
+    {
+        get => field;
+        set
+        {
+            field = Math.Round((value / 1.609344), 1);
+        }
+    }
+    public double Max
+    {
+        get => field;
+        set
+        {
+            field = Math.Round((value / 1.609344), 1);
+        }
+    }
+    public double Min
+    {
+        get => field;
+        set
+        {
+            field = Math.Round((value / 1.609344), 1);
+        }
+    }
 }
 
 public class WindGustValue
 {
-    public string UnitCode { get; set; }
-    public double Value { get; set; }
+    public int Duration { get; set; }
+    public string GustStatement => $", and gust up to {Value}{UnitCode}.";
+    public string UnitCode => "mph";
+    public double Value
+    {
+        get => field;
+        set
+        {
+            field = Math.Round((value / 1.609344), 1);
+        }
+    }
 }
 
 public class Weather
@@ -340,15 +657,40 @@ public class WeatherValue
     public WeatherStatementsValue?[] Value { get; set; }
 }
 
-public class WeatherStatementsValue
+public partial class WeatherStatementsValue : ObservableObject
 {
-    public DateTime Time { get; set; }
-    public string Statement { get; set; }
-    public string Coverage { get; set; }
-    public string Intensity { get; set; }
-    public string Weather { get; set; }
-    public string[] Attributes { get; set; }
+    [ObservableProperty]
+    public partial int Duration { get; set; }
+    [ObservableProperty]
+    public partial DateTime Time { get; set; }
+    [ObservableProperty]
+    public partial string Statement { get; set; }
+    [ObservableProperty]
+    public partial string Coverage { get; set; }
+    [ObservableProperty]
+    public partial string Intensity { get; set; }
+    [ObservableProperty]
+    public partial string Weather { get; set; }
+    [ObservableProperty]
+    public partial string[] Attributes { get; set; }
+    public string Category => GetCategories(this.Weather);
+
+    private string GetCategories(string weather)
+    {
+        foreach (var p in Enum.GetValues(typeof(PrecipitationType)))
+        {
+            if (weather.StartsWith(p.ToString(), StringComparison.OrdinalIgnoreCase))
+            {
+                return p.ToString().ToLowerInvariant();
+            }
+        }
+        // Implement your logic to determine the category based on the weather string
+        return string.Empty;
+    }
+
 }
+
+
 
 public class VisibilityValue
 {
@@ -381,6 +723,7 @@ public class Heatrisk
 
 public class HeatRiskValue
 {
+    public int Duration { get; set; }
     public DateTime Time { get; set; }
     public string UnitCode { get; set; }
     public int Value { get; set; }
@@ -427,26 +770,53 @@ public class HeatRiskValue
 
 public class ProbabilityOfPrecipitationValue
 {
+    public int Duration { get; set; }
     public string UnitCode { get; set; }
     public double Value { get; set; }
 }
 
 public class QuantitativePrecipitationValue
 {
-    public string UnitCode { get; set; }
-    public double Value { get; set; }
+    public int Duration { get; set; }
+    public string UnitCode => Value > 1 ? "inches" : Value <= .1 ? @"less than 1/10th of an inch" : "inch";
+    public double Value
+    {
+        get => field;
+        set
+        {
+            field = Math.Round((value / 25.4), 1);
+        }
+    }
+    public DateTime Time { get; set; }
+    public string Description => $"{this.Value} {this.UnitCode}";
 }
 
 public class IceAccumulationValue
 {
+    public int Duration { get; set; }
     public string UnitCode { get; set; }
-    public double Value { get; set; }
+    public double Value
+    {
+        get => field;
+        set
+        {
+            field = Math.Round((value / 25.4), 1);
+        }
+    }
 }
 
 public class SnowFallAmountValue
 {
+    public int Duration { get; set; }
     public string UnitCode { get; set; }
-    public double Value { get; set; }
+    public double Value
+    {
+        get => field;
+        set
+        {
+            field = Math.Round((value / 25.4), 1);
+        }
+    }
 }
 
 public class SnowlevelValue
@@ -488,8 +858,18 @@ public class TransportWindDirectionValue
 
 public class MixingHeightValue
 {
-    public string UnitCode { get; set; }
-    public double Value { get; set; }
+    public int Duration { get; set; }
+    public string UnitCode => "ft";
+    public double Value
+    {
+        get => field;
+        set
+        {
+            var mixing = Math.Round(Value * 3.2808399, 1);
+            if (mixing <= 0) field = 0.0;
+            field = mixing;
+        }
+    }
 }
 
 public class HainesindexValue
@@ -558,8 +938,15 @@ public class WavePeriod2Value
 
 public class WindWaveHeightValue
 {
-    public string UnitCode { get; set; }
-    public double Value { get; set; }
+    public string UnitCode => "ft";
+    public double Value
+    {
+        get => field;
+        set
+        {
+            field = Math.Round((value / 3.2808399), 1);
+        }
+    }
 }
 
 public class Dispersionindex
@@ -634,9 +1021,18 @@ public class Grasslandfiredangerindex
 
 public class ProbabilityOfThunderValue
 {
-    public string UnitCode { get; set; }
+    public int Duration { get; set; }
+    public string UnitCode => "%";
     public double Value { get; set; }
-    public string description { get; set; }
+    public string Description => Value switch
+    {
+        > 75 => " there is an extremely high risk wide spread and intense thunderstorms with strong winds.",
+        > 50 and <= 75 => " there is a high risk of thunderstorms and strong winds.",
+        > 30 and <= 50 => " there is a moderate risk of thunderstorms and strong winds.",
+        > 10 and <= 30 => " there is a slight risk of scattered thunderstorms possible.",
+        > 1 and <= 10 => " there is a low chance of thunderstorms.",
+        _ => " No thunderstorms expected."
+    };
     public DateTime Time { get; set; }
 }
 
@@ -652,9 +1048,24 @@ public class Atmosphericdispersionindex
 
 public class LowVisibilityOccurrenceRiskIndexValue
 {
-    public string UnitCode { get; set; }
-    public double Value { get; set; }
-    public string description { get; set; }
+    public int Duration { get; set; }
+    public string UnitCode => "ft";
+    public double Value
+    {
+        get => field;
+        set
+        {
+            field = Math.Round((value * 3.2808399), 1);
+        }
+    }
+    public string Description => Value switch
+    {
+        1 or 2 or 3 => "Low risk of very low Visibility.",
+        4 or 5 or 6 => "Moderate risk of low Visibility.",
+        7 or 8 or 9 => "High risk of low Visibility.",
+        10 => "Exreme risk - very low Visibility expected.",
+        _ => "No low Visibility risk issued."
+    };
 }
 
 public class Stability
@@ -671,147 +1082,34 @@ public enum PrecipitationType
 {
     // Liquid water drops larger than 0.5 mm (0.02 in) in diameter.
     // The most common form, falling when air temperatures are above freezing.
-    Rain,
-    Rain_Showers,
+    rain,
     // Very fine, uniform droplets (<0.5 mm) that appear to float in the air but
     // fall to the ground. Often occurs with fog.
-    Drizzle,
-    Drizzle_Showers,
+    drizzle,
     // Transparent or translucent hard grains of ice, formed when raindrops
     // freeze before reaching the ground or refreeze after melting.
-    Ice_Pellets,
+    ice_pellets,
     // Balls or irregular lumps of ice, ≥¼ in (5 mm) in diameter, usually in
     // strong thunderstorms; ≥1 in (2.5 cm) indicates severe storms.
-    Hail,
+    hail,
     //  (Small Hail/Snow Pellets) – White, opaque, round or conical ice grains <¼ in (5 mm),
     //  often with a slushy texture.
-    Graupel,
+    graupel,
     // Crystalline ice particles, usually six‑pointed flakes, falling when the entire
     // atmospheric column is below freezing.
-    Snow,
-    Snow_Showers,
-    // Very small, opaque ice grains—essentially frozen drizzle.
-    Snow_Grain,
+    snow
+    // Very small, opaque ice grains—essentially frozen drizzle
     // Needles, columns, or plates falling in very cold air; also called “diamond dust,”
     // producing optical effects like light pillars.
-    Ice_Crystals,
-    Fog
 }
 
-public enum ShortForecastPhrase
+public enum NwsWeatherIntensity
 {
-    // Sky Conditions
-    Sunny,
-    MostlySunny,
-    PartlySunny,
-    Clear,
-    MostlyClear,
-    PartlyCloudy,
-    MostlyCloudy,
-    Cloudy,
-    IncreasingClouds,
-    DecreasingClouds,
-    BecomingSunny,
-    BecomingCloudy,
-    GradualClearing,
-    ClearingLate,
-
-    // Rain / Showers / Drizzle
-    Rain,
-    LightRain,
-    HeavyRain,
-    Showers,
-    RainShowers,
-    Drizzle,
-    Sprinkles,
-    IsolatedRain,
-    IsolatedShowers,
-    IsolatedDrizzle,
-    SlightChanceRain,
-    SlightChanceShowers,
-    SlightChanceDrizzle,
-    ScatteredRain,
-    ScatteredShowers,
-    ScatteredDrizzle,
-    AreasRain,
-    AreasShowers,
-    AreasDrizzle,
-    ChanceRain,
-    ChanceShowers,
-    ChanceDrizzle,
-    RainLikely,
-    ShowersLikely,
-    DrizzleLikely,
-
-    // Thunderstorms
-    Thunderstorms,
-    SevereThunderstorms,
-    IsolatedThunderstorms,
-    SlightChanceThunderstorms,
-    ScatteredThunderstorms,
-    AreasThunderstorms,
-    ChanceThunderstorms,
-    ThunderstormsLikely,
-
-    // Snow / Wintry Mix
-    Snow,
-    LightSnow,
-    HeavySnow,
-    SnowShowers,
-    FreezingRain,
-    FreezingDrizzle,
-    Sleet,
-    WintryMix,
-    IsolatedSnow,
-    SlightChanceSnow,
-    ScatteredSnow,
-    AreasSnow,
-    ChanceSnow,
-    SnowLikely,
-
-    // Fog / Visibility
-    Fog,
-    DenseFog,
-    FreezingFog,
-    DenseFreezingFog,
-    PatchyFog,
-    PatchyFreezingFog,
-    AreasFog,
-    AreasFreezingFog,
-    IsolatedFog,
-    IsolatedFreezingFog,
-
-    // Wind / Temperature
-    Breezy,
-    Windy,
-    VeryWindy,
-    Blustery,
-    Hot,
-    Cold,
-
-    // Obstructions
-    Haze,
-    Smoke,
-    BlowingDust,
-    BlowingSnow,
-    PatchyHaze,
-    AreasHaze,
-    IsolatedHaze,
-    PatchySmoke,
-    AreasSmoke,
-    IsolatedSmoke,
-
-    // Tropical / Hurricane
-    TropicalStormConditions,
-    TropicalStormConditionsPossible,
-    TropicalStormConditionsExpected,
-    TropicalStormOrHurricaneConditionsPossible,
-    HurricaneConditionsPossible,
-    HurricaneConditionsExpected,
-
-    // Frost
-    Frost,
-    PatchyFrost,
-    AreasFrost,
-    MorningFrost
+    light = 0,
+    very_light = 1,
+    moderate = 2,
+    heavy = 3
 }
+
+
+

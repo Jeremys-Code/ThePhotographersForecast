@@ -12,18 +12,14 @@ public class MappedHourly
     public bool IsDay { get; set; }
     public string TimeOfDay => Services.TimeOfDayService.CalcTimeOfDay(this.StartTime.Hour).ToString();
     public TemperatureValue Temperature { get; set; }
-    public string? WeatherStatements { get; set; }
     public bool IsDailyHigh { get; set; }
     public bool IsDailyLow { get; set; }
-    public ImageSource HourlyImageSource { get; set; } = ImageSource.FromFile("unknown.png");
     public SKFileLottieImageSource SkHourlyAnimation { get; set; }
     public string HourlyForecast { get; set; } = string.Empty;
     public EventTime[] Events { get; set; }
     public string TemperatureStatement { get; set; }
-    public string PtsiStatement { get; set; }
     public string SkyCoverStatement { get; set; }
     public string WindSpeedStatement { get; set; }
-    public string GustsStatement { get; set; }
     public string BriefForecast { get; set; }
     public string PrecipitationStatement { get; set; }
     public string StormStatement { get; set; }

@@ -8,9 +8,7 @@ namespace ThePhotographersForecast.Services
         {
             switch (hour)
             {
-                case int h when (0 <= h && h < 3):
-                    return "Early Hours";
-                case int h when (3 <= h && h < 6):
+                case int h when (0 <= h && h < 6):
                     return "Early Morning";
                 case int h when (6 <= h && h < 12):
                     return "Morning";
@@ -29,9 +27,7 @@ namespace ThePhotographersForecast.Services
         {
             switch (hour)
             {
-                case int h when (0 <= h && h < 3):
-                    return TimeOfDay.EarlyHours;
-                case int h when (3 <= h && h < 6):
+                case int h when (0 <= h && h < 6):
                     return TimeOfDay.EarlyMorning;
                 case int h when (6 <= h && h < 12):
                     return TimeOfDay.Morning;
@@ -49,9 +45,7 @@ namespace ThePhotographersForecast.Services
         {
             switch (hour)
             {
-                case int h when (0 <= h && h < 3):
-                    return "Good evening";
-                case int h when (3 <= h && h < 12):
+                case int h when (0 <= h && h < 12):
                     return "Good morning";
                 case int h when (12 <= h && h < 18):
                     return "Good afternoon";
@@ -66,9 +60,7 @@ namespace ThePhotographersForecast.Services
         {
             switch (hour)
             {
-                case int h when (0 <= h && h < 3):
-                    return (LinearGradientBrush)Application.Current.Resources["PeriodEarlyHours"];
-                case int h when (3 <= h && h < 6):
+                case int h when (0 <= h && h < 6):
                     return (LinearGradientBrush)Application.Current.Resources["PeriodEarlyMorning"];
                 case int h when (6 <= h && h < 12):
                     return (LinearGradientBrush)Application.Current.Resources["PeriodMorning"];
@@ -87,9 +79,7 @@ namespace ThePhotographersForecast.Services
         {
             switch (hour)
             {
-                case int h when (0 <= h && h < 3):
-                    return Colors.White;
-                case int h when (3 <= h && h < 6):
+                case int h when (0 <= h && h < 6):
                     return Colors.White;
                 case int h when (6 <= h && h < 12):
                     return Colors.Black;
@@ -108,7 +98,6 @@ namespace ThePhotographersForecast.Services
 
         public enum TimeOfDay
         {
-            EarlyHours,
             EarlyMorning,
             Morning,
             Afternoon,

@@ -1,18 +1,24 @@
-﻿using System.Text.Json;
+﻿using CommunityToolkit.Maui;
+using CommunityToolkit.Mvvm.ComponentModel;
+using System.Text.Json;
+using ThePhotographersForecast.Services;
+using ThePhotographersForecast.Services.JsonConverters;
 using ThePhotographersForecast.Shared;
 
 namespace ThePhotographersForecast.ApiClients
 {
-    public class GetApi : IGetApi
+    public class GetApi : ObservableObject, IGetApi
     {
         private string appDataDirectory = FileSystem.Current.AppDataDirectory;
-        private HttpClient _client;
+        private IHttpClientFactory _client = null;
         private IServiceProvider _service;
-        private ISession _session;
-        public void Initialize(IServiceProvider service, ISession session, IHttpClientFactory client)
+        [ObservableProperty]
+        public partial Session SharedSession { get; set }
+        public void Initialize(IServiceProvider service, Session sharedSession, IHttpClientFactory client)
         {
             _service = service;
-            _session = session;
+            SharedSession = sharedsession;
+            _client = client;
         }
 
         public async Task<T> RetrieveApiDataAsync<T>(HttpRequestMessage request)
@@ -26,7 +32,7 @@ namespace ThePhotographersForecast.ApiClients
                 fileName = uri.Host.Replace('.', '_');
             }
 
-            fileName += $"_{_session.StartDate.ToString("yyyy_MM_dd")}_{_session.EndDate.ToString("yyyy-MM-dd")}.json";
+            fileName += $"_{SharedSession.StartDate.ToString("yyyy_MM_dd")}_{SharedSession.EndDate.ToString("yyyy-MM-dd")}.json";
 
             foreach (var c in Path.GetInvalidFileNameChars())
                 fileName = fileName.Replace(c, '_');
@@ -38,6 +44,7 @@ namespace ThePhotographersForecast.ApiClients
                 var jsonOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
                 if (File.Exists(filePath))
                 {
+                    jsonOptions.GetConverter(typeof(NullNumberConverterFactory));
                     var cached = await File.ReadAllTextAsync(filePath);
                     return JsonSerializer.Deserialize<T>(cached, jsonOptions);
                 }
@@ -46,7 +53,7 @@ namespace ThePhotographersForecast.ApiClients
                 {
                     client.DefaultRequestHeaders.UserAgent.Add(new System.Net.Http.Headers.ProductInfoHeaderValue(@"ThePhotographersForecast/6.0"));
                     client.DefaultRequestHeaders.Accept.Clear();
-                    if (client.DefaultRequestHeaders.Host.Contains("weather.gov", StringComparison.OrdinalIgnoreCase))
+                    if (client.DefaultRequestHeaders.Host.Contains("api.weather.gov", StringComparison.OrdinalIgnoreCase))
                     {
                         client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue(@"application/geo+json"));
                     }

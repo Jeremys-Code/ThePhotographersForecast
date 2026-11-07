@@ -110,9 +110,8 @@ namespace ThePhotographersForecast.Models
         public SKFileLottieImageSource SkUvIndexIcon => GetSkUvIndex();
         private SKFileLottieImageSource GetSkUvIndex()
         {
-            return new SKFileLottieImageSource
-            {
-                File =
+
+            var lottieFile =
             this.UvIndexMax.Value switch
             {
                 1 => "uv_index_1.json",
@@ -128,8 +127,13 @@ namespace ThePhotographersForecast.Models
                 11 => "uv_index_11.json",
                 > 11 => "uv_index_11_plus.json",
                 _ => "uv_index.json",
-            }
             };
+
+            var animation = new SKFileLottieImageSource { File = lottieFile };
+
+
+            return animation;
+
         }
     }
     public class ForecastSummaries

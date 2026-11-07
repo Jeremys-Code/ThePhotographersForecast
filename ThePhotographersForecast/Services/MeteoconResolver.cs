@@ -64,9 +64,20 @@ namespace ThePhotographersForecast.Services
                 _ => isDay ? "clear_day" : "clear_night"
             };
             var lottieFile = $"{slug}.json";
-            var fileLocation = "meteocons/" + lottieFile;
+            var fileLocation = lottieFile;
 
-            return new SKFileLottieImageSource { File = fileLocation };
+            //string json = string.Empty;
+            //Task.Run(async () =>
+            //{
+            //    var stream = await FileSystem.Current.OpenAppPackageFileAsync(lottieFile);
+            //    using var reader = new StreamReader(stream);
+            //    json = await reader.ReadToEndAsync();
+            //});
+
+            var animation = new SKFileLottieImageSource { File = lottieFile };
+
+
+            return animation;
 
 
             //using var stream = await FileSystem.Current.OpenAppPackageFileAsync(Path.Combine("meteocons", lottieFile));
@@ -81,9 +92,13 @@ namespace ThePhotographersForecast.Services
         public static SKFileLottieImageSource ResolveMoons(string phase)
         {
             var lottieFile = phase.ToLowerInvariant().Replace("-", "_").Replace(" ", "_") switch { "first_quarter" => "moon_first_quarter.json", "full_moon" => "moon_full.json", "last_quarter" => "moon_last_quarter.json", "waning_crescent" => "moon_waning_crescent.json", "waning_gibbous" => "moon_waning_gibbous.json", "waxing_crescent" => "moon_waxing_crescent.json", "waxing_gibbous" => "moon_waxing_gibbous.json", "new_moon" => "moon_new.json", _ => "unavailable.json" };
-            var fileLocation = "meteocons/" + lottieFile;
 
-            return new SKFileLottieImageSource { File = fileLocation };
+            var animation = new SKFileLottieImageSource { File = lottieFile };
+
+
+            return animation;
+            //            return new SKFileLottieImageSource { File = json };
+
 
 
             //using var stream = await FileSystem.Current.OpenAppPackageFileAsync(Path.Combine("meteocons", lottieFile));
@@ -123,7 +138,7 @@ namespace ThePhotographersForecast.Services
 
 
 
-            var json = animation switch
+            var lottieFile = animation switch
             {
                 "skc" => isDay ? "clear_day" : "clear_night",
                 "few" => isDay ? "mostly_clear_day" : "mostly_clear_night",
@@ -161,7 +176,16 @@ namespace ThePhotographersForecast.Services
                 "fog" => isDay ? "fog_day" : "fog_night",
                 _ => "not_available"
             } + ".json";
-            return new SKFileLottieImageSource { File = json };
+            //  string json = string.Empty;
+            //Task.Run(async () =>
+            //{
+            //    var stream = await FileSystem.Current.OpenAppPackageFileAsync(lottieFile);
+            //    using var reader = new StreamReader(stream);
+            //    json = await reader.ReadToEndAsync();
+            //});
+
+            var skLottie = new SKFileLottieImageSource { File = lottieFile };
+            return skLottie;
 
         }
     }

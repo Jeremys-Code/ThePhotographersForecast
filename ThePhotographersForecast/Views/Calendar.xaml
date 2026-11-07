@@ -123,7 +123,7 @@
                                                         <VerticalStackLayout Grid.Row="0" x:Name="EventDisplay">
                                                             <HorizontalStackLayout>
                                                                 <Label x:Name="EventNameLabel" Text="Event: " FontSize="18" FontFamily="NotoSans"/>
-                                                                <Label x:Name="EventName" Text="{Binding EventName}" FontSize="20" FontFamily="ManFont"/>
+                                                                <Label x:Name="EventName" Text="{Binding EventName}" FontSize="20" FontFamily="NotoThick"/>
                                                             </HorizontalStackLayout>
                                                             <HorizontalStackLayout>
                                                                 <Label x:Name="EventTimeLable" Text="Event: " FontSize="18" FontFamily="NotoSans"/>

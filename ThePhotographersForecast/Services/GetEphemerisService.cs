@@ -1,4 +1,5 @@
 ﻿using SunCalcSharp;
+using System.Collections.ObjectModel;
 using ThePhotographersForecast.Models;
 using ThePhotographersForecast.Shared;
 
@@ -6,42 +7,50 @@ namespace ThePhotographersForecast.Services
 {
     public partial class GetEphemerisService : IGetEphemerisService
     {
-        public Session SharedSession { get; set; }
-        public GetEphemerisService(Session sharedSession)
+        private ISession _session;
+        public GetEphemerisService(ISession session)
         {
-            SharedSession = sharedSession;
+            _session = session;
         }
 
-        public async Task<EventModel[]> GetDailyAstronomicalEventsAsync(double latitude, double longitude, NwsWeatherModel nws, int selectedTimeZoneOffset)
+        public async Task<EventModel[]> GetDailyAstronomicalEventsAsync(double latitude, double longitude, NwsWeatherModel nws)
         {
+            var masterEvents = new List<EventTime>();
             var eventModels = new List<EventModel>();
-            if (SharedSession.Dates == null || SharedSession.Dates.Length == 0)
+            int selectedTimeZoneOffset = nws.TimezoneOffsetSeconds;
+            if (_session.Dates == null || _session.Dates.Length == 0)
             {
                 throw new ApplicationException("There are no photo shoot dates selected. At least one date needs to be selected.");
                 return null;
             }
             //Creates the EventModel for each Photo Day
-            for (int e = 0; e < SharedSession.Dates.Length; e++)
+            for (int e = 0; e < _session.Dates.Length; e++)
             {
-                var date = SharedSession.Dates[e].Date.AddSeconds(SharedSession.SelectedTimeZoneOffset * -1);
+
+                var date = _session.Dates[e].Date.AddSeconds(_session.SelectedTimeZoneOffset * -1);
                 var eventList = new List<EventTime>();
                 var dailyEvents = SunCalc.GetTimes(date, latitude, longitude);
                 var moonEvents = MoonCalc.GetMoonTimes(date, latitude, longitude);
                 var moonIllumination = MoonCalc.GetMoonIllumination(date);
+                var sunPosition = SunCalc.GetPosition(date, latitude, longitude);
                 if (dailyEvents == null || moonEvents == null || moonIllumination == null) return null;
                 var astronomicalTwilightBegins = dailyEvents.AstronomicalTwilightBegins.AddSeconds(selectedTimeZoneOffset);
                 var nauticalTwilightBegins = dailyEvents.NauticalTwilightBegins.AddSeconds(selectedTimeZoneOffset);
-                var blueHourBegins = dailyEvents.BlueHourBegins.AddSeconds(selectedTimeZoneOffset);
+                var morningBlueHourBegins = dailyEvents.MorningBlueHourBegins.AddSeconds(selectedTimeZoneOffset);
+                var morningBlueHourEnds = dailyEvents.MorningBlueHourEnds.AddSeconds(selectedTimeZoneOffset);
                 var civilTwilightBegins = dailyEvents.CivilTwilightBegins.AddSeconds(selectedTimeZoneOffset);
-                var goldenHourBegins = dailyEvents.GoldenHourBegins.AddSeconds(selectedTimeZoneOffset);
+                var morningGoldenHourBegins = dailyEvents.MorningGoldenHourBegins.AddSeconds(selectedTimeZoneOffset);
+                var morningGoldenHourEnds = dailyEvents.MorningGoldenHourEnds.AddSeconds(selectedTimeZoneOffset);
                 var sunrise = dailyEvents.Sunrise.AddSeconds(selectedTimeZoneOffset);
                 var sunriseEnds = dailyEvents.SunriseEnd.AddSeconds(selectedTimeZoneOffset);
                 var solarNoon = dailyEvents.SolarNoon.AddSeconds(selectedTimeZoneOffset);
                 var sunsetBegins = dailyEvents.SunsetBegins.AddSeconds(selectedTimeZoneOffset);
                 var sunset = dailyEvents.Sunset.AddSeconds(selectedTimeZoneOffset);
-                var goldenHourEnds = dailyEvents.GoldenHourEnds.AddSeconds(selectedTimeZoneOffset);
+                var eveningGoldenHourBegins = dailyEvents.EveningGoldenHourBegins.AddSeconds(selectedTimeZoneOffset);
+                var eveningGoldenHourEnds = dailyEvents.EveningGoldenHourEnds.AddSeconds(selectedTimeZoneOffset);
+                var eveningBlueHourBegins = dailyEvents.EveningBlueHourBegins.AddSeconds(selectedTimeZoneOffset);
                 var civilTwilightEnds = dailyEvents.CivilTwilightEnds.AddSeconds(selectedTimeZoneOffset);
-                var blueHourEnds = dailyEvents.BlueHourEnds.AddSeconds(selectedTimeZoneOffset);
+                var eveningBlueHourEnds = dailyEvents.EveningBlueHourEnds.AddSeconds(selectedTimeZoneOffset);
                 var nauticalTwilightEnds = dailyEvents.NauticalTwilightEnds.AddSeconds(selectedTimeZoneOffset);
                 var astronomicalTwilightEnds = dailyEvents.AstronomicalTwilightEnds.AddSeconds(selectedTimeZoneOffset);
                 var midnight = dailyEvents.Midnight.AddSeconds(selectedTimeZoneOffset);
@@ -66,7 +75,6 @@ namespace ThePhotographersForecast.Services
                 {
                     EventName = "Astronomical Twilight Begins",
                     AstroTime = astronomicalTwilightBegins,
-                    //Forecast = nws.HourlyForecasts.Where(h => h.StartTime == GetWeatherHour(astronomicalTwilightBegins)).FirstOrDefault() ?? new NwsHourlyForecast(),
                     WeatherHour = GetWeatherHour(astronomicalTwilightBegins)
                 };
                 eventList.Add(astroBegins);
@@ -74,40 +82,37 @@ namespace ThePhotographersForecast.Services
                 {
                     EventName = "Nautical Twilight Begins",
                     AstroTime = nauticalTwilightBegins,
-                    //Forecast = nws.HourlyForecasts.Where(h => h.StartTime == GetWeatherHour(nauticalTwilightBegins)).FirstOrDefault() ?? new NwsHourlyForecast(),
                     WeatherHour = GetWeatherHour(nauticalTwilightBegins)
                 };
                 eventList.Add(nauticalBegins);
-                var blueHourStart = new EventTime
+                var morningBlueHour = new EventTime
                 {
-                    EventName = "Blue Hour Begins",
-                    AstroTime = blueHourBegins,
-                    //Forecast = nws.HourlyForecasts.Where(h => h.StartTime == GetWeatherHour(blueHourBegins)).FirstOrDefault() ?? new NwsHourlyForecast(),
-                    WeatherHour = GetWeatherHour(blueHourBegins)
+                    EventName = "Morning Blue Hour",
+                    AstroTime = morningBlueHourBegins,
+                    OtherTime = morningBlueHourEnds,
+                    WeatherHour = GetWeatherHour(morningBlueHourBegins)
                 };
-                eventList.Add(blueHourStart);
+                eventList.Add(morningBlueHour);
                 var civilBegins = new EventTime
                 {
                     EventName = "Civil Twilight Begins",
                     AstroTime = civilTwilightBegins,
-                    //Forecast = nws.HourlyForecasts.Where(h => h.StartTime == GetWeatherHour(civilTwilightBegins)).FirstOrDefault() ?? new NwsHourlyForecast(),
                     WeatherHour = GetWeatherHour(civilTwilightBegins)
                 };
                 eventList.Add(civilBegins);
-                var goldenHourStart = new EventTime
+                var morningGoldenHour = new EventTime
                 {
-                    EventName = "Golden Hour Begins",
-                    AstroTime = goldenHourBegins,
-                    //Forecast = nws.HourlyForecasts.Where(h => h.StartTime == GetWeatherHour(goldenHourBegins)).FirstOrDefault() ?? new NwsHourlyForecast(),
-                    WeatherHour = GetWeatherHour(goldenHourBegins)
+                    EventName = "Morning Golden Hour",
+                    AstroTime = morningGoldenHourBegins,
+                    OtherTime = morningGoldenHourEnds,
+                    WeatherHour = GetWeatherHour(morningGoldenHourBegins)
                 };
-                eventList.Add(goldenHourStart);
+                eventList.Add(morningGoldenHour);
                 var sunriseEvent = new EventTime
                 {
                     EventName = "Sunrise",
                     AstroTime = sunrise,
                     OtherTime = sunriseEnds,
-                    //Forecast = nws.HourlyForecasts.Where(h => h.StartTime == GetWeatherHour(sunrise)).FirstOrDefault() ?? new NwsHourlyForecast(),
                     WeatherHour = GetWeatherHour(sunrise)
                 };
                 eventList.Add(sunriseEvent);
@@ -115,7 +120,6 @@ namespace ThePhotographersForecast.Services
                 {
                     EventName = "Solar Noon",
                     AstroTime = solarNoon,
-                    //Forecast = nws.HourlyForecasts.Where(h => h.StartTime == GetWeatherHour(solarNoon)).FirstOrDefault() ?? new NwsHourlyForecast(),
                     WeatherHour = GetWeatherHour(solarNoon)
                 };
                 eventList.Add(solarNoonEvent);
@@ -124,39 +128,36 @@ namespace ThePhotographersForecast.Services
                     EventName = "Sunset",
                     AstroTime = sunsetBegins,
                     OtherTime = sunset,
-                    //Forecast = nws.HourlyForecasts.Where(h => h.StartTime == GetWeatherHour(sunset)).FirstOrDefault() ?? new NwsHourlyForecast(),
                     WeatherHour = GetWeatherHour(sunset)
                 };
                 eventList.Add(sunsetEvent);
-                var goldenHourEndsEvent = new EventTime
+                var eveningGoldenHour = new EventTime
                 {
-                    EventName = "Golden Hour Ends",
-                    AstroTime = goldenHourEnds,
-                    //Forecast = nws.HourlyForecasts.Where(h => h.StartTime == GetWeatherHour(goldenHourEnds)).FirstOrDefault() ?? new NwsHourlyForecast(),
-                    WeatherHour = GetWeatherHour(goldenHourEnds)
+                    EventName = "Eveing Golden Hour",
+                    AstroTime = eveningGoldenHourBegins,
+                    OtherTime = eveningGoldenHourEnds,
+                    WeatherHour = GetWeatherHour(eveningGoldenHourBegins)
                 };
-                eventList.Add(goldenHourEndsEvent);
+                eventList.Add(eveningGoldenHour);
                 var civilTwilightEndsEvent = new EventTime
                 {
                     EventName = "Civil Twilight Ends",
                     AstroTime = civilTwilightEnds,
-                    //Forecast = nws.HourlyForecasts.Where(h => h.StartTime == GetWeatherHour(civilTwilightEnds)).FirstOrDefault() ?? new NwsHourlyForecast(),
                     WeatherHour = GetWeatherHour(civilTwilightEnds)
                 };
                 eventList.Add(civilTwilightEndsEvent);
-                var blueHourEndsEvent = new EventTime
+                var eveningBlueHour = new EventTime
                 {
-                    EventName = "Blue Hour Ends",
-                    AstroTime = blueHourEnds,
-                    //Forecast = nws.HourlyForecasts.Where(h => h.StartTime == GetWeatherHour(blueHourEnds)).FirstOrDefault() ?? new NwsHourlyForecast(),
-                    WeatherHour = GetWeatherHour(blueHourEnds)
+                    EventName = "Evening Blue Hour",
+                    AstroTime = eveningBlueHourBegins,
+                    OtherTime = eveningBlueHourEnds,
+                    WeatherHour = GetWeatherHour(eveningBlueHourBegins)
                 };
-                eventList.Add(blueHourEndsEvent);
+                eventList.Add(eveningBlueHour);
                 var nauticalTwilightEndsEvent = new EventTime
                 {
                     EventName = "Nautical Twilight Ends",
                     AstroTime = nauticalTwilightEnds,
-                    //Forecast = nws.HourlyForecasts.Where(h => h.StartTime == GetWeatherHour(nauticalTwilightEnds)).FirstOrDefault() ?? new NwsHourlyForecast(),
                     WeatherHour = GetWeatherHour(nauticalTwilightEnds)
                 };
                 eventList.Add(nauticalTwilightEndsEvent);
@@ -164,7 +165,6 @@ namespace ThePhotographersForecast.Services
                 {
                     EventName = "Astronomical Twilight Ends",
                     AstroTime = astronomicalTwilightEnds,
-                    //Forecast = nws.HourlyForecasts.Where(h => h.StartTime == GetWeatherHour(astronomicalTwilightEnds)).FirstOrDefault() ?? new NwsHourlyForecast(),
                     WeatherHour = GetWeatherHour(astronomicalTwilightEnds)
                 };
                 eventList.Add(astronomicalTwilightEndsEvent);
@@ -174,7 +174,6 @@ namespace ThePhotographersForecast.Services
                     {
                         EventName = "Moonrise",
                         AstroTime = moonrise,
-                        //Forecast = nws.HourlyForecasts.Where(h => h.StartTime == GetWeatherHour(moonrise)).FirstOrDefault() ?? new NwsHourlyForecast(),
                         WeatherHour = GetWeatherHour(moonrise)
                     };
                     eventList.Add(moonriseEvent);
@@ -185,32 +184,62 @@ namespace ThePhotographersForecast.Services
                     {
                         EventName = "Moonset",
                         AstroTime = moonset,
-                        //Forecast = nws.HourlyForecasts.Where(h => h.StartTime == GetWeatherHour(moonset)).FirstOrDefault() ?? new NwsHourlyForecast(),
                         WeatherHour = GetWeatherHour(moonset)
                     };
                     eventList.Add(moonsetEvent);
                 }
+                masterEvents.AddRange(eventList);
 
 
                 var eventData = new EventModel
                 {
-                    Date = DateOnly.FromDateTime(date),
+                    Date = date,
                     AstronomicalData = new Astronomical
                     {
-                        Date = DateOnly.FromDateTime(date),
                         DayLength = astronomicalTwilightEnds.Subtract(astronomicalTwilightBegins),
                         MoonPhase = moonPhase,
-                        SkMoon = MeteoconsResolver.ResolveMoons(moonPhase)
+                        SkMoon = MeteoconsResolver.ResolveMoons(moonPhase),
+                        SunAltitude = sunPosition.Altitude,
+                        SunAzimuth = sunPosition.Azimuth
                     },
                     EventTimes = eventList.OrderBy(e => e.AstroTime).ToArray()
                 };
 
+
                 eventModels.Add(eventData);
 
             }//Finished processing each photo day
+            var c = new List<EventTime>();
+            foreach (var a in masterEvents) { if (a.AstroTime != DateTime.MinValue) { c.Add(a); } }
+
+            _session.EventTimes = c.OrderBy(v => v.AstroTime).ToArray();
+
+            var finishedEventModels = new ObservableCollection<EventModel>();
+            foreach (var model in eventModels)
+            {
+                var clone = new EventModel();
+                clone.Date = model.Date;
+                clone.AstronomicalData = new Astronomical(model.AstronomicalData);
+                clone.EventTimes = new EventTime[model.EventTimes.Length];
+                for (int time = 0; time < model.EventTimes.Length; time++)
+                {
+                    clone.EventTimes[time] = new EventTime
+                    {
+                        AstroTime = model.EventTimes[time].AstroTime,
+                        OtherTime = model.EventTimes[time].OtherTime,
+                        EventName = model.EventTimes[time].EventName,
+                        WeatherHour = model.EventTimes[time].WeatherHour,
+                        Forecast = nws.HourlyForecasts.Where(h => h.StartTime == model.EventTimes[time].WeatherHour).FirstOrDefault()
+                    };
+                }
+                ;
+                finishedEventModels.Add(clone);
+
+            }
+            ;
 
             //Return the eventModels
-            return eventModels.OrderBy(o => o.Date).ToArray();
+            return finishedEventModels.OrderBy(o => o.Date).ToArray();
         }
 
         private DateTime GetWeatherHour(DateTime astroTime)

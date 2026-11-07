@@ -1,26 +1,29 @@
-﻿using System.Diagnostics;
-using System.Net.Sockets;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using System.Diagnostics;
 using System.Text.Json;
 using ThePhotographersForecast.Data;
 using ThePhotographersForecast.Models;
 using ThePhotographersForecast.Services.JsonConverters;
+using ThePhotographersForecast.Shared;
 
 namespace ThePhotographersForecast.Services
 {
-    public partial class GetMoonService : IGetMoonService
+    public partial class GetMoonService : ObservableObject, IGetMoonService
     {
-        private HttpClient _client;
 
-        public GetMoonService(IHttpClientFactory client)
+        private ISession _session;
+        private readonly HttpClient _client;
+        public GetMoonService(HttpClient client, ISession session)
         {
-            _client = client.CreateClient("moonClient");
+            _client = client;
+            _session = session;
         }
-        private async Task<T?> GetDataAsync<T>(HttpRequestMessage request)
+        private async Task<T?> GetDataAsync<T>(HttpRequestMessage request, string name, CancellationToken cancellationToken = default)
         {
             try
             {
                 // ensure response is disposed so connection returns to pool promptly
-                using var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
+                using var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -28,13 +31,26 @@ namespace ThePhotographersForecast.Services
                     return default;
                 }
 
-                await using var stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
+                using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
                 var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
                 options.Converters.Add(new NullNumberConverterFactory());
-                var result = await JsonSerializer.DeserializeAsync<T>(stream, options).ConfigureAwait(false);
+
+                // pass the cancellation token to DeserializeAsync so the read can be cancelled cleanly
+                var result = await JsonSerializer.DeserializeAsync<T>(stream, options, cancellationToken);
+                string jsonFileContent = JsonSerializer.Serialize(result, new JsonSerializerOptions
+                {
+                    WriteIndented = true // optional: for readable output
+                });
+
+                File.WriteAllText(Path.Combine(FileSystem.Current.CacheDirectory, $"moon_{DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss")}_{name}.json"), jsonFileContent);
                 return result;
             }
-            catch (Exception ex) when (ex is HttpRequestException || ex is IOException || ex is ObjectDisposedException || ex is SocketException)
+            catch (OperationCanceledException)
+            {
+                Debug.WriteLine("Request cancelled.");
+                return default;
+            }
+            catch (Exception ex) //handle transient IO/HTTP/Socket/ObjectDisposed etc.
             {
                 Debug.WriteLine($"Transient error: {ex.GetType().Name} - {ex.Message}");
                 return default;
@@ -45,7 +61,7 @@ namespace ThePhotographersForecast.Services
         {
             string apiString = $"https://aa.usno.navy.mil/api/moon/phases/date?date={date.ToString("yyyy-MM-dd")}&nump=5";
             var request = new HttpRequestMessage(HttpMethod.Get, apiString);
-            var json = await GetDataAsync<UsnoData.Rootobject>(request);
+            var json = await GetDataAsync<UsnoData.Rootobject>(request, "phases");
 
             if (json == null)
             {
@@ -63,10 +79,11 @@ namespace ThePhotographersForecast.Services
             for (int i = 0; i < json.phasedata.Length; i++)
             {
                 var pd = json.phasedata[i];
+                TimeOnly time = TimeOnly.TryParse(pd.time, out var moonTime) ? moonTime : default;
                 int year = pd.year;
                 int month = pd.month;
                 int day = pd.day;
-                var utc = new DateTime(year, month, day, pd.time.Hour, pd.time.Minute, 0, DateTimeKind.Utc);
+                var utc = new DateTime(year, month, day, time.Hour, time.Minute, 0, DateTimeKind.Utc);
                 moonPhases[i] = new FutureMoonPhase
                 {
                     UtcDateTime = utc,

@@ -11,7 +11,7 @@
             //{
             //    System.Diagnostics.Debug.WriteLine($"[XAML ERROR] {e.Exception}");
             //};
-            //  _selectLocation = service.GetService<SelectLocation>();
+            //_selectLocation = service.GetService<SelectLocation>()
         }
         protected override Window CreateWindow(IActivationState? activationState)
         {

@@ -16,8 +16,8 @@ namespace ThePhotographersForecast.Services.Modules
 
     public class Thresholds
     {
-        public double TempDelta { get; init; } = 2.0; // degrees
-        public double WindDelta { get; init; } = 4.0; // same units as WindSpeed
+        public double TempDelta { get; init; } = 3.0; // degrees
+        public double WindDelta { get; init; } = 5.0; // same units as WindSpeed
         public double GustDelta { get; init; } = 5.0;
         public double SkyCoverDelta { get; init; } = 15.0; // percent
         public double PrecipAmtDelta { get; init; } = 0.1; // small amount threshold
@@ -82,7 +82,8 @@ namespace ThePhotographersForecast.Services.Modules
             //{
             //    // attempt to parse numeric Value from string like "5 mph" or "5"
             //    var digits = new string(v.WindSpeed.Where(c => char.IsDigit(c) || c == '.' || c == '-').ToArray());
-            //    if (double.TryParse(digits, out var w)) windSpeed = w;
+            //    if (double.TryParse(digits, out var w)) windSpeed = w
+
             //}
 
             double gusts = v.Gusts?.FirstOrDefault()?.Value ?? 0;

@@ -72,22 +72,22 @@ public partial class ForecastViewModel : ObservableObject
     public partial Services.TimeOfDayService.TimeOfDay SelectedTimeOfDay { get; set; }
 
     [ObservableProperty]
-    public partial Session SharedSession { get; set; }
-    public ForecastViewModel(Session sharedSession)
+    public partial ISession _session { get; set; }
+    public ForecastViewModel(ISession _session)
     {
-        SharedSession = sharedSession;
+        _session = _session;
         //_skyEngine = skyEngine;
-        MainThread.BeginInvokeOnMainThread(() => Dates = [.. SharedSession.Dates]);
-        if (Dates.Length == SharedSession.Dates.Length)
+        MainThread.BeginInvokeOnMainThread(() => Dates = [.. _session.Dates]);
+        if (Dates.Length == _session.Dates.Length)
         {
             SelectedDate = Dates[0].Date;
         }
-        //  MainThread.BeginInvokeOnMainThread(() => Days = [.. SharedSession.Days]);
+        //  MainThread.BeginInvokeOnMainThread(() => Days = [.. _session.Days]);
         if (Dates?.Length == 0) return;
         if (WeatherForecasts?.Length == 0) return;
-        if (SharedSession.Days.Length == 0) return;
-        LocationName = SharedSession.SelectedLocation.DisplayName;
-        SelectedDay = SharedSession.Days.Where(d => d.Date.Date == Dates[0].Date).FirstOrDefault<DayViewModel>();
+        if (_session.Days.Count == 0) return;
+        LocationName = _session.SelectedLocation.DisplayName;
+        SelectedDay = _session.Days.Where(d => d.Date.Date == Dates[0].Date).FirstOrDefault<DayViewModel>();
         if (SelectedDay == null) return;
         //MainThread.BeginInvokeOnMainThread(async ()=>
         //{
@@ -95,9 +95,9 @@ public partial class ForecastViewModel : ObservableObject
         //    BackgroundGradient = DailyGradients.TryGetValue(DateOnly.FromDateTime(Dates[0].Time)) ? background : (LinearGradientBrush)Application.Current.Resources["Noon"];
         //});
 
-        SelectedDaily = SharedSession.WeatherForecasts.DailyForecasts.Where(w => w.Date == DateOnly.FromDateTime(SelectedDate)).SingleOrDefault();
+        SelectedDaily = _session.WeatherForecasts.DailyForecasts.Where(w => w.Date == DateOnly.FromDateTime(SelectedDate)).SingleOrDefault();
 
-        SelectedTimeOfDay = TimeOfDayService.GetTimeOfDay(DateTime.UtcNow.AddSeconds(SharedSession.SelectedTimeZoneOffset).Hour);
+        SelectedTimeOfDay = TimeOfDayService.GetTimeOfDay(DateTime.UtcNow.AddSeconds(_session.SelectedTimeZoneOffset).Hour);
 
         SelectedEarlyHoursHourlyForecast = SelectedDaily.HourlyForecasts.Where(x => x.HourlyTime.Date == SelectedDate.Date && x.TimeOfDay == "Early Hours" && x.WeatherCodeDescription != null).OrderByDescending(y => y.WeatherCode).FirstOrDefault();
         SelectedEarlyMorningHourlyForecast = SelectedDaily.HourlyForecasts.Where(x => x.HourlyTime.Date == SelectedDate.Date && x.TimeOfDay == "Early Morning" && x.WeatherCodeDescription != null).OrderByDescending(y => y.WeatherCode).FirstOrDefault();
@@ -138,8 +138,8 @@ public partial class ForecastViewModel : ObservableObject
         //            Time = SelectedDate,
         //            TimeOfDayEvents = new ObservableCollection<EventTime>(SelectedDailyEvents.Where(d => d.WeatherHour >= SelectedDate.Date && d.WeatherHour < SelectedDate.AddHours(3)).OrderBy(x => x.OrderTime)),
         //            TimeOfDayBackgroundBrush = (LinearGradientBrush)Application.Current.Resources["PeriodEarlyHours"],
-        //            TimeOfDayImage = earlyHours,
-        //            HourlyName = SelectedEarlyHoursHourlyForecast.Name,
+        //            TimeOfDaySkAnimation = earlyHours,
+        //            HourlyName = SelectedEarlyHoursHourlyForecast.TimeOfDayName,
         //            TimeOfDaySummary = SelectedEarlyHoursHourlyForecast.HourlyForecastSummary.WeatherSummary,
         //            TimeOfDayWeatherImage = SelectedEarlyHoursHourlyForecast.SkHourlyMeteocon,
         //            TimeOfDayStormSummary = SelectedEarlyHoursHourlyForecast.HourlyForecastSummary.StormSummary
@@ -150,8 +150,8 @@ public partial class ForecastViewModel : ObservableObject
         //            Time = SelectedDate,
         //            TimeOfDayEvents = new ObservableCollection<EventTime>(SelectedDailyEvents.Where(d => d.WeatherHour >= SelectedDate.AddHours(3) && d.WeatherHour < SelectedDate.AddHours(6)).OrderBy(x => x.OrderTime)),
         //            TimeOfDayBackgroundBrush = (LinearGradientBrush)Application.Current.Resources["PeriodEarlyMorning"],
-        //            TimeOfDayImage = earlyMorning,
-        //            HourlyName = SelectedEarlyMorningHourlyForecast.Name,
+        //            TimeOfDaySkAnimation = earlyMorning,
+        //            HourlyName = SelectedEarlyMorningHourlyForecast.TimeOfDayName,
         //            TimeOfDaySummary = SelectedEarlyMorningHourlyForecast.HourlyForecastSummary.WeatherSummary,
         //            TimeOfDayWeatherImage = SelectedEarlyMorningHourlyForecast.SkHourlyMeteocon,
         //            TimeOfDayStormSummary = SelectedEarlyMorningHourlyForecast.HourlyForecastSummary.StormSummary
@@ -162,8 +162,8 @@ public partial class ForecastViewModel : ObservableObject
         //            Time = SelectedDate,
         //            TimeOfDayEvents = new ObservableCollection<EventTime>(SelectedDailyEvents.Where(d => d.WeatherHour >= SelectedDate.AddHours(6) && d.WeatherHour < SelectedDate.AddHours(12)).OrderBy(x => x.OrderTime)),
         //            TimeOfDayBackgroundBrush = (LinearGradientBrush)Application.Current.Resources["PeriodMorning"],
-        //            TimeOfDayImage = morning,
-        //            HourlyName = SelectedMorningHourlyForecast.Name,
+        //            TimeOfDaySkAnimation = morning,
+        //            HourlyName = SelectedMorningHourlyForecast.TimeOfDayName,
         //            TimeOfDaySummary = SelectedMorningHourlyForecast.HourlyForecastSummary.WeatherSummary,
         //            TimeOfDayWeatherImage = SelectedMorningHourlyForecast.SkHourlyMeteocon,
         //            TimeOfDayStormSummary = SelectedMorningHourlyForecast.HourlyForecastSummary.StormSummary
@@ -174,8 +174,8 @@ public partial class ForecastViewModel : ObservableObject
         //            Time = SelectedDate,
         //            TimeOfDayEvents = new ObservableCollection<EventTime>(SelectedDailyEvents.Where(d => d.WeatherHour >= SelectedDate.AddHours(12) && d.WeatherHour < SelectedDate.AddHours(18)).OrderBy(x => x.OrderTime)),
         //            TimeOfDayBackgroundBrush = (LinearGradientBrush)Application.Current.Resources["PeriodAfternoon"],
-        //            TimeOfDayImage = afternoon,
-        //            HourlyName = SelectedAfternoonHourlyForecast.Name,
+        //            TimeOfDaySkAnimation = afternoon,
+        //            HourlyName = SelectedAfternoonHourlyForecast.TimeOfDayName,
         //            TimeOfDaySummary = SelectedAfternoonHourlyForecast.HourlyForecastSummary.WeatherSummary,
         //            TimeOfDayWeatherImage = SelectedAfternoonHourlyForecast.SkHourlyMeteocon,
         //            TimeOfDayStormSummary = SelectedAfternoonHourlyForecast.HourlyForecastSummary.StormSummary
@@ -186,8 +186,8 @@ public partial class ForecastViewModel : ObservableObject
         //            Time = SelectedDate,
         //            TimeOfDayEvents = new ObservableCollection<EventTime>(SelectedDailyEvents.Where(d => d.WeatherHour >= SelectedDate.AddHours(18) && d.WeatherHour < SelectedDate.AddHours(22)).OrderBy(x => x.OrderTime)),
         //            TimeOfDayBackgroundBrush = (LinearGradientBrush)Application.Current.Resources["PeriodEvening"],
-        //            TimeOfDayImage = evening,
-        //           HourlyName = SelectedEveningHourlyForecast.Name,
+        //            TimeOfDaySkAnimation = evening,
+        //           HourlyName = SelectedEveningHourlyForecast.TimeOfDayName,
         //            TimeOfDaySummary = SelectedEveningHourlyForecast.HourlyForecastSummary.WeatherSummary,
         //            TimeOfDayWeatherImage = SelectedEveningHourlyForecast.SkHourlyMeteocon,
         //            TimeOfDayStormSummary = SelectedEveningHourlyForecast.HourlyForecastSummary.StormSummary
@@ -198,15 +198,15 @@ public partial class ForecastViewModel : ObservableObject
         //            Time = SelectedDate,
         //            TimeOfDayEvents = new ObservableCollection<EventTime>(SelectedDailyEvents.Where(d => d.WeatherHour >= SelectedDate.AddHours(22) && d.WeatherHour < SelectedDate.AddHours(24)).OrderBy(x => x.OrderTime)),
         //            TimeOfDayBackgroundBrush = (LinearGradientBrush)Application.Current.Resources["PeriodNight"],
-        //            TimeOfDayImage = night,
-        //            HourlyName = SelectedNightHourlyForecast.Name,
+        //            TimeOfDaySkAnimation = night,
+        //            HourlyName = SelectedNightHourlyForecast.TimeOfDayName,
         //            TimeOfDaySummary = SelectedNightHourlyForecast.HourlyForecastSummary.WeatherSummary,
         //            TimeOfDayWeatherImage = SelectedNightHourlyForecast.SkHourlyMeteocon,
         //            TimeOfDayStormSummary = SelectedNightHourlyForecast.HourlyForecastSummary.StormSummary
         //        }
         //};
         // Initialize timer
-        LocationTime = $"as of {DateTime.UtcNow.AddSeconds(SharedSession.SelectedTimeZoneOffset).ToString("F")}";
+        LocationTime = $"as of {DateTime.UtcNow.AddSeconds(_session.SelectedTimeZoneOffset).ToString("F")}";
         _timer = new System.Timers.Timer(1000); // 1 second interval
         _timer.Elapsed += OnTimerElapsed;
         _timer.Start();
@@ -220,7 +220,7 @@ public partial class ForecastViewModel : ObservableObject
 
     private void OnTimerElapsed(object? sender, System.Timers.ElapsedEventArgs e)
     {
-        DateTime time = DateTime.UtcNow.AddSeconds(SharedSession.SelectedTimeZoneOffset);
+        DateTime time = DateTime.UtcNow.AddSeconds(_session.SelectedTimeZoneOffset);
         LocationTime = $"where the local time is: {time.ToString("F")}";
     }
 
@@ -228,13 +228,13 @@ public partial class ForecastViewModel : ObservableObject
     {
         try
         {
-            var dayStorms = SharedSession.NwsData.HourlySupplementals.Where(d => d.Time.Date == date.Date && d.TimeOfDay == timeOfDay && d.Weather != null).OrderBy(a => a.Time).ToArray();
+            var dayStorms = _session.NwsData.HourlySupplementals.Where(d => d.Time.Date == date.Date && d.TimeOfDay == timeOfDay && d.Weather != null).OrderBy(a => a.Time).ToArray();
             if (dayStorms.Length > 0)
             {
                 string stormTimeOfDay = string.Empty;
                 foreach (var item in dayStorms)
                 {
-                    stormTimeOfDay += item.Weather.Statement;
+                    stormTimeOfDay += item.SupplementalWeatherStatement;
                 }
                 return stormTimeOfDay;
             }
@@ -263,7 +263,7 @@ public partial class ForecastViewModel : ObservableObject
     {
         SelectedDate = date;
         //    BackgroundGradient = DailyGradients.TryGetValue(DateOnly.FromDateTime(Dates[0].Time)) : (LinearGradientBrush)Application.Current.Resources["Noon"];
-        var forecast = SharedSession.WeatherForecasts.DailyForecasts.Where(x => x.Date == DateOnly.FromDateTime(SelectedDate)).SingleOrDefault();
+        var forecast = _session.WeatherForecasts.DailyForecasts.Where(x => x.Date == DateOnly.FromDateTime(SelectedDate)).SingleOrDefault();
         SelectedDaily = forecast;
 
         if (SelectedDaily == null)
@@ -323,8 +323,8 @@ public partial class ForecastViewModel : ObservableObject
         //            Time = SelectedDate,
         //            TimeOfDayEvents = new ObservableCollection<EventTime>(SelectedDailyEvents.Where(d => d.WeatherHour >= SelectedDate.Date && d.WeatherHour < SelectedDate.AddHours(3)).OrderBy(x => x.OrderTime)),
         //            TimeOfDayBackgroundBrush = (LinearGradientBrush)Application.Current.Resources["PeriodEarlyHours"],
-        //            TimeOfDayImage = earlyHours,
-        //            HourlyName = SelectedEarlyHoursHourlyForecast.Name,
+        //            TimeOfDaySkAnimation = earlyHours,
+        //            HourlyName = SelectedEarlyHoursHourlyForecast.TimeOfDayName,
         //            TimeOfDaySummary = SelectedEarlyHoursHourlyForecast.HourlyForecastSummary.WeatherSummary,
         //            TimeOfDayWeatherImage = SelectedEarlyHoursHourlyForecast.SkHourlyMeteocon,
         //            TimeOfDayStormSummary = SelectedEarlyHoursHourlyForecast.HourlyForecastSummary.StormSummary
@@ -335,8 +335,8 @@ public partial class ForecastViewModel : ObservableObject
         //            Time = SelectedDate,
         //            TimeOfDayEvents = new ObservableCollection<EventTime>(SelectedDailyEvents.Where(d => d.WeatherHour >= SelectedDate.AddHours(3) && d.WeatherHour < SelectedDate.AddHours(6)).OrderBy(x => x.OrderTime)),
         //            TimeOfDayBackgroundBrush = (LinearGradientBrush)Application.Current.Resources["PeriodEarlyMorning"],
-        //            TimeOfDayImage = earlyMorning,
-        //            HourlyName = SelectedEarlyMorningHourlyForecast.Name,
+        //            TimeOfDaySkAnimation = earlyMorning,
+        //            HourlyName = SelectedEarlyMorningHourlyForecast.TimeOfDayName,
         //            TimeOfDaySummary = SelectedEarlyMorningHourlyForecast.HourlyForecastSummary.WeatherSummary,
         //            TimeOfDayWeatherImage = SelectedEarlyMorningHourlyForecast.SkHourlyMeteocon,
         //            TimeOfDayStormSummary = SelectedEarlyMorningHourlyForecast.HourlyForecastSummary.StormSummary
@@ -347,8 +347,8 @@ public partial class ForecastViewModel : ObservableObject
         //            Time = SelectedDate,
         //            TimeOfDayEvents = new ObservableCollection<EventTime>(SelectedDailyEvents.Where(d => d.WeatherHour >= SelectedDate.AddHours(6) && d.WeatherHour < SelectedDate.AddHours(12)).OrderBy(x => x.OrderTime)),
         //            TimeOfDayBackgroundBrush = (LinearGradientBrush)Application.Current.Resources["PeriodMorning"],
-        //            TimeOfDayImage = morning,
-        //            HourlyName = SelectedMorningHourlyForecast.Name,
+        //            TimeOfDaySkAnimation = morning,
+        //            HourlyName = SelectedMorningHourlyForecast.TimeOfDayName,
         //            TimeOfDaySummary = SelectedMorningHourlyForecast.HourlyForecastSummary.WeatherSummary,
         //            TimeOfDayWeatherImage = SelectedMorningHourlyForecast.SkHourlyMeteocon,
         //            TimeOfDayStormSummary = SelectedMorningHourlyForecast.HourlyForecastSummary.StormSummary
@@ -359,8 +359,8 @@ public partial class ForecastViewModel : ObservableObject
         //            Time = SelectedDate,
         //            TimeOfDayEvents = new ObservableCollection<EventTime>(SelectedDailyEvents.Where(d => d.WeatherHour >= SelectedDate.AddHours(12) && d.WeatherHour < SelectedDate.AddHours(18)).OrderBy(x => x.OrderTime)),
         //            TimeOfDayBackgroundBrush = (LinearGradientBrush)Application.Current.Resources["PeriodAfternoon"],
-        //            TimeOfDayImage = afternoon,
-        //            HourlyName = SelectedAfternoonHourlyForecast.Name,
+        //            TimeOfDaySkAnimation = afternoon,
+        //            HourlyName = SelectedAfternoonHourlyForecast.TimeOfDayName,
         //            TimeOfDaySummary = SelectedAfternoonHourlyForecast.HourlyForecastSummary.WeatherSummary,
         //            TimeOfDayWeatherImage = SelectedAfternoonHourlyForecast.SkHourlyMeteocon,
         //            TimeOfDayStormSummary = SelectedAfternoonHourlyForecast.HourlyForecastSummary.StormSummary
@@ -371,8 +371,8 @@ public partial class ForecastViewModel : ObservableObject
         //            Time = SelectedDate,
         //            TimeOfDayEvents = new ObservableCollection<EventTime>(SelectedDailyEvents.Where(d => d.WeatherHour >= SelectedDate.AddHours(18) && d.WeatherHour < SelectedDate.AddHours(22)).OrderBy(x => x.OrderTime)),
         //            TimeOfDayBackgroundBrush = (LinearGradientBrush)Application.Current.Resources["PeriodEvening"],
-        //            TimeOfDayImage = evening,
-        //           HourlyName = SelectedEveningHourlyForecast.Name,
+        //            TimeOfDaySkAnimation = evening,
+        //           HourlyName = SelectedEveningHourlyForecast.TimeOfDayName,
         //            TimeOfDaySummary = SelectedEveningHourlyForecast.HourlyForecastSummary.WeatherSummary,
         //            TimeOfDayWeatherImage = SelectedEveningHourlyForecast.SkHourlyMeteocon,
         //            TimeOfDayStormSummary = SelectedEveningHourlyForecast.HourlyForecastSummary.StormSummary
@@ -383,8 +383,8 @@ public partial class ForecastViewModel : ObservableObject
         //            Time = SelectedDate,
         //            TimeOfDayEvents = new ObservableCollection<EventTime>(SelectedDailyEvents.Where(d => d.WeatherHour >= SelectedDate.AddHours(22) && d.WeatherHour < SelectedDate.AddHours(24)).OrderBy(x => x.OrderTime)),
         //            TimeOfDayBackgroundBrush = (LinearGradientBrush)Application.Current.Resources["PeriodNight"],
-        //            TimeOfDayImage = night,
-        //            HourlyName = SelectedNightHourlyForecast.Name,
+        //            TimeOfDaySkAnimation = night,
+        //            HourlyName = SelectedNightHourlyForecast.TimeOfDayName,
         //            TimeOfDaySummary = SelectedNightHourlyForecast.HourlyForecastSummary.WeatherSummary,
         //            TimeOfDayWeatherImage = SelectedNightHourlyForecast.SkHourlyMeteocon,
         //            TimeOfDayStormSummary = SelectedNightHourlyForecast.HourlyForecastSummary.StormSummary
@@ -457,14 +457,14 @@ public partial class ForecastViewModel : ObservableObject
 //private GetEventService _eventService;
 //private GetMoonService _moonService;
 
-//        if (Session.WeatherForecasts?.Select(x => x.DailyForecasts.SelectedDailyHourlyForecasts) == null || Session.NwsData?.SelectedDailyHourlyForecasts == null) return;
-//  LocationName = SharedSession.SelectedLocation.DisplayName;
+//        if (ISession.WeatherForecasts?.Select(x => x.DailyForecasts.SelectedDailyHourlyForecasts) == null || ISession.NwsData?.SelectedDailyHourlyForecasts == null) return;
+//  LocationName = _session.SelectedLocation.DisplayName;
 
-//     MainThread.BeginInvokeOnMainThread(() => WeatherForecasts = new ObservableCollection<WeatherForecasts>(SharedSession.WeatherForecasts.ToList()));
-//    MainThread.BeginInvokeOnMainThread(() => Dates = new ObservableCollection<DateItem>(SharedSession.Dates));
+//     MainThread.BeginInvokeOnMainThread(() => WeatherForecasts = new ObservableCollection<WeatherForecasts>(_session.WeatherForecasts.ToList()));
+//    MainThread.BeginInvokeOnMainThread(() => Dates = new ObservableCollection<DateItem>(_session.Dates));
 //WeatherForecasts.CollectionChanged += (s, e) => MainThread.BeginInvokeOnMainThread(() =>
 //{
-//    foreach (var forecast in SharedSession.WeatherForecasts.OrderBy(w => w.Time))
+//    foreach (var forecast in _session.WeatherForecasts.OrderBy(w => w.Time))
 //    {
 //        WeatherForecasts.Add(forecast);
 //        Debug.WriteLine($"WeatherForecasts.CollectionChanged invoked on thread {Environment.CurrentManagedThreadId}; count={WeatherForecasts.Count}");
@@ -472,12 +472,12 @@ public partial class ForecastViewModel : ObservableObject
 //    }
 //});
 
-//if (SharedSession.Dates == null)
+//if (_session.Dates == null)
 //{
 //    return;
 //}
 
-//var heatRisks = Session.NwsData.HourlySupplementals.Where(z => z.ForecastHeatRisk?.Value != null).Select(x => x.ForecastHeatRisk).ToArray();
+//var heatRisks = ISession.NwsData.HourlySupplementals.Where(z => z.ForecastHeatRisk?.Value != null).Select(x => x.ForecastHeatRisk).ToArray();
 //if (heatRisks.Length > 1)
 //{
 //    AllHeatRiskValues = new ObservableCollection<HeatRiskValue>(heatRisks);
@@ -504,7 +504,7 @@ public partial class ForecastViewModel : ObservableObject
 //SelectedSummary = SelectedDaily?.DailyForecastSummary?.WeatherSummary ?? "There are no forecast layers to load";
 //SelectedSafetySummary = SelectedDaily?.DailyForecastSummary?.HealthSafetySummary ?? "There are no health and safety layers to load";
 //SelectedDailyStormSummary = SelectedDaily?.DailyForecastSummary?.StormSummary ?? "There are no storms to report.";
-//SelectedDayHeatRiskSummary = Session.NwsData?.HourlySupplementals?.Where(h => h.Time.Time == SelectedDate.Time).Select(x => x.ForecastHeatRisk?.HeatRiskDescription).ToString() ?? "There is no Heat Risk assigned today.";
+//SelectedDayHeatRiskSummary = ISession.NwsData?.HourlySupplementals?.Where(h => h.Time.Time == SelectedDate.Time).Select(x => x.ForecastHeatRisk?.HeatRiskDescription).ToString() ?? "There is no Heat Risk assigned today.";
 
 
 //SelectedEarlyHoursHourlyForecast = SelectedDaily.SelectedDailyHourlyForecasts.Where(x => x.HourlyTime.Time == SelectedDate.Time && x.TimeOfDay == "Early Hours" && x.WeatherCodeDescription != null).OrderByDescending(y => y.WeatherCode).FirstOrDefault();
@@ -600,7 +600,7 @@ public partial class ForecastViewModel : ObservableObject
 
 ////        _selectedDaily = WeatherForecasts.Where(x => x.Time.Time == SelectedDate.Time).Select(d => d.DailyForecasts).FirstOrDefault();
 ////        SelectedDaily = _selectedDaily;
-////        var storms = Session.AdditionalWeatherDesc.Where(x => x.Time.Time == SelectedDate.Time).OrderBy(o => o.Time).Select(s => s.WeatherSummary).ToArray();
+////        var storms = ISession.AdditionalWeatherDesc.Where(x => x.Time.Time == SelectedDate.Time).OrderBy(o => o.Time).Select(s => s.WeatherSummary).ToArray();
 ////        if (storms.Any())
 ////        {
 ////            SelectedDailyStormSummary = String.Join(" ", storms);
@@ -609,7 +609,7 @@ public partial class ForecastViewModel : ObservableObject
 ////        {
 ////            SelectedDailyStormSummary = "There are no storms to report.";
 ////        }
-////        var heatrisk = Session.AllHeatriskDetails.Where(h => h.Time.Time == SelectedDate.Time).FirstOrDefault();
+////        var heatrisk = ISession.AllHeatriskDetails.Where(h => h.Time.Time == SelectedDate.Time).FirstOrDefault();
 ////        if (heatrisk != null)
 ////        {
 ////            SelectedDailyHeatrisk = $"There is a ForecastHeatRisk today, category {heatrisk.Heatrisk}. {heatrisk.HeatriskDescription}";

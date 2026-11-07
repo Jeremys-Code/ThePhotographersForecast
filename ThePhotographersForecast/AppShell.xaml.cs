@@ -12,6 +12,7 @@ namespace ThePhotographersForecast
             Routing.RegisterRoute(nameof(SelectLocation), typeof(SelectLocation));
             Routing.RegisterRoute(nameof(Settings), typeof(Settings));
             Routing.RegisterRoute(nameof(Forecast), typeof(Forecast));
+            Routing.RegisterRoute(nameof(LottieParade), typeof(LottieParade));
             Routing.RegisterRoute(nameof(ForecastDetails), typeof(ForecastDetails));
             Routing.RegisterRoute(nameof(Calendar), typeof(Calendar));
             Routing.RegisterRoute(nameof(DataCheck), typeof(DataCheck));

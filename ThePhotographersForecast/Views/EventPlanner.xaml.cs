@@ -1,4 +1,4 @@
-using SkiaSharp.Extended.UI.Controls;
+using System.Timers;
 using ThePhotographersForecast.Models;
 using ThePhotographersForecast.Shared;
 using ThePhotographersForecast.ViewModels;
@@ -10,24 +10,37 @@ public partial class EventPlanner : ContentPage
     private EventPlannerViewModel _vm;
     //   private IBackgroundMapService _mapService
     private double Pane2GridHeight { get; set; }
-    public Session SharedSession { get; set; }
-    public EventPlanner(EventPlannerViewModel vm, Session sharedSession)
+    public ISession _session { get; set; }
+    public EventPlanner(EventPlannerViewModel vm, ISession session)
     {
         InitializeComponent();
         _vm = vm;
-        SharedSession = sharedSession;
-        if (SharedSession != null)
-            Resources["forecastService"] = SharedSession;
+        BindingContext = _vm;
+        _session = session;
+
 
 
         //    _mapService = mapService;asy += (s, e) =>
 
         //       this.SizeChanged += ContentPage_SizeChanged;
 
-        HighTempAnimation.Source = new SKFileLottieImageSource { File = "thermometer_warmer.json" };
-        LowTempAnimation.Source = new SKFileLottieImageSource { File = "thermometer_colder.json" };
+        //  HighTempAnimation.Source = new SKFileLottieImageSource { File = "thermometer_warmer.json" };
+        //   LowTempAnimation.Source = new SKFileLottieImageSource { File = "thermometer_colder.json" };
     }
 
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+
+        var _timer = new System.Timers.Timer(1500);
+        _timer.Elapsed += NextFloat;
+    }
+
+    private void NextFloat(object? sender, ElapsedEventArgs e)
+    {
+        //   this.Lott LottieParadeView.
+
+    }
     //private void ContentPage_SizeChanged(object? sender, EventArgs e)
     //{
 
@@ -188,6 +201,16 @@ public partial class EventPlanner : ContentPage
         }
         return;
     }
+
+    //private async void LottieParadeView_CurrentItemChanged(object sender, CurrentItemChangedEventArgs e)
+    //{
+
+    //    if (e.CurrentItem is SKLottieView sK)
+    //    {
+    //        sK.Parent.GetVisualElementWindow().
+    //    }
+
+    //}
 
     //private async Task OnCardTapped(object sender, TappedEventArgs e)
     //{

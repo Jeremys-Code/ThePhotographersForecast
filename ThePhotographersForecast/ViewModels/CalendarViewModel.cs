@@ -22,7 +22,7 @@ namespace ThePhotographersForecast.ViewModels
         //   public partial ObservableCollection<PhotoDay> photoDays { get; set; }
         //     [ObservableProperty]
         //     public partial PhotoDay currentPhotoDay { get; set; }
-        public int UtcOffset => SharedSession.SelectedTimeZoneOffset;
+        public int UtcOffset => _session.SelectedTimeZoneOffset;
         [ObservableProperty]
         public partial string SelectedLocationTime { get; set; }
         //[ObservableProperty]
@@ -54,14 +54,14 @@ namespace ThePhotographersForecast.ViewModels
         public IAsyncRelayCommand<DayViewModel> FlipCommand { get; }
         public Command SelectedDayChangedCommand { get; }
 
-        public Session SharedSession { get; set; }
-        public CalendarViewModel(Session sharedSession)
+        private ISession _session;
+        public CalendarViewModel(ISession session)
         {
-            SharedSession = sharedSession;
-            MainThread.BeginInvokeOnMainThread(() => Days = SharedSession.Days.ToObservableCollection());
+            _session = session;
+            MainThread.BeginInvokeOnMainThread(() => Days = _session.Days.ToObservableCollection());
             MainThread.BeginInvokeOnMainThread((Action)(() =>
             {
-                this.Days = [.. SharedSession.Days];
+                this.Days = [.. _session.Days];
 
                 SelectedDay = Days[0];
                 SelectedDayEventModel = SelectedDay.Events;
@@ -85,8 +85,8 @@ namespace ThePhotographersForecast.ViewModels
 
                 // The page greeting message.
                 GreetingLine1 = $"Here is your forecast for:";
-                GreetingLine2 = $@"{SharedSession.SelectedLocation.City}, {(SharedSession.SelectedLocation.State != null ? SharedSession.SelectedLocation.State + ", " : "")} {SharedSession.SelectedLocation.Country}";
-                GreetingLine3 = $@"{SharedSession.StartDate.DayOfWeek}, {SharedSession.StartDate.ToString("MMMM d")} - {SharedSession.EndDate.DayOfWeek}, {SharedSession.EndDate.ToString("MMMM d")}";
+                GreetingLine2 = $@"{_session.SelectedLocation.City}, {(_session.SelectedLocation.State != null ? _session.SelectedLocation.State + ", " : "")} {_session.SelectedLocation.Country}";
+                GreetingLine3 = $@"{_session.StartDate.DayOfWeek}, {_session.StartDate.ToString("MMMM d")} - {_session.EndDate.DayOfWeek}, {_session.EndDate.ToString("MMMM d")}";
 
                 // The Local Time of the selected location.
                 SelectedLocationTime = DateTime.UtcNow.AddSeconds(UtcOffset).ToString("F");
@@ -162,7 +162,7 @@ namespace ThePhotographersForecast.ViewModels
             if (e.PropertyName == nameof(Days))
             {
                 //Days = new ObservableCollection<DayViewModel>();
-                //foreach (var day in SharedSession.Days)
+                //foreach (var day in _session.Days)
                 //{
                 //    Days.Add(day);
                 //}

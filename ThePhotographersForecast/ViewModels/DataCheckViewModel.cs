@@ -1,160 +1,49 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using ThePhotographersForecast.Components;
 using ThePhotographersForecast.Models;
-using ThePhotographersForecast.Services;
-using ThePhotographersForecast.Services.Modules;
+using ThePhotographersForecast.Models.DayData;
 using ThePhotographersForecast.Shared;
 
 namespace ThePhotographersForecast.ViewModels
 {
     public partial class DataCheckViewModel : ObservableObject
     {
-        [ObservableProperty]
-        public partial string Location { get; set; }
-        [ObservableProperty]
-        public partial CalendarDayModel[] Dates { get; set; }
-        [ObservableProperty]
-        public partial NwsDailyForecast[] Dailies { get; set; }
-        [ObservableProperty]
-        public partial NwsDailyForecast[] SelectedDailies { get; set; }
-        [ObservableProperty]
-        public partial NwsDailyForecast SelectedDaily { get; set; }
-        [ObservableProperty]
-        public partial NwsHourlyForecast[] SelectedDailyHourlies { get; set; }
-        [ObservableProperty]
-        public partial NwsHourlyForecast SelectedDailyHourly { get; set; }
-        [ObservableProperty]
-        public partial NwsHourlyForecast CurrentForecast { get; set; }
-        [ObservableProperty]
-        public partial NwsHourlySupplemental SelectedDailyHourlySupplemental { get; set; }
-        [ObservableProperty]
-        public partial DailyForecast[] MeteoDailies { get; set; }
-        [ObservableProperty]
-        public partial DailyForecast SelectedMeteoDaily { get; set; }
-        [ObservableProperty]
-        public partial HourlyForecast[] SelectedMeteoDailyHourlies { get; set; }
-        [ObservableProperty]
-        public partial HourlyForecast SelectedMeteoDailyHourly { get; set; }
-        [ObservableProperty]
-        public partial EventModel[] EventModels { get; set; }
-        [ObservableProperty]
-        public partial EventModel SelectedDailyEventModel { get; set; }
-        [ObservableProperty]
-        public partial EventTime[] SelectedDailyEventTimes { get; set; }
-        [ObservableProperty]
-        public partial DayViewModel[] Days { get; set; }
-        [ObservableProperty]
-        public partial DayViewModel SelectedDay { get; set; }
+        private ISession _session;
+        private readonly IDailyForecastEventsView _hourlyServices;
 
         [ObservableProperty]
-        public partial DateTime SelectedDate { get; set; }
+        public partial MappedHourly[] HourlyCollection { get; set; }
         [ObservableProperty]
-        public partial string StartDate { get; set; }
+        public partial MappedHourly CurrentHourly { get; set; }
         [ObservableProperty]
-        public partial string EndDate { get; set; }
+        public partial DateTime[] HoursCollection { get; set; }
         [ObservableProperty]
-        public partial DateItem SelectedDateItem { get; set; }
-        [ObservableProperty]
-        public partial string TimePeriod { get; set; }
-        [ObservableProperty]
-        public partial PhotoLocation SelectedLocation { get; set; }
-        public Session SharedSession { get; set; }
-        private readonly IForecastService _forecastService;
-        public DataCheckViewModel(Session sharedSession, IForecastService forecastService)
+        public partial DateTime CurrentHour { get; set; }
+
+        public DataCheckViewModel(ISession session, IDailyForecastEventsView hourlyServices)
         {
-            SharedSession = sharedSession;
-            _forecastService = forecastService;
-            MainThread.BeginInvokeOnMainThread(() =>
+            _session = session;
+            _hourlyServices = hourlyServices;
+            MainThread.BeginInvokeOnMainThread(async () =>
             {
-
-                SelectedLocation = new PhotoLocation(SharedSession.SelectedLocation);
-                Dates = SharedSession.Dates.ToArray();
-                SelectedDate = Dates[0].Date;
-                Dailies = SharedSession.NwsData.DailyForecasts.ToArray();
-                SelectedDaily = Dailies[0];
-                SelectedDailyHourlies = SelectedDaily.HourlyWeathers;
-                SelectedDailyHourly = SelectedDailyHourlies[0];
-                Days = SharedSession.Days.ToArray();
-                MeteoDailies = SharedSession.WeatherForecasts.DailyForecasts;
-                EventModels = SharedSession.EventsData.ToArray();
-                StartDate = SharedSession.StartDate.ToString("F");
-                EndDate = SharedSession.EndDate.ToString("F");
-                CurrentForecast = SharedSession.NwsData.HourlyForecasts[0];
-                //if (Dailies != null && MeteoDailies != null)
-                //{
-                //    for (int e = 0; e < Dailies.Length; e++)
-                //    {
-                //        var meteoDaily = MeteoDailies.Where(x => DateOnly.FromDateTime(Dailies[e].StartTime) == x.Time).SingleOrDefault();
-                //        var enrichedForecast = await _forecastService.BuildDailyForecastAsync(Dailies[e], meteoDaily);
-                //        Dailies[e].EnrichedForecast = String.Join(" ", enrichedForecast);
-
-                //    }
-                //    ;
-                //}
+                HourlyCollection = await _hourlyServices.BuildMappedHourlyAsync().ConfigureAwait(ConfigureAwaitOptions.ForceYielding);
+                CurrentHourly = HourlyCollection.FirstOrDefault() ?? new MappedHourly();
             });
-
-            if (Dailies.Length == 0 || Dailies == null)
+            int nbrOfHours = _session.EndDate.Subtract(_session.StartDate).Hours + 1;
+            var currentDate = _session.StartDate;
+            HoursCollection = new DateTime[nbrOfHours];
+            for (int i = 0; i < nbrOfHours; i++)
             {
-                Dailies = Array.Empty<NwsDailyForecast>();
+                currentDate = currentDate;
+                HoursCollection[i] = currentDate;
+                currentDate = currentDate.AddHours(1);
             }
-            //SelectedDateItem = Dates[0];
-            //SelectedDate = SelectedDateItem.Time;
-
-            SelectedDailies = [.. Dailies.Where(w => w.StartTime.Date == SelectedDate || w.EndTime.Date == SelectedDate)];
-
-            SelectedDailyHourlies = [.. SelectedDaily.HourlyWeathers];
-            SelectedDailyHourly = SelectedDailyHourlies[0];
-            if (SelectedDailyHourly.Supplemental != null)
-                SelectedDailyHourlySupplemental = SelectedDailyHourly.Supplemental;
-
-
-            SelectedMeteoDaily = MeteoDailies.Where(w => w.Date == DateOnly.FromDateTime(SelectedDate)).SingleOrDefault();
-            SelectedMeteoDailyHourlies = SelectedMeteoDaily.HourlyForecasts;
-            SelectedMeteoDailyHourly = SelectedMeteoDailyHourlies[0];
-            TimePeriod = SelectedMeteoDailyHourly.TimeOfDay;
-
-            SelectedDailyEventModel = EventModels.Where(e => e.Date == DateOnly.FromDateTime(SelectedDate)).SingleOrDefault();
-            SelectedDailyEventTimes = SelectedDailyEventModel.EventTimes;
+            CurrentHour = HoursCollection[0];
         }
 
-        partial void OnSelectedDateItemChanged(DateItem Value)
+        partial void OnCurrentHourChanged(DateTime value)
         {
-            SelectedDate = Value.Date;
-            UpdateData(SelectedDate);
+
         }
 
-        partial void OnSelectedDailyChanged(NwsDailyForecast nwsSelectedForecast)
-        {
-            SelectedDate = nwsSelectedForecast.StartTime.Date;
-            UpdateData(SelectedDate);
-        }
-
-        partial void OnSelectedMeteoDailyChanged(DailyForecast selectedForecast)
-        {
-            SelectedDate = new DateTime(selectedForecast.Date.Year, selectedForecast.Date.Month, selectedForecast.Date.Day, 0, 0, 0);
-            UpdateData(SelectedDate);
-        }
-
-
-        private async Task UpdateData(DateTime selectedDate)
-        {
-            await MainThread.InvokeOnMainThreadAsync(async () =>
-            {
-                SelectedDate = selectedDate;
-                SelectedDaily = Dailies.FirstOrDefault(x => x.StartTime.Date == SelectedDate);
-                SelectedDailyHourlies = [.. SelectedDaily.HourlyWeathers];
-                SelectedDailyHourly = SelectedDailyHourlies[0];
-                SelectedDailyEventModel = EventModels.Where(e => e.Date == DateOnly.FromDateTime(SelectedDate)).SingleOrDefault();
-                SelectedDailyEventTimes = SelectedDailyEventModel.EventTimes;
-                if (SelectedDailyHourly.Supplemental != null)
-                    SelectedDailyHourlySupplemental = SelectedDailyHourly.Supplemental;
-                SelectedDay = Days.Where(d => d.Date == selectedDate).SingleOrDefault();
-                SelectedMeteoDaily = MeteoDailies.Where(w => w.Date == DateOnly.FromDateTime(SelectedDate)).SingleOrDefault();
-                SelectedMeteoDailyHourlies = SelectedMeteoDaily.HourlyForecasts;
-                SelectedMeteoDailyHourly = SelectedMeteoDailyHourlies[0];
-                TimePeriod = SelectedMeteoDailyHourly.TimeOfDay;
-
-            });
-        }
     }
 }

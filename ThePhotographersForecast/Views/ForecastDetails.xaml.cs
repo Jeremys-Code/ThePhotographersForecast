@@ -44,7 +44,7 @@ public partial class ForecastDetails : ContentPage
         //    BackgroundMapView.IsEnabled = true;
         //    }
         //// If session polygon coordinates exist, compute a Spherical Mercator envelope and navigate the map's navigator to it
-        //var ring = _vm.SharedSession?.Coordinates;
+        //var ring = _vm._session?.Coordinates;
         //if (ring != null)
         //{
         //    var mercCoords = ring.Coordinates.Select(c => Mapsui.Projections.SphericalMercator.FromLonLat(c.X, c.Y)).ToArray();

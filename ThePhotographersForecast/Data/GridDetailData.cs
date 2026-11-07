@@ -223,7 +223,7 @@ public class GridDetailData
     public class WindDirectionValues
     {
         public string validTime { get; set; }
-        public double value { get; set; }
+        public int value { get; set; }
     }
 
     public class Windspeed

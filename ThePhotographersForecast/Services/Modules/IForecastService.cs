@@ -1,5 +1,4 @@
-﻿using System.Collections.ObjectModel;
-using ThePhotographersForecast.Components;
+﻿using ThePhotographersForecast.Components;
 using ThePhotographersForecast.Models;
 
 namespace ThePhotographersForecast.Services.Modules
@@ -12,8 +11,8 @@ namespace ThePhotographersForecast.Services.Modules
         DateTime SelectedDate { get; set; }
         DateTime SelectedTime { get; set; }
 
-        Task<ObservableCollection<string>> BuildDailyForecastAsync(NwsDailyForecast nwsDaily);
-        string BuildTemperatureStatement(NwsHourlyForecast[] evolutions);
+        Task<string> BuildForecastAsync(NwsHourlyForecast[] hourlies);
+        Task<NwsTimeOfDayForecast[]> BuildTimeOfDayForecastsAsync(NwsDailyForecast[] nwsDailies);
         double Max(Bin bin);
         double Mean(Bin bin);
         double Min(Bin bin);

@@ -19,8 +19,15 @@ namespace SunCalcSharp
 
         /// <summary>
         /// morning golden hour (soft light, best time for photography) ends
+        /// sun is 6 degrees above the horizon
         /// </summary>
-        public DateTime GoldenHourEnds;
+        public DateTime MorningGoldenHourBegins;
+
+        /// <summary>
+        /// morning golden hour (soft light, best time for photography) ends
+        /// sun is 6 degrees below the horizon
+        /// </summary>
+        public DateTime MorningGoldenHourEnds;
 
         /// <summary>
         /// solar noon (sun is in the highest position)
@@ -28,9 +35,14 @@ namespace SunCalcSharp
         public DateTime SolarNoon;
 
         /// <summary>
-        /// evening golden hour starts
+        /// evening golden hour starts (sun is 6 degrees above the horizon)
         /// </summary>
-        public DateTime GoldenHourBegins;
+        public DateTime EveningGoldenHourBegins;
+
+        /// <summary>
+        /// evening golden hour starts (sun is 6 degrees below the horizon)
+        /// </summary>
+        public DateTime EveningGoldenHourEnds;
 
         /// <summary>
         /// sunset starts (bottom edge of the sun touches the horizon)
@@ -44,15 +56,24 @@ namespace SunCalcSharp
 
 
         /// <summary>
-        /// blue hour (sun is 4 degrees below the horizon)
+        /// blue hour (sun is 8 degrees below the horizon)
         /// </summary>
-        public DateTime BlueHourBegins;
-
+        public DateTime MorningBlueHourBegins;
 
         /// <summary>
-        /// blue hour ends (sun is 6 degrees below the horizon)
+        /// blue hour (sun is 4 degrees below the horizon)
         /// </summary>
-        public DateTime BlueHourEnds;
+        public DateTime MorningBlueHourEnds;
+
+        /// <summary>
+        /// blue hour ends (sun is 4 degrees below the horizon)
+        /// </summary>
+        public DateTime EveningBlueHourBegins;
+
+        /// <summary>
+        /// blue hour ends (sun is 8 degrees below the horizon)
+        /// </summary>
+        public DateTime EveningBlueHourEnds;
 
         /// <summary>
         /// dusk (evening nautical twilight starts)

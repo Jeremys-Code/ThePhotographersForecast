@@ -9,10 +9,10 @@
        
             <Grid HorizontalOptions="Center">
         <VerticalStackLayout>
-            <CarouselView x:Name="DailyCollection"
+            <CarouselView x:Name="Collection"
                         ItemsSource="{Binding DailyCollection, Source={x:Reference Root}}"
                         CurrentItem="{Binding SelectedDay, Mode=TwoWay, Source={x:Reference Root}}"  
-                        
+                        CurrentItemChanged="Collection_CurrentItemChanged"
                         PeekAreaInsets="60">
                 <CarouselView.Shadow>
                     <Shadow Brush="#BEFCA6" Offset="10,10" Radius="40" Opacity="0.7"/>
@@ -53,8 +53,8 @@
                                     <!-- Front Card-->
                                     <VerticalStackLayout>
                                     <Grid x:Name="CardFront" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="10" HorizontalOptions="Center">
-                                        <Label Grid.Row="0" Text="Here's your Photographer's Forecast for" FontFamily="ManFont" FontSize="Header" />
-                                        <Label Grid.Row="1" Text="{Binding Name}" FontAttributes="Bold" LineBreakMode="WordWrap" FontFamily="ManFont" FontSize="Header" />
+                                        <Label Grid.Row="0" Text="Here's your Photographer's Forecast for" FontFamily="NotoThick" FontSize="Header" />
+                                        <Label Grid.Row="1" Text="{Binding Name}" FontAttributes="Bold" LineBreakMode="WordWrap" FontFamily="NotoThick" FontSize="Header" />
                                         <HorizontalStackLayout Grid.Row="2">
                                             <Label Text="Start Time: " FontFamily="NotoSans"/>
                                             <Label Text="{Binding StartTime, StringFormat='{0:ddd MMM d h:mm tt}'}" FontFamily="NotoSans" />
@@ -75,11 +75,11 @@
                                         <!--{Binding Temperature-->
                                         <Border Stroke="{StaticResource Moon}" Grid.Row="5" StrokeThickness="4" StrokeShape="RoundRectangle 30">
                                             <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto" Margin="10" RowSpacing="10" ColumnSpacing="10" HorizontalOptions="Center">
-                                                <Label Grid.Row="0" Grid.ColumnSpan="2" Text="Daily Forecast" FontFamily="ManFont" FontSize="Header" HorizontalTextAlignment="Center" HorizontalOptions="Center" />
+                                                <Label Grid.Row="0" Grid.ColumnSpan="2" Text="Daily Forecast" FontFamily="NotoThick" FontSize="Header" HorizontalTextAlignment="Center" HorizontalOptions="Center" />
                                                 <skia:SKLottieView Grid.Row="1" Grid.Column="0" Grid.RowSpan="2" Source="{Binding SelectedDailyForecast.SkDailyAnimation}"  MinimumHeightRequest="150" WidthRequest="150" HorizontalOptions="Center" RepeatCount="-1" RepeatMode="Restart" />
                                                 <Label Grid.Row="1" Grid.Column="1" Text="{Binding SelectedDailyForecast.DetailForecast}" LineBreakMode="WordWrap" HorizontalOptions="Start" />
                                                 <VerticalStackLayout  Grid.Row="2" Grid.Column="1" HorizontalOptions="Center">
-                                                    <Label Text="Current Temperature:" FontFamily="ManFont" FontSize="Header"/>
+                                                    <Label Text="Current Temperature:" FontFamily="NotoThick" FontSize="Header"/>
                                                     <Label Text="{Binding CurrentForecast.TempAndUnit}" FontFamily="NotoSans"/>
                                                     <skia:SKLottieView Source="{Binding CurrentForecast.SkHourlyAnimation}" HorizontalOptions="Center" WidthRequest="100" HeightRequest="100" RepeatCount="-1" RepeatMode="Restart"/>
                                                         <Label Text="{Binding CurrentForecast.ShortForecast}" HorizontalTextAlignment="Center" FontFamily="NotoSans"/>
@@ -91,7 +91,7 @@
 
                                     <!--Back Of the card-->
                                         <Grid x:Name="BackCard" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="10" HorizontalOptions="Center">
-                                            <Label Text="Times of the Day" FontFamily="ManFont" FontSize="Header" HorizontalTextAlignment="Center" Grid.Row="0"/>
+                                            <Label Text="Times of the Day" FontFamily="NotoThick" FontSize="Header" HorizontalTextAlignment="Center" Grid.Row="0"/>
                                             <Grid Grid.Row="1" HorizontalOptions="Fill">
                                                 <CollectionView ItemsSource="{Binding EventsByPeriod}"
                                  SelectionMode="None">
@@ -107,10 +107,10 @@
                                                                     </Border.StrokeShape>
                                                                     <Grid>
                                                                         <VerticalStackLayout>
-                                                                            <Label Text="{Binding TimeOfDayName}" TextColor="#FFFF00" FontAttributes="Bold"  FontFamily="ManFont" FontAutoScalingEnabled="True"  TextDecorations="Underline" HorizontalTextAlignment="Center" HorizontalOptions="Center" Margin="5" />
+                                                                            <Label Text="{Binding TimeOfDayName}" TextColor="#FFFF00" FontAttributes="Bold"  FontFamily="NotoThick" FontAutoScalingEnabled="True"  TextDecorations="Underline" HorizontalTextAlignment="Center" HorizontalOptions="Center" Margin="5" />
                                                                             <skia:SKLottieView x:Name="TimeOfDayAnimation" Source="{Binding TimeOfDayImage}" RepeatCount="-1" RepeatMode="Restart" WidthRequest="80" HeightRequest="80" HorizontalOptions="Center"/>
-                                                                            <Label Text="The forecast for" TextColor="#FFFF00" FontFamily="ManFont" FontAutoScalingEnabled="True" TextDecorations="Underline" FontAttributes="Bold" HorizontalTextAlignment="Center" HorizontalOptions="Center" Margin="5" />
-                                                                            <Label Text="{Binding HourlyName}" TextColor="#FFFF00" FontFamily="ManFont" FontAutoScalingEnabled="True"  FontAttributes="Bold" TextDecorations="Underline" HorizontalTextAlignment="Center" HorizontalOptions="Center" Margin="5" />
+                                                                            <Label Text="The forecast for" TextColor="#FFFF00" FontFamily="NotoThick" FontAutoScalingEnabled="True" TextDecorations="Underline" FontAttributes="Bold" HorizontalTextAlignment="Center" HorizontalOptions="Center" Margin="5" />
+                                                                            <Label Text="{Binding HourlyName}" TextColor="#FFFF00" FontFamily="NotoThick" FontAutoScalingEnabled="True"  FontAttributes="Bold" TextDecorations="Underline" HorizontalTextAlignment="Center" HorizontalOptions="Center" Margin="5" />
                                                                             <skia:SKLottieView x:Name="TimeOfDaySkWeatherMeteocon" HeightRequest="80" WidthRequest="80" RepeatCount="-1" RepeatMode="Restart" Source="{Binding TimeOfDayWeatherImage}" HorizontalOptions="Center" Margin="5"/>
                                                                             <Label Text="{Binding TimeOfDayStormSummary}" TextColor="#FF004D" Shadow="1,1,2,White,0.9" FontAutoScalingEnabled="True"  FontFamily="NotoSans" FontAttributes="Bold" LineBreakMode="WordWrap" />
                                                                             <Label Text="{Binding TimeOfDaySummary}" LineBreakMode="WordWrap" MaxLines="5" FontAutoScalingEnabled="True" FontFamily="NotoSans" TextColor="#FE0194" HorizontalOptions="Center" Margin="5" />
@@ -118,14 +118,14 @@
                                                                                 <CollectionView.ItemTemplate>
                                                                                     <DataTemplate x:DataType="models:EventTime">
                                                                                         <VerticalStackLayout Margin="5">
-                                                                                            <Label Text="{Binding EventName}" LineBreakMode="WordWrap" FontFamily="ManFont" FontAttributes="Bold" TextColor="#26f629" HorizontalOptions="Center" HorizontalTextAlignment="Center" />
+                                                                                            <Label Text="{Binding EventName}" LineBreakMode="WordWrap" FontFamily="NotoThick" FontAttributes="Bold" TextColor="#26f629" HorizontalOptions="Center" HorizontalTextAlignment="Center" />
                                                                                             <HorizontalStackLayout HorizontalOptions="Center">
-                                                                                                <Label Text="{Binding TimeLabel}"  HorizontalOptions="Fill" HorizontalTextAlignment="Justify" FontAttributes="Bold" FontAutoScalingEnabled="True" TextColor="#FF01FB" FontFamily="ManFont" />
-                                                                                                <Label Text="{Binding AstroTime, StringFormat='{}{0:h:mm tt}'}" TextColor="#FAFF00" HorizontalOptions="Fill" HorizontalTextAlignment="Justify" FontAutoScalingEnabled="True" FontAttributes="Bold" FontFamily="ManFont" />
+                                                                                                <Label Text="{Binding TimeLabel}"  HorizontalOptions="Fill" HorizontalTextAlignment="Justify" FontAttributes="Bold" FontAutoScalingEnabled="True" TextColor="#FF01FB" FontFamily="NotoThick" />
+                                                                                                <!--<Label Text="{Binding AstroTime, StringFormat='{}{0:h:mm tt}'}" TextColor="#FAFF00" HorizontalOptions="Fill" HorizontalTextAlignment="Justify" FontAutoScalingEnabled="True" FontAttributes="Bold" FontFamily="NotoThick" />-->
                                                                                             </HorizontalStackLayout>
                                                                                             <HorizontalStackLayout HorizontalOptions="Center">
-                                                                                                <Label Text="{Binding OtherTimeLabel}" TextColor="#00F556" FontFamily="ManFont" HorizontalOptions="Fill" HorizontalTextAlignment="Justify" FontAttributes="Bold" FontAutoScalingEnabled="True"/>
-                                                                                                <Label Text="{Binding OtherTime, StringFormat='{}{0:h:mm tt}'}" TextColor="#EE1717" FontFamily="ManFont" HorizontalOptions="Fill" FontAttributes="Bold" HorizontalTextAlignment="Justify" FontAutoScalingEnabled="True"/>
+                                                                                                <Label Text="{Binding OtherTimeLabel}" TextColor="#00F556" FontFamily="NotoThick" HorizontalOptions="Fill" HorizontalTextAlignment="Justify" FontAttributes="Bold" FontAutoScalingEnabled="True"/>
+                                                                                                <!--<Label Text="{Binding OtherTime, StringFormat='{}{0:h:mm tt}'}" TextColor="#EE1717" FontFamily="NotoThick" HorizontalOptions="Fill" FontAttributes="Bold" HorizontalTextAlignment="Justify" FontAutoScalingEnabled="True"/>-->
                                                                                             </HorizontalStackLayout>
                                                                                         </VerticalStackLayout>
                                                                                     </DataTemplate>

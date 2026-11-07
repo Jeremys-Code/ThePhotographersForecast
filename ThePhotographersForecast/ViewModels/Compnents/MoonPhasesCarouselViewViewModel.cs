@@ -17,8 +17,8 @@ namespace ThePhotographersForecast.ViewModels.Compnents
             _session = session;
             MainThread.BeginInvokeOnMainThread(() =>
             {
-                SelectedUpcomingMoonPhases = [.. _session.MoonPhases];
-                SelectedDisplayedMoonPhase = SelectedUpcomingMoonPhases[0];
+                //SelectedUpcomingMoonPhases = [.. _session.MoonPhases];
+                //SelectedDisplayedMoonPhase = SelectedUpcomingMoonPhases[0];
             });
 
         }

@@ -20,7 +20,7 @@
                 <VerticalStackLayout Grid.Column="1">
                     <Label 
             Text="Please select your preferences:"
-            FontFamily="ManFont"
+            FontFamily="NotoThick"
             VerticalOptions="Center" 
           HorizontalOptions="Center" 
             Margin="12"/>
@@ -53,7 +53,7 @@ Style="{StaticResource PickerLabelStyle}"
             ItemDisplayBinding="{Binding UnitName}"
             SelectedItem="{Binding SelectedWindSpeedUnit}"/>
                     <Button x:Name="SavePreferencesButton" Style="{StaticResource ButtonStyle}" Text="Save Preferences" Command="{Binding SavePreferencesCommand}"/>
-                    <Label Text="{Binding SaveStatusMessage}" IsVisible="{Binding IsSaved}" FontFamily="ManFont" TextColor="{StaticResource GlowInDark}" VerticalOptions="Center" HorizontalOptions="Center" Margin="12"/>
+                    <Label Text="{Binding SaveStatusMessage}" IsVisible="{Binding IsSaved}" FontFamily="NotoThick" TextColor="{StaticResource GlowInDark}" VerticalOptions="Center" HorizontalOptions="Center" Margin="12"/>
                 </VerticalStackLayout>
             </Grid>
         </Grid>

@@ -143,7 +143,7 @@ public partial class DailyForecastCarouselView : ContentView
     }
 
 
-    async void OnCardTapped(object sender, EventArgs e)
+    async void OnCardTapped(object sender, TappedEventArgs e)
     {
         try
         {
@@ -215,14 +215,6 @@ public partial class DailyForecastCarouselView : ContentView
         {
             if (sender is BindableObject bo && bo.BindingContext is NwsDailyForecast daily)
                 SelectedDaily = daily;
-        }
-    }
-
-    private async Task OnCardTapped(object sender, TappedEventArgs e)
-    {
-        if (sender is Grid card)
-        {
-
         }
     }
 }
