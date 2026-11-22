@@ -1,298 +1,164 @@
-The Photographer’s Forecast
-A precision‑engineered MAUI application for photographers who chase perfect light.
-The Photographer’s Forecast is a cross‑platform .NET MAUI application designed for photographers who rely on accurate weather, astronomical timing, and sky‑color prediction to plan their shoots. Built with a modern, refactored architecture, the app provides fast, reliable, and visually rich forecasting tailored specifically for photography.
+# The Photographer's Forecast
+
+[![.NET MAUI](https://img.shields.io/badge/.NET%20MAUI-10%20%2F%2011-512BD4?logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/apps/maui)
+[![ONNX Runtime](https://img.shields.io/badge/ONNX%20Runtime-1.26.0-005CED?logo=onnx&logoColor=white)](https://onnxruntime.ai/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-Model%20Pipeline-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
+**The Photographer's Forecast** is a cross-platform mobile and desktop application built with **.NET MAUI** and **C#** that predicts optimal outdoor photography and commercial UAS (drone) flight windows. 
+
+By combining **National Weather Service (NWS)** hourly gridpoint weather data, astronomical solar/lunar/galactic ephemeris calculations, dynamic **SkiaSharp** sky visualizations, and an **on-device ONNX neural network**, the app evaluates shooting conditions hour-by-hour with zero cloud inference latency.
+
+---
+
+## Key Features
+
+* **Multi-Window Photographic & Flight Scoring (ONNX v2):** Evaluates a 28-feature meteorological and astronomical tensor in a single batch inference pass (`float32[N, 28] -> float32[N, 7]`) to score:
+  * **Drone Flight Viability:** Evaluates sustained wind speed, gust factor, precipitation probability, and visibility envelopes.
+  * **Civil Blue Hour:** Identifies crisp atmospheric clarity and scattered high-altitude clouds during civil twilight (`-6°` to `-4°` solar elevation).
+  * **Sunrise & Sunset:** Separates low-level stratus clouds (`< 2,000 m`) from high/mid-level cirrus (`> 2,000 m`) capable of catching warm horizon color.
+  * **Lunar Rise & Set:** Tracks moonrise/moonset horizon elevation windows alongside dewpoint depression haze proxies.
+  * **Galactic Core (Milky Way):** Scores dark-sky visibility windows when solar elevation is below `-12°` to `-18°`, Sagittarius A* altitude is above the coastal light dome, and lunar interference is minimal.
+* **NWS Gridpoint Weather Pipeline:** Fetches and parses high-resolution `/gridpoints/{wfo}/{x},{y}` forecast data including cloud ceiling heights, dewpoint depression, wind shear/gusts, and 3-hour thermal lapse deltas.
+* **Real-Time Ephemeris Engine:** Computes solar elevation/azimuth, lunar illumination fraction and elevation, and Galactic Center altitude/azimuth for any coordinate and timestamp.
+* **Dynamic Sky Visualizations:** Renders real-time twilight and atmospheric sky gradients using **SkiaSharp** and **Skottie**.
+* **Local Shoot Logging & Offline Caching:** Persists location profiles, forecast snapshots, and personal shoot ratings locally in **SQLite** for offline field access and future model fine-tuning.
+
+---
+
+## System Architecture
+
+```text
+┌─────────────────────────────────────────────────────────────────────────┐
+│                        .NET MAUI Client (C# / MVVM)                     │
+│                                                                         │
+│  ┌────────────────────┐   ┌────────────────────┐   ┌─────────────────┐  │
+│  │  NWS Gridpoint API │   │  Ephemeris Engine  │   │  SQLite Store   │  │
+│  │  (Hourly Weather)  │   │ (Sun/Moon/Galaxy)  │   │ (Locations/Logs)│  │
+│  └─────────┬──────────┘   └─────────┬──────────┘   └────────┬────────┘  │
+│            │                        │                       │           │
+│            └───────────┬────────────┘                       │           │
+│                        ▼                                    │           │
+│         ┌─────────────────────────────┐                     │           │
+│         │  28-Feature Tensor Builder  │                     │           │
+│         └──────────────┬──────────────┘                     │           │
+│                        ▼                                    │           │
+│         ┌─────────────────────────────┐                     │           │
+│         │  Microsoft.ML.OnnxRuntime   │                     │           │
+│         │  (photographers_forecast_v2)│                     │           │
+│         └──────────────┬──────────────┘                     │           │
+│                        ▼                                    ▼           │
+│         ┌─────────────────────────────┐   ┌──────────────────────────┐  │
+│         │   7-Head Hourly Scorecards  │──▶│  SkiaSharp Sky Renderer  │  │
+│         │  (Blue Hr/Sun/Moon/Galaxy)  │   │  & Timeline ViewModels   │  │
+│         └─────────────────────────────┘   └──────────────────────────┘  │
+└─────────────────────────────────────────────────────────────────────────┘
 
-This README explains the app’s purpose, architecture, features, and upcoming enhancements.
 
-🌅 Purpose
-The Photographer’s Forecast helps photographers answer the most important question:
-
-“When will the sky look its best?”
-
-To do this, the app combines:
-
-authoritative weather data
-
-astronomical calculations
-
-twilight modeling
-
-sky‑color prediction
-
-photo‑specific scheduling
-
-intuitive navigation
-
-It is built for aerial photographers, landscape shooters, and anyone who relies on precise environmental conditions.
-
-📱 Core Features
-1. Location‑Aware Forecasting
-Select your shooting location and instantly receive:
-
-detailed weather conditions
-
-sky coverage
-
-visibility
-
-wind profiles
-
-precipitation type + intensity
-
-temperature + feels‑like
-
-hazard indicators
-
-All location data is stored in a singleton SessionStore, ensuring consistency across the app.
-
-2. Twilight & Astronomical Timing
-The app computes:
-
-civil, nautical, and astronomical twilight
-
-sunrise / sunset
-
-moonrise / moonset
-
-golden hour
-
-blue hour
-
-solar elevation
-
-lunar illumination
-
-These values feed directly into the sky‑color engine.
-
-3. Sky‑Color Engine (v1)
-The sky‑color engine models:
-
-Rayleigh scattering
-
-aerosol optical depth
-
-cloud deck height
-
-horizon clarity
-
-humidity + particulates
-
-wind direction
-
-temperature gradients
-
-It produces color‑phase predictions for:
-
-pre‑sunrise glow
-
-golden hour warmth
-
-blue hour saturation
-
-post‑sunset gradients
-
-This engine is being actively refined (see “Coming Soon”).
-
-4. Photo‑Time Tracking
-A dedicated view shows:
-
-optimal shooting windows
-
-transitions between sky phases
-
-expected color intensity
-
-weather‑dependent adjustments
-
-This helps photographers plan exact takeoff times for drones or arrival times for ground shoots.
-
-5. Clean, Modern UI
-Built with:
-
-Material 3 on Android
-
-Fluent icons
-
-custom fonts
-
-optimized XAML via SourceGen
-
-fast navigation via Shell routes
-
-The UI is intentionally minimal, fast, and photography‑focused.
-
-🧩 Architecture Overview
-Dependency Injection
-The app uses a clean DI structure:
-
-Singleton Services
-ISessionStore → shared app state
-
-IWeatherService → API + payload handling
-
-WeatherEngine → transforms raw weather into photo‑ready data
-
-AstronomyEngine → sun/moon/twilight calculations
-
-ImageCacheService → icon caching
-
-ServiceHelper → shared utilities
-
-Singletons ensure consistency across navigation and prevent recomputation.
-
-Transient ViewModels
-Each page receives a fresh ViewModel instance:
-
-ForecastViewModel
-
-SelectLocationViewModel
-
-SettingsViewModel
-
-DayViewModel
-
-EventsViewModel
-
-PhotoTimeTrackViewModel
-
-This prevents stale UI state and ensures accurate recalculation.
-
-Shell Routing
-Pages are registered via:
-
-csharp
-Routing.RegisterRoute(nameof(ForecastPage), typeof(ForecastPage));
-Routing.RegisterRoute(nameof(SelectLocationPage), typeof(SelectLocationPage));
-Routing.RegisterRoute(nameof(SettingsPage), typeof(SettingsPage));
-Views are not registered in DI — Shell instantiates them.
-
-🗺️ Coming Soon
-1. Map Tile Background (Major Feature)
-A fully integrated map background using:
-
-OpenStreetMap tiles
-
-Mapsui 8
-
-custom tile caching
-
-NetTopologySuite for projections
-
-optimized Android compatibility
-
-This will allow:
-
-location selection directly on the map
-
-visual context for forecasts
-
-sky‑color overlays
-
-horizon‑aware predictions
-
-This is a major UI upgrade.
-
-2. Sky‑Color Engine v2 (Fine‑Tuning)
-The next version will include:
-
-improved aerosol modeling
-
-horizon obstruction detection
-
-humidity‑based color dampening
-
-inversion layer detection
-
-sea‑breeze color shifts (Boston‑specific)
-
-storm‑edge color bloom prediction
-
-enhanced blue‑hour saturation modeling
-
-This will make predictions significantly more accurate.
-
-3. Photo‑Event Timeline
-A new timeline view showing:
-
-color transitions
-
-weather changes
-
-astronomical events
-
-hazard windows
-
-recommended shooting times
-
-This will replace older timeline pages removed during the refactor.
-
-4. Cached Forecast History
-The app will store:
-
-previous forecasts
-
-previous sky‑color predictions
-
-previous photo‑time windows
-
-This allows comparison across days and seasons.
-
-5. Improved Asset Pipeline
-Fixes for:
-
-image caching
-
-font aliasing
-
-splash/icon refresh
-
-cross‑platform asset consistency
-
-This ensures updated icons and fonts always display correctly.
-
-🧭 Project Structure
-Code
 ThePhotographersForecast/
-│
-├── Views/
-│   ├── Forecast.xaml
-│   ├── SelectLocation.xaml
-│   ├── Settings.xaml
-│   └── (more coming soon)
-│
-├── ViewModels/
-│   ├── ForecastViewModel.cs
-│   ├── SelectLocationViewModel.cs
-│   ├── SettingsViewModel.cs
-│   └── (secondary viewmodels)
-│
-├── Services/
-│   ├── WeatherEngine.cs
-│   ├── AstronomyEngine.cs
-│   ├── IWeatherService.cs
-│   ├── ImageCacheService.cs
-│   └── ServiceHelper.cs
-│
-├── Shared/
-│   └── ISessionStore.cs
-│
-├── Resources/
-│   ├── Images/
-│   ├── Fonts/
-│   └── Raw/
-│
-└── AppShell.xaml
-📸 Why This App Exists
-The Photographer’s Forecast is built for photographers who care about:
+├── src/
+│   ├── PhotographersForecast/             # Main .NET MAUI cross-platform application
+│   │   ├── Models/                        # Weather, Ephemeris, and WindowScore records
+│   │   ├── ViewModels/                    # CommunityToolkit.Mvvm observable ViewModels
+│   │   ├── Views/                         # XAML pages and custom SkiaSharp sky canvases
+│   │   ├── Services/
+│   │   │   ├── Weather/                   # NWS API client & gridpoint feature mapper
+│   │   │   ├── Ephemeris/                 # Solar, lunar, and Galactic Center math
+│   │   │   └── Inference/                 # ONNX Runtime session & batch scoring service
+│   │   └── Resources/
+│   │       └── Raw/
+│   │           └── photographers_forecast_v2.onnx  # Bundled on-device ONNX model
+│   └── PhotographersForecast.Tests/       # Unit tests & ONNX numerical parity checks
+├── ml_pipeline/                           # Python PyTorch training & export scripts
+│   ├── build_features.py                  # Vectorized 28-feature engineering pipeline
+│   ├── train_export_onnx.py               # Multi-head PyTorch training & ONNX export
+│   ├── feature_schema_v2.json             # Input/output tensor index contract
+│   └── onnx_parity_fixture.json           # Reference vectors for C# parity testing
+├── .gitignore
+└── README.md
 
-color
 
-light
+ONNX Model Specification (photographers_forecast_v2.onnx)
+To prevent preprocessing drift between Python training and C# inference, Z-score normalization (mean and std computed on the chronological training split) is embedded directly inside the ONNX graph's input layer.
 
-timing
+Input Tensor: hourly_features — float32[forecast_hours, 28] (dynamic batch axis supporting 24h, 48h, or 168h NWS windows)
 
-atmosphere
+0–13: Temperature, dewpoint, dewpoint depression, relative humidity, total/low/mid/high cloud cover %, visibility, wind speed, wind gust, gust factor, precipitation probability, 3-hour temperature delta.
 
-precision
+14–21: Wind direction (
+sin/cos), solar elevation & azimuth (
+sin/cos), lunar elevation, lunar interference index, Galactic Center altitude.
 
-It’s not a generic weather app — it’s a photography tool, engineered with the same care you put into your aerial work.
+22–27: Soft astronomical window weights (w_blue_hour, w_sunrise, w_sunset, w_lunar_event, w_galactic, is_daylight).
+
+Output Tensor: window_scores — float32[forecast_hours, 7] (scaled 0.0 to 100.0)
+
+[0] score_drone_flight
+
+[1] score_blue_hour
+
+[2] score_sunrise
+
+[3] score_sunset
+
+[4] score_lunar_rise_set
+
+[5] score_galaxy_rise_set
+
+[6] score_overall_window
+
+Getting Started
+Prerequisites
+Visual Studio 2026 with the .NET Multi-platform App UI development workload installed
+
+.NET 10 / .NET 11 SDK
+
+Python 3.11+ with torch, onnx, onnxruntime, numpy, and pandas (only required if retraining or modifying the ONNX model)
+
+Building & Running the .NET MAUI App
+Clone the repository:
+
+Bash
+git clone [https://github.com/Jeremys-Code/ThePhotographersForecast.git](https://github.com/Jeremys-Code/ThePhotographersForecast.git)
+cd ThePhotographersForecast
+Open the solution (.sln / .slnx) in Visual Studio 2026.
+
+Restore NuGet packages (Microsoft.ML.OnnxRuntime, CommunityToolkit.Mvvm, CommunityToolkit.Maui, SkiaSharp.Views.Maui.Controls, sqlite-net-pcl).
+
+Select your target platform (Windows Machine, Android Emulator, or iOS Simulator) and press F5 to build and run.
+
+Retraining & Exporting the ONNX Model
+Navigate to the ML pipeline directory and install dependencies:
+
+Bash
+cd ml_pipeline
+pip install torch onnx onnxruntime numpy pandas pyarrow
+Run feature engineering, training, and ONNX parity verification:
+
+Bash
+python train_export_onnx.py
+Copy the newly generated photographers_forecast_v2.onnx into src/PhotographersForecast/Resources/Raw/ (ensuring its Build Action is set to MauiAsset) and run the C# unit test suite to verify numerical parity against onnx_parity_fixture.json.
+
+Tech Stack
+Application Framework: .NET MAUI (C#)
+
+Architecture & Tooling: MVVM (CommunityToolkit.Mvvm), CommunityToolkit.Maui
+
+On-Device Machine Learning: PyTorch, ONNX (Opset 17), Microsoft.ML.OnnxRuntime
+
+Graphics & Animation: SkiaSharp, Skottie
+
+Local Persistence: SQLite
+
+Data Sources: National Weather Service (NWS) Gridpoint API (api.weather.gov)
+
+License
+This project is licensed under the MIT License — see the LICENSE file for details.
+
+
+---
+
+### Quick Tip Before Committing `README.md`
+Adjust the folder paths under **Repository Structure** (e.g., if your `.csproj` sits directly at the root of `F:\source\ThePhotographersForecast` rather than inside a `src/` subfolder) so every path matches your exact solution layout.
+
+<FollowUp label="Want me to generate the C# feature builder and Visual Studio parity unit test to drop straight into your solution?" query="Write the C# 28-feature builder class and the Visual Studio unit test that loads photographers_forecast_v2.onnx and asserts output parity against onnx_parity_fixture.json."/>
