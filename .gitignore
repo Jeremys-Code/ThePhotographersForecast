@@ -361,3 +361,133 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+## ============================================================================
+## 1. Visual Studio 2026 & .NET MAUI Build Artifacts
+## ============================================================================
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.nupkg
+*.snupkg
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Visual Studio Diagnostic & Profiling Sessions (prevents GH001 >100MB errors)
+Diag Sessions/
+*.diagsession
+*.vspx
+*.coverage
+*.coveragexml
+
+# NuGet & Local Caches
+packages/
+*.nuget.props
+*.nuget.targets
+
+## ============================================================================
+## 2. .NET MAUI Platform-Specific (Android, iOS/MacCatalyst, Windows)
+## ============================================================================
+# Android
+*.apk
+*.aab
+*.dex
+*.ap_
+proguard/
+captures/
+
+# iOS & MacCatalyst
+*.ipa
+*.dSYM.zip
+*.dSYM
+*.xcarchive
+*.app/
+*/*.iOS/obj/
+*/*.MacCatalyst/obj/
+
+# Windows App SDK / MSIX
+AppPackages/
+BundleArtifacts/
+*.msix
+*.msixbundle
+*.appx
+*.appxbundle
+*.appxsym
+
+# Local Mobile Databases & App Secrets
+*.db3
+*.sqlite
+*.sqlite3
+appsettings.Development.json
+secrets.json
+
+## ============================================================================
+## 3. Python, PyTorch & Jupyter Training Pipeline
+## ============================================================================
+# Bytecode & Caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual Environments
+.venv/
+venv/
+env/
+ENV/
+.conda/
+
+# Jupyter Notebooks Checkpoints
+.ipynb_checkpoints/
+
+# PyTorch Checkpoints & Experiment Logs (keep raw training checkpoints local)
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+runs/
+wandb/
+mlruns/
+lightning_logs/
+
+## ============================================================================
+## 4. Datasets & ONNX Artifacts
+## ============================================================================
+# Ignore large raw weather/training datasets (re-generated locally)
+*.parquet
+*.feather
+*.h5
+*.hdf5
+*.pkl
+*.pickle
+data/raw/
+data/processed/
+
+# Ignore intermediate/experimental ONNX exports, EXCEPT production MAUI assets
+*.onnx
+*.onnx.data
+!Resources/Raw/*.onnx
+!**/Resources/Raw/*.onnx
+
+# Keep small C# / Python parity test fixtures tracked
+!**/onnx_parity_fixture.json
+!**/feature_schema_v2.json
+
+## ============================================================================
+## 5. Operating System & Editor Junk
+## ============================================================================
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.tmp
+*~
