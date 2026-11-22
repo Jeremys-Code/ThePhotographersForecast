@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ThePhotographersForecast.Views.DataCheck"
+             xmlns:model="clr-namespace:ThePhotographersForecast.Models"
+             xmlns:fold="clr-namespace:Microsoft.Maui.Controls.Foldable;assembly=Microsoft.Maui.Controls.Foldable"
+             xmlns:component="clr-namespace:ThePhotographersForecast.Components"
+             xmlns:svc="clr-namespace:ThePhotographersForecast.Services"
+             xmlns:vm="clr-namespace:ThePhotographersForecast.ViewModels"
+             xmlns:skia="clr-namespace:SkiaSharp.Extended.UI.Controls;assembly=SkiaSharp.Extended.UI"
+             xmlns:maps="http://schemas.microsoft.com/dotnet/2021/maui/maps"
+             x:DataType="vm:DataCheckViewModel"
+             Title="Data Card Tester">
+    <fold:TwoPaneView Pane1Length="1*"
+                      Pane2Length="1*"
+                      PanePriority="Pane1"
+                      WideModeConfiguration="LeftRight"
+                      TallModeConfiguration="TopBottom"
+                      MinWideModeWidth="720"
+                      MinTallModeHeight="800">
+        <fold:TwoPaneView.Pane1>
+            <Grid x:Name="DataCardContainer" HorizontalOptions="Fill" VerticalOptions="Fill" Padding="30">
+                <maps:Map x:Name="BackgroundMapView" MapType="Street" IsShowingUser="False" InputTransparent="True" />
+                <VerticalStackLayout>
+                    <Border Stroke="{StaticResource NoonReverse}" 
+                StrokeThickness="4" 
+                Margin="10" 
+                HorizontalOptions="Start">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="15"/>
+                        </Border.StrokeShape>
+                        <VerticalStackLayout HorizontalOptions="Center">
+                            <Image Source="thephotographersforecast.png" 
+                       Aspect="AspectFit"/>
+                           
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Label Text="Hourly or Daily" 
+                   HorizontalOptions="Center"/>
+                    <Grid>
+                        <Picker ItemsSource="{Binding HoursCollection, StringFormat='{}{0:MMM dd htt}'}" SelectedItem="{Binding .,Mode=TwoWay}"/>
+                    </Grid>
+                </VerticalStackLayout>
+            </Grid>
+        </fold:TwoPaneView.Pane1>
+        <fold:TwoPaneView.Pane2>
+            <Grid HorizontalOptions="Fill" VerticalOptions="Fill">
+                <CollectionView x:Name="HourDetail" 
+                                ItemsSource="{Binding HourlyCollection}"
+                                SelectedItem="{Binding CurrentHourly}">
+
+                    <CollectionView.ItemsLayout>
+                    <GridItemsLayout Span="6" Orientation="Horizontal" HorizontalItemSpacing="10"/>
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="model:MappedHourly">
+                            <Grid>
+                                <Label Text="{Binding Name}"/>
+                            <Label Text="{Binding StartTime, StringFormat='{}{0:F}'}"/>
+                            <Label Text="{Binding EndTime, StringFormat='{}{0:F}'}"/>
+                            <Label Text="{Binding Temperature.Value}"/>
+                            <Label Text="{Binding TemperatureStatement}"/>
+                            <Label Text="{Binding TimeOfDay}"/>
+                            <Label Text="{Binding WindSpeedStatement}"/>
+                            <Label Text="{Binding BriefForecast}"/>
+                            <Label Text="{Binding HealthSafetyStatement}"/>
+                            <Label Text="{Binding PrecipitationStatement}"/>
+                            <Label Text="{Binding SkyCoverStatement}"/>
+                            <Label Text="{Binding StormStatement}"/>
+                            <skia:SKLottieView Source="{Binding SkHourlyAnimations}"
+                                               WidthRequest="150"
+                                               HeightRequest="150"
+                                               RepeatCount="-1"
+                                               RepeatMode="Restart"/>
+                                </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+                
+            </Grid>    
+        </fold:TwoPaneView.Pane2>
+    </fold:TwoPaneView>
+</ContentPage>

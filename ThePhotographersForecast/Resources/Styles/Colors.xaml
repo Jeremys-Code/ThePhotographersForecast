@@ -196,6 +196,12 @@
         <GradientStop Color="#203AA4" Offset="1.0"/>
     </LinearGradientBrush>
 
+    <LinearGradientBrush x:Key="EarlyMorning" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#081F43" Offset="0.0"/>
+        <GradientStop Color="#0D297A" Offset="0.5"/>
+        <GradientStop Color="#203AA4" Offset="1.0"/>
+    </LinearGradientBrush>
+
     <LinearGradientBrush x:Key="PeriodMorning" StartPoint="0,0" EndPoint="1,0">
         <GradientStop Color="#203AA4" Offset="0.0"/>
         <GradientStop Color="#316BE8" Offset="0.33"/>
@@ -246,10 +252,22 @@
         <GradientStop Color="#0D297A" Offset="0.5"/>
         <GradientStop Color="#081F43" Offset="1.0"/>
     </LinearGradientBrush>
+    
     <LinearGradientBrush x:Key="NightBackground" StartPoint="0,0" EndPoint="0,1">
         <GradientStop Color="#203AA4" Offset="0.0"/>
         <GradientStop Color="#0D297A" Offset="0.5"/>
         <GradientStop Color="#081F43" Offset="1.0"/>
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="Dusk" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#0A5EB8" Offset="0.65"/>
+        <GradientStop Color="#EC9393" Offset="1.0" />
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="Night" StartPoint="1,0" EndPoint="0,1">
+        <GradientStop Color="#0F172A" Offset="0.0"/>
+        <GradientStop Color="#312E81" Offset="0.6"/>
+        <GradientStop Color="#6366F1" Offset="1.0"/>
     </LinearGradientBrush>
 
 </ResourceDictionary>

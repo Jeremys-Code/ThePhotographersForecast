@@ -247,6 +247,7 @@
 		<!-- Custom Fonts -->
 		<MauiFont Include="Resources\Fonts\NotoSansBlack.ttf" />
 		<MauiFont Include="Resources\Fonts\NotoSansECLight.ttf" />
+		<MauiFont Include="Resources\Fonts\HennyPenny.ttf"/>
 
 		<!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
 		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
@@ -259,6 +260,13 @@
 	</ItemGroup>
 	
 	
+	<ItemGroup>
+	  <Compile Remove="Services\GetEventService.cs" />
+	  <Compile Remove="Services\IGetEventService.cs" />
+	  <Compile Remove="Services\Modules\TemperatureEngine.cs" />
+	</ItemGroup>
+	
+	
 
 	
 	
@@ -267,19 +275,21 @@
 	<ItemGroup>
 		<PackageReference Include="CommunityToolkit.Maui" Version="15.0.1" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.1" />
 		<PackageReference Include="Microsoft.Extensions.Http" Version="10.0.13" />
-		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.110" />
+		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.130" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.13" />
-		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="10.0.110" />
-		<PackageReference Include="Microsoft.Maui.Controls.Foldable" Version="10.0.110" />
-		<PackageReference Include="Microsoft.Maui.Controls.Maps" Version="10.0.110" />
-		<PackageReference Include="Microsoft.Maui.Essentials" Version="10.0.110" />
-		<PackageReference Include="Microsoft.Maui.Graphics.Skia" Version="10.0.110" />
-		<PackageReference Include="Microsoft.Maui.Maps" Version="10.0.110" />
-		<PackageReference Include="SkiaSharp" Version="4.153.1" />
+		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="10.0.130" />
+		<PackageReference Include="Microsoft.Maui.Controls.Foldable" Version="10.0.130" />
+		<PackageReference Include="Microsoft.Maui.Controls.Maps" Version="10.0.130" />
+		<PackageReference Include="Microsoft.Maui.Essentials" Version="10.0.130" />
+		<PackageReference Include="Microsoft.Maui.Graphics.Skia" Version="10.0.130" />
+		<PackageReference Include="Microsoft.Maui.Maps" Version="10.0.130" />
+		<PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.32.0" />
+		<PackageReference Include="SkiaSharp" Version="4.156.0" />
 		<PackageReference Include="SkiaSharp.Extended.UI.Maui" Version="3.0.0" />
-		<PackageReference Include="SkiaSharp.Views" Version="4.153.1" />
-		<PackageReference Include="SkiaSharp.Views.Maui.Controls" Version="4.153.1" />
+		<PackageReference Include="SkiaSharp.Views" Version="4.156.0" />
+		<PackageReference Include="SkiaSharp.Views.Maui.Controls" Version="4.156.0" />
 		<PackageReference Include="SkiaSharp.Views.Maui.Controls.Compatibility" Version="2.88.9" />
 		<PackageReference Include="System.ObjectModel" Version="4.3.0" />
 	</ItemGroup>
@@ -345,6 +355,9 @@
 		<MauiXaml Update="Views\LottieParade.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
+		<MauiXaml Update="Views\MissMeNot.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
 	  <MauiXaml Update="Views\SelectLocation.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
@@ -357,15 +370,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\SunCalcSharp\SunCalcSharp.csproj">
-	    <CopyLocalSatelliteAssemblies></CopyLocalSatelliteAssemblies>
-	    <Private>True</Private>
-	    <EmbedInteropTypes>False</EmbedInteropTypes>
-	    <ReferenceOutputAssembly></ReferenceOutputAssembly>
-	  </ProjectReference>
-	</ItemGroup>
-
-	<ItemGroup>
 	  <MauiImage Update="Resources\Images\clear_day.json">
 	    <LogicalName>%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
 	  </MauiImage>
@@ -374,6 +378,7 @@
 
 	<PropertyGroup>
 		<NoWarn>$(NoWarn);MAUIAI0001</NoWarn>
+		<UserSecretsId>9872883f-24fb-4c6b-8746-3eaeba1b192e</UserSecretsId>
 	</PropertyGroup>
 	
 </Project>

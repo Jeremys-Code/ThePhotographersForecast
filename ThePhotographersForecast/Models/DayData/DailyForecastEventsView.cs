@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using ThePhotographersForecast.Components;
 using ThePhotographersForecast.Services.Modules;
 using ThePhotographersForecast.Shared;
 
@@ -8,7 +9,40 @@ namespace ThePhotographersForecast.Models.DayData
     {
         private readonly ISession _session;
         private IForecastService _forecastService;
-
+        [ObservableProperty]
+        public partial PhotoLocation SelectedLocation { get; set; }
+        [ObservableProperty]
+        public partial CalendarDayModel[] Dates { get; set; }
+        [ObservableProperty]
+        public partial CalendarDayModel SelectedDate { get; set; }
+        [ObservableProperty]
+        public partial EventModel[] EventModels { get; set; }
+        [ObservableProperty]
+        public partial EventModel SelectEventModel { get; set; }
+        [ObservableProperty]
+        public partial EventTime[] SelectedEventModelEventTimes { get; set; }
+        [ObservableProperty]
+        public partial EventTime SelectedEventModelSelectedEventTime { get; set; }
+        [ObservableProperty]
+        public partial HourlyForecast SelectedEventTimeMeteoForecast { get; set; }
+        [ObservableProperty]
+        public partial NwsHourlyForecast SelectedEventTimeNwsForecast { get; set; }
+        [ObservableProperty]
+        public partial NwsDailyForecast[] NwsDailies { get; set; }
+        [ObservableProperty]
+        public partial NwsDailyForecast SelectedNwsDaily { get; set; }
+        [ObservableProperty]
+        public partial NwsHourlyForecast[] SelectedNwsDailyHourlies { get; set; }
+        [ObservableProperty]
+        public partial NwsHourlyForecast SelectedNwsDailySelectedHourly { get; set; }
+        [ObservableProperty]
+        public partial DailyForecast[] MeteoDailies { get; set; }
+        [ObservableProperty]
+        public partial DailyForecast SelectedMeteoDaily { get; set; }
+        [ObservableProperty]
+        public partial HourlyForecast[] SelectedMeteoDailyHourlies { get; set; }
+        [ObservableProperty]
+        public partial HourlyForecast SelectedMeteoDailySelectedHourly { get; set; }
         public DailyForecastEventsView(ISession session, IForecastService forecastService)
         {
             _session = session;

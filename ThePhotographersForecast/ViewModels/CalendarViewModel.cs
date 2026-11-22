@@ -2,7 +2,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
-using System.Timers;
 using ThePhotographersForecast.Models;
 using ThePhotographersForecast.Shared;
 
@@ -10,8 +9,7 @@ namespace ThePhotographersForecast.ViewModels
 {
     public partial class CalendarViewModel : ObservableObject
     {
-        [ObservableProperty]
-        private System.Timers.Timer _timer;
+        private IDispatcherTimer? _timer;
         [ObservableProperty]
         public partial string GreetingLine1 { get; set; }
         [ObservableProperty]
@@ -58,44 +56,44 @@ namespace ThePhotographersForecast.ViewModels
         public CalendarViewModel(ISession session)
         {
             _session = session;
-            MainThread.BeginInvokeOnMainThread(() => Days = _session.Days.ToObservableCollection());
-            MainThread.BeginInvokeOnMainThread((Action)(() =>
+            RefreshFromSession();
+
+            _timer = Application.Current?.Dispatcher.CreateTimer();
+            if (_timer != null)
+            {
+                _timer.Interval = TimeSpan.FromSeconds(1);
+                _timer.Tick += (_, _) => OnTimerElapsed();
+                _timer.Start();
+            }
+        }
+
+        public void RefreshFromSession()
+        {
+            if (_session.Days == null || _session.Days.Count == 0)
+                return;
+
+            MainThread.BeginInvokeOnMainThread(() =>
             {
                 this.Days = [.. _session.Days];
 
                 SelectedDay = Days[0];
                 SelectedDayEventModel = SelectedDay.Events;
-                SelectedDayEventTimes = [.. SelectedDayEventModel.EventTimes];
-                SelectedDayCurrentEventTime = SelectedDayEventTimes[0];
-
-                SelectedDayCurrentEventTimeHourlyWeather = SelectedDayCurrentEventTime.Forecast;
-
-
-                //SelectedDayDayWeather = SelectedDay.WeatherDetails.Where(x=>x.Time==
+                SelectedDayEventTimes = SelectedDayEventModel?.EventTimes != null
+                    ? [.. SelectedDayEventModel.EventTimes]
+                    : Array.Empty<EventTime>();
+                SelectedDayCurrentEventTime = SelectedDayEventTimes.FirstOrDefault() ?? new EventTime();
+                SelectedDayCurrentEventTimeHourlyWeather = SelectedDayCurrentEventTime.Forecast ?? new NwsHourlyForecast();
 
                 CurrentDate = DateTime.Today;
                 SelectedLocationTime = DateTime.UtcNow.AddSeconds(UtcOffset).ToString("F");
                 MonthYear = CurrentDate.ToString("MMMM") + " " + CurrentDate.ToString("yyyy");
 
-
-
-
-
                 GenerateCalendar();
 
-                // The page greeting message.
-                GreetingLine1 = $"Here is your forecast for:";
-                GreetingLine2 = $@"{_session.SelectedLocation.City}, {(_session.SelectedLocation.State != null ? _session.SelectedLocation.State + ", " : "")} {_session.SelectedLocation.Country}";
-                GreetingLine3 = $@"{_session.StartDate.DayOfWeek}, {_session.StartDate.ToString("MMMM d")} - {_session.EndDate.DayOfWeek}, {_session.EndDate.ToString("MMMM d")}";
-
-                // The Local Time of the selected location.
-                SelectedLocationTime = DateTime.UtcNow.AddSeconds(UtcOffset).ToString("F");
-                _timer = new System.Timers.Timer(1000); // 1 second interval
-                _timer.Elapsed += OnTimerElapsed;
-                _timer.Start();
-
-
-            }));
+                GreetingLine1 = "Here is your forecast for:";
+                GreetingLine2 = $@"{_session.SelectedLocation?.City}, {(_session.SelectedLocation?.State != null ? _session.SelectedLocation.State + ", " : "")} {_session.SelectedLocation?.Country}";
+                GreetingLine3 = $@"{_session.StartDate.DayOfWeek}, {_session.StartDate:MMMM d} - {_session.EndDate.DayOfWeek}, {_session.EndDate:MMMM d}";
+            });
         }
 
         //[RelayCommand]
@@ -126,14 +124,9 @@ namespace ThePhotographersForecast.ViewModels
         //    SelectedDayCurrentEventTimeHourlyWeather = SelectedDayCurrentEventModel.HourlyWeather;
         //    SelectedDayDayWeather = SelectedDay.WeatherDetails;
         //}
-        private void OnTimerElapsed(object? sender, ElapsedEventArgs e)
+        private void OnTimerElapsed()
         {
             SelectedLocationTime = DateTime.UtcNow.AddSeconds(UtcOffset).ToString("F");
-            //            CurrentTime = DateTime.Now.ToString("F");
-        }
-        private async void Init()
-        {
-
         }
         private async Task OnFlip(DayViewModel day)
         {

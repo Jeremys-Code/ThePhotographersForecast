@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Configuration;
 using System.Diagnostics;
 using System.Globalization;
 using System.Text.Json;
@@ -97,7 +98,16 @@ public partial class GetEventService : IGetEventService
         var json = new EventTimeSeriesData.Rootobject();
         try
         {
-            var request = new HttpRequestMessage(HttpMethod.Get, $"https://api.ipgeolocation.io/v3/astronomy/timeSeries?apiKey=b3c99c6a0b9e44169fa96b6918495732&dateStart={ISession.StartDate.ToString("yyyy-MM-dd")}&dateEnd={ISession.EndDate.ToString("yyyy-MM-dd")}&lat={ISession.SelectedLocation.Latitude}&long={ISession.SelectedLocation.Longitude}");
+            var configuration = new ConfigurationBuilder()
+               .AddUserSecrets<MauiApp>() // Reads secrets for this project
+               .Build();
+
+            // Retrieve API key from secrets
+
+            string apiKey = configuration["ApiIpGeoLocation:ApiKey"];
+            if (apiKey == null) return default;
+
+            var request = new HttpRequestMessage(HttpMethod.Get, $"https://api.ipgeolocation.io/v3/astronomy/timeSeries?apiKey={apiKey}&dateStart={ISession.StartDate.ToString("yyyy-MM-dd")}&dateEnd={ISession.EndDate.ToString("yyyy-MM-dd")}&lat={ISession.SelectedLocation.Latitude}&long={ISession.SelectedLocation.Longitude}");
             json = await GetDataAsync<EventTimeSeriesData.Rootobject>(request);
 
 

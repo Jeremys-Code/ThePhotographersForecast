@@ -5,6 +5,7 @@ using SkiaSharp.Views.Maui.Controls.Hosting;
 using ThePhotographersForecast.Components;
 using ThePhotographersForecast.Models.DayData;
 using ThePhotographersForecast.Services;
+using ThePhotographersForecast.Services.ML;
 using ThePhotographersForecast.Services.Modules;
 using ThePhotographersForecast.Shared;
 using ThePhotographersForecast.ViewModels;
@@ -28,6 +29,7 @@ namespace ThePhotographersForecast
                 {
                     fonts.AddFont("NotoSansECLight.ttf", "NotoSans");
                     fonts.AddFont("NotoSansBlack.ttf", "NotoThick");
+                    fonts.AddFont("HennyPenny.ttf", "HennyPenny");
                 });
             //Create logging service
             //  builder.Services.AddLogging(loggingBuilder =>
@@ -90,6 +92,12 @@ namespace ThePhotographersForecast
                 c.DefaultRequestHeaders.UserAgent.ParseAdd("ThePhotographersForecast/6.0 (airmail@bostonfromabove.com)");
                 c.DefaultRequestHeaders.Add("Accept", "application/json");
             });
+            builder.Services.AddHttpClient<ISkyMetricsService, SkyMetricsService>(c =>
+            {
+                c.BaseAddress = new Uri("https://api.open-meteo.com/");
+                c.DefaultRequestHeaders.UserAgent.ParseAdd("ThePhotographersForecast/7.0 (airmail@bostonfromabove.com)");
+                c.DefaultRequestHeaders.Add("Accept", "application/json");
+            });
             builder.Services.AddHttpClient<ISkyColorEngine, SkyColorEngine>(c =>
             {
                 c.DefaultRequestHeaders.UserAgent.ParseAdd("ThePhotographersForecast/6.0 (airmail@bostonfromabove.com)");
@@ -116,6 +124,8 @@ namespace ThePhotographersForecast
             builder.Services.AddSingleton<ISession, Session>();
             builder.Services.AddSingleton<ILottieParadeService, LottieParadeService>();
             builder.Services.AddSingleton<IGetDays, GetDays>();
+            builder.Services.AddSingleton<PhotographersForecastOnnxService>();
+            builder.Services.AddSingleton<ISkyColorCalculator, SkyColorCalculator>();
             // Register components
 
 
@@ -129,17 +139,19 @@ namespace ThePhotographersForecast
             builder.Services.AddSingleton<DataCheckViewModel>();
             builder.Services.AddSingleton<DailyForecastViewModel>();
             builder.Services.AddSingleton<EventPlannerViewModel>();
+            builder.Services.AddSingleton<MissMeNotViewModel>();
             // Register the Views and inject the VM's
-            builder.Services.AddTransient<SelectLocation>();
-            builder.Services.AddTransient<Forecast>();
-            builder.Services.AddTransient<ForecastDetails>();
-            builder.Services.AddTransient<Settings>();
-            builder.Services.AddTransient<Calendar>();
-            builder.Services.AddTransient<DataCheck>();
-            builder.Services.AddTransient<EventPlanner>();
-            builder.Services.AddTransient<LottieParade>();
+            builder.Services.AddSingleton<SelectLocation>();
+            builder.Services.AddSingleton<Forecast>();
+            builder.Services.AddSingleton<ForecastDetails>();
+            builder.Services.AddSingleton<Settings>();
+            builder.Services.AddSingleton<Calendar>();
+            builder.Services.AddSingleton<DataCheck>();
+            builder.Services.AddSingleton<EventPlanner>();
+            builder.Services.AddSingleton<LottieParade>();
+            builder.Services.AddSingleton<MissMeNot>();
             // Register the ContentViews
-            builder.Services.AddTransient<NwsDailyHourlyView>();
+            builder.Services.AddSingleton<NwsDailyHourlyView>();
 
             //#if IOS || MACCATALYST
             //        // Register the platform-specific implementation

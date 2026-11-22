@@ -1,4 +1,6 @@
-﻿namespace ThePhotographersForecast.Data;
+﻿using ThePhotographersForecast.Models;
+
+namespace ThePhotographersForecast.Data;
 
 public class GridDetailData
 {
@@ -94,161 +96,38 @@ public class GridDetailData
         public double value { get; set; }
     }
 
-    public class Temperature
-    {
-        public string uom { get; set; }
-        public TemperatureValues[] values { get; set; }
-    }
+    // Numeric gridpoint layers inherit uom/values (and validTime/value per entry)
+    // from NwsGridpointProperty<T> so they can be passed straight to ExpandMetric<T>.
+    public class Temperature : NwsGridpointProperty<double> { }
 
-    public class TemperatureValues
-    {
-        public string validTime { get; set; }
-        public double value { get; set; }
-    }
+    public class Dewpoint : NwsGridpointProperty<double> { }
 
-    public class Dewpoint
-    {
-        public string uom { get; set; }
-        public DewPointValues[] values { get; set; }
-    }
+    public class Maxtemperature : NwsGridpointProperty<double> { }
 
-    public class DewPointValues
-    {
-        public string validTime { get; set; }
-        public double value { get; set; }
-    }
+    public class MinTemperature : NwsGridpointProperty<double> { }
 
-    public class Maxtemperature
-    {
-        public string uom { get; set; }
-        public MaxTemperatureValues[] values { get; set; }
-    }
+    public class Relativehumidity : NwsGridpointProperty<double> { }
 
-    public class MaxTemperatureValues
-    {
-        public string validTime { get; set; }
-        public double value { get; set; }
-    }
+    public class Apparenttemperature : NwsGridpointProperty<double> { }
 
-    public class MinTemperature
-    {
-        public string uom { get; set; }
-        public MinTemperatureValues[] values { get; set; }
-    }
+    public class Wetbulbglobetemperature : NwsGridpointProperty<double> { }
 
-    public class MinTemperatureValues
-    {
-        public string validTime { get; set; }
-        public double value { get; set; }
-    }
-
-    public class Relativehumidity
-    {
-        public string uom { get; set; }
-        public RelativeHumidityValues[] values { get; set; }
-    }
-
-    public class RelativeHumidityValues
-    {
-        public string validTime { get; set; }
-        public double value { get; set; }
-    }
-
-    public class Apparenttemperature
-    {
-        public string uom { get; set; }
-        public ApparentTemperatureValues[] values { get; set; }
-    }
-
-    public class ApparentTemperatureValues
-    {
-        public string validTime { get; set; }
-        public double value { get; set; }
-    }
-
-    public class Wetbulbglobetemperature
-    {
-        public string uom { get; set; }
-        public WetBulbGlobeTemperatureValues[] values { get; set; }
-    }
-
-    public class WetBulbGlobeTemperatureValues
-    {
-        public string validTime { get; set; }
-        public double value { get; set; }
-    }
-
-    public class Heatindex
-    {
-        public string uom { get; set; }
-        public HeatIndexValues[] values { get; set; }
-    }
     // Heatindex represents the apparent temperature (temerapture and Relative Humidity combined)
-    public class HeatIndexValues
-    {
-        public string validTime { get; set; }
-        public double value { get; set; }
-    }
+    public class Heatindex : NwsGridpointProperty<double> { }
 
-    public class Windchill
-    {
-        public string uom { get; set; }
-        public WindchillValues[] values { get; set; }
-    }
+    public class Windchill : NwsGridpointProperty<double> { }
 
-    public class WindchillValues
-    {
-        public string validTime { get; set; }
-        public double value { get; set; }
-    }
+    public class Skycover : NwsGridpointProperty<double> { }
 
-    public class Skycover
-    {
-        public string uom { get; set; }
-        public SkyCoverValues[] values { get; set; }
-    }
+    public class Winddirection : NwsGridpointProperty<int> { }
 
-    public class SkyCoverValues
-    {
-        public string validTime { get; set; }
-        public double value { get; set; }
-    }
+    public class Windspeed : NwsGridpointProperty<double> { }
 
-    public class Winddirection
-    {
-        public string uom { get; set; }
-        public WindDirectionValues[] values { get; set; }
-    }
-
-    public class WindDirectionValues
-    {
-        public string validTime { get; set; }
-        public int value { get; set; }
-    }
-
-    public class Windspeed
-    {
-        public string uom { get; set; }
-        public WindSpeedValues[] values { get; set; }
-    }
-
-    public class WindSpeedValues
-    {
-        public string validTime { get; set; }
-        public double value { get; set; }
-    }
-
-    public class Windgust
-    {
-        public string uom { get; set; }
-        public WindGustValues[] values { get; set; }
-    }
-
-    public class WindGustValues
-    {
-        public string validTime { get; set; }
-        public double value { get; set; }
-    }
+    public class Windgust : NwsGridpointProperty<double> { }
+    public class Transportwindspeed : NwsGridpointProperty<double> { }
+    public class Transportwinddirection : NwsGridpointProperty<int> { }
+    public class Visibility1 : NwsGridpointProperty<double> { }
+    public class Ceilingheight : NwsGridpointProperty<double> { }
 
     public class Weather
     {
@@ -284,73 +163,20 @@ public class GridDetailData
         public double event_number { get; set; }
     }
 
-    public class Heatrisk
-    {
-        public HeatRiskValues[] values { get; set; }
-    }
     // HeatRisk values are 0-4 representing heat anonomlies based on the recorded average temperature of the day.
-    public class HeatRiskValues
-    {
-        public string validTime { get; set; }
-        public int value { get; set; }
-    }
+    public class Heatrisk : NwsGridpointProperty<int> { }
 
-    public class Probabilityofprecipitation
-    {
-        public string uom { get; set; }
-        public ProbabilityOfPrecipitationValues[] values { get; set; }
-    }
+    public class Probabilityofprecipitation : NwsGridpointProperty<double> { }
 
-    public class ProbabilityOfPrecipitationValues
-    {
-        public string validTime { get; set; }
-        public double value { get; set; }
-    }
+    public class Quantitativeprecipitation : NwsGridpointProperty<double> { }
 
-    public class Quantitativeprecipitation
-    {
-        public string uom { get; set; }
-        public QuantitativePrecipitationValues[] values { get; set; }
-    }
+    public class Iceaccumulation : NwsGridpointProperty<double> { }
 
-    public class QuantitativePrecipitationValues
-    {
-        public string validTime { get; set; }
-        public double value { get; set; }
-    }
-
-    public class Iceaccumulation
-    {
-        public string uom { get; set; }
-        public IceAccumulationValues[] values { get; set; }
-    }
-
-    public class IceAccumulationValues
-    {
-        public string validTime { get; set; }
-        public double value { get; set; }
-    }
-
-    public class Snowfallamount
-    {
-        public string uom { get; set; }
-        public SnowFallAmountValues[] values { get; set; }
-    }
-
-    public class SnowFallAmountValues
-    {
-        public string validTime { get; set; }
-        public double value { get; set; }
-    }
+    public class Snowfallamount : NwsGridpointProperty<double> { }
 
     public class Snowlevel
     {
         public object[] values { get; set; }
-    }
-    public class Ceilingheight
-    {
-        public string uom { get; set; }
-        public CeilingHeightValues[] values { get; set; }
     }
 
     public class CeilingHeightValues
@@ -359,22 +185,10 @@ public class GridDetailData
         public double value { get; set; }
     }
 
-    public class Visibility1
-    {
-        public string uom { get; set; }
-        public VisibilityValues[] values { get; set; }
-    }
-
     public class VisibilityValues
     {
         public string validTime { get; set; }
         public double value { get; set; }
-    }
-
-    public class Transportwindspeed
-    {
-        public string uom { get; set; }
-        public TransportWindSpeedValues[] values { get; set; }
     }
 
     public class TransportWindSpeedValues
@@ -383,29 +197,13 @@ public class GridDetailData
         public double value { get; set; }
     }
 
-    public class Transportwinddirection
-    {
-        public string uom { get; set; }
-        public TransportWindDirectionValues[] values { get; set; }
-    }
-
     public class TransportWindDirectionValues
     {
         public string validTime { get; set; }
         public double value { get; set; }
     }
 
-    public class Mixingheight
-    {
-        public string uom { get; set; }
-        public MixingHeightValues[] values { get; set; }
-    }
-
-    public class MixingHeightValues
-    {
-        public string validTime { get; set; }
-        public double value { get; set; }
-    }
+    public class Mixingheight : NwsGridpointProperty<double> { }
 
     public class Hainesindex
     {
@@ -570,16 +368,7 @@ public class GridDetailData
         public object[] values { get; set; }
     }
 
-    public class Probabilityofthunder
-    {
-        public ProbabilityOfThunderValues[] values { get; set; }
-    }
-
-    public class ProbabilityOfThunderValues
-    {
-        public string validTime { get; set; }
-        public double value { get; set; }
-    }
+    public class Probabilityofthunder : NwsGridpointProperty<double> { }
 
     public class Davisstabilityindex
     {
@@ -591,16 +380,7 @@ public class GridDetailData
         public object[] values { get; set; }
     }
 
-    public class Lowvisibilityoccurrenceriskindex
-    {
-        public LowVisibilityOccurrenceRiskIndexValues[] values { get; set; }
-    }
-
-    public class LowVisibilityOccurrenceRiskIndexValues
-    {
-        public string validTime { get; set; }
-        public double value { get; set; }
-    }
+    public class Lowvisibilityoccurrenceriskindex : NwsGridpointProperty<double> { }
 
     public class Stability
     {

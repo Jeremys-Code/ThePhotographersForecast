@@ -13,7 +13,7 @@ public partial class LottieAnimation : ObservableObject
     public partial string Temperature { get; set; }
     [ObservableProperty]
     public partial DateTime Time { get; set; }
-    public string TimeString => "Time: " + Time.ToString("DDD, MMM d htt");
+    public string TimeString => "Time: " + Time.ToString("ddd, MMM d @ h tt");
     [ObservableProperty]
     public partial LinearGradientBrush SkyTransition { get; set; }
     [ObservableProperty]

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using ThePhotographersForecast.Models;
+﻿using ThePhotographersForecast.Models;
 
 namespace ThePhotographersForecast.Services.Modules
 {
@@ -39,5 +36,4 @@ namespace ThePhotographersForecast.Services.Modules
             return "remaining fairly steady";
         }
     }
-
 }

@@ -8,12 +8,12 @@ namespace ThePhotographersForecast.Controls
         {
             return tod switch
             {
-                TimeOfDay.EarlyMorning => (GetBrush("PeriodEarlyMorning"), "sky_deffault.jpg"),
-                TimeOfDay.Morning => (GetBrush("PeriodMorning"), "sky_morning.jpg"),
-                TimeOfDay.Afternoon => (GetBrush("PeriodAfternoon"), "sky_default.jpg"),
-                TimeOfDay.Evening => (GetBrush("PeriodEvening"), "sky_morning.jpg"),
-                TimeOfDay.Night => (GetBrush("PeriodNight"), "sky_night.jpg"),
-                _ => (GetBrush("PeriodEarlyMorning"), "sky_default.jpg")
+                TimeOfDay.EarlyMorning => ((LinearGradientBrush)Application.Current.Resources["PeriodEarlyMorning"], "sky_default.jpg"),
+                TimeOfDay.Morning => ((LinearGradientBrush)Application.Current.Resources["PeriodMorning"], "sky_morning.jpg"),
+                TimeOfDay.Afternoon => ((LinearGradientBrush)Application.Current.Resources["PeriodAfternoon"], "sky_default.jpg"),
+                TimeOfDay.Evening => ((LinearGradientBrush)Application.Current.Resources["PeriodEvening"], "sky_morning.jpg"),
+                TimeOfDay.Night => ((LinearGradientBrush)Application.Current.Resources["PeriodNight"], "sky_night.png"),
+                _ => ((LinearGradientBrush)Application.Current.Resources["PeriodEarlyMorning"], "sky_default.jpg")
             };
         }
 

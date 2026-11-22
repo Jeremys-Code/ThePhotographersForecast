@@ -11,4 +11,10 @@ public partial class Calendar : ContentPage
         _vm = vm;
         BindingContext = _vm;
     }
+
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+        _vm.RefreshFromSession();
+    }
 }

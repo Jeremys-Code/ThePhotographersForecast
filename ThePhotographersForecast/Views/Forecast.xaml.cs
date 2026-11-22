@@ -11,13 +11,19 @@ namespace ThePhotographersForecast.Views
             InitializeComponent();
             _vm = vm;
             BindingContext = _vm;
+        }
 
-            // subscribe to the correct event
-            //PageScroll.MeasureInvalidated += ScrollView_MeasureInvalidated;
+        protected override void OnAppearing()
+        {
+            base.OnAppearing();
+            _vm.RefreshFromSession();
+            _vm.StartClock();
+        }
 
-            // if your viewmodel collections change, force a relayout/remeasure
-            //if (_vm.EventsByPeriod is INotifyCollectionChanged events)
-            //    events.CollectionChanged += (_, __) => RefreshScroll();
+        protected override void OnDisappearing()
+        {
+            base.OnDisappearing();
+            _vm.StopClock();
         }
     }
 }

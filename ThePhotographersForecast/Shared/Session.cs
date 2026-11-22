@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using ThePhotographersForecast.Components;
 using ThePhotographersForecast.Models;
+using ThePhotographersForecast.Services.ML;
 
 namespace ThePhotographersForecast.Shared
 {
@@ -48,6 +49,16 @@ namespace ThePhotographersForecast.Shared
         public partial FutureMoonPhase[] MoonPhases { get; set; }
         [ObservableProperty]
         public partial ObservableCollection<DayViewModel> Days { get; set; }
+        [ObservableProperty]
+        public partial IReadOnlyList<DailyForecastSummary> DailyPhotoScoringSummary { get; set; }
+        public IReadOnlyList<DailyForecastSummary> ScoreSummaries
+        {
+            get => DailyPhotoScoringSummary;
+            set => DailyPhotoScoringSummary = value;
+        }
+
+        [ObservableProperty]
+        public partial SkyHourData[] SkyData { get; set; }
         private void SetProperty<Type>(ref Type backingStore, Type Value)
         {
             if (Equals(backingStore, Value))
@@ -86,6 +97,7 @@ namespace ThePhotographersForecast.Shared
             EventsByPeriod = new Dictionary<string, ObservableCollection<EventTime>>();
             NwsData = new NwsWeatherModel();
             Days = new ObservableCollection<DayViewModel>();
+            SkyData = Array.Empty<SkyHourData>();
         }
         public async Task ResetSessionAsync()
         {

@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Text;
 
 namespace ThePhotographersForecast.Services
 {
@@ -230,7 +231,6 @@ namespace ThePhotographersForecast.Services
     public class ForecastEvolution
     {
         //Buckets for holding the forecast hours
-        public ObservableCollection<ValueEvolution> EarlyHours { get; set; }
         public ObservableCollection<ValueEvolution> EarlyMorning { get; set; }
         public ObservableCollection<ValueEvolution> Morning { get; set; }
         public ObservableCollection<ValueEvolution> Afternoon { get; set; }
@@ -245,10 +245,11 @@ namespace ThePhotographersForecast.Services
         public int Order => Time.Hour;
         public bool IsDay { get; set; }
         public List<ForecastTemperature> Temperature { get; set; } = new List<ForecastTemperature>();
-        public List<ApparentTemperature> ApparentTemperature { get; set; } = new List<ApparentTemperature>();
+        public List<ForecastApparentTemperature> ApparentTemperature { get; set; } = new List<ForecastApparentTemperature>();
         public string PrecipitationType { get; set; }
         public double PrecipitationAmt { get; set; }
         public double WindSpeed { get; set; }
+        public List<ForecastPrecipitation> Precipitation { get; set; } = new List<ForecastPrecipitation>();
         public List<ForecastWind> Wind { get; set; } = new List<ForecastWind>();
         public List<ForecastGusts> Gusts { get; set; } = new List<ForecastGusts>();
         public List<ForecastSkyCover> SkyCover { get; set; } = new List<ForecastSkyCover>();
@@ -258,100 +259,195 @@ namespace ThePhotographersForecast.Services
         public List<ForecastRelativeHumidity> RelativeHumidity { get; set; } = new List<ForecastRelativeHumidity>();
         public List<ForecastHeatRisk> HeatRisk { get; set; } = new List<ForecastHeatRisk>();
         public List<ForecastWindChill> WindChill { get; set; } = new List<ForecastWindChill>();
-        public List<ForecastWeatherStatement> WeatherStatement { get; set; } = new List<ForecastWeatherStatement>();
+        public List<ForecastShortForecast> ShortForecast { get; set; } = new List<ForecastShortForecast>();
         public List<ForecastWmoDescription> WeatherDescription { get; set; } = new List<ForecastWmoDescription>();
+        public List<ForecastThunder> Thunder { get; set; } = new List<ForecastThunder>();
+        public List<ForecastWeatherStatement> WeatherStatement { get; set; } = new List<ForecastWeatherStatement>();
+        public List<ForecastIceAccumulation> IceAccumulation { get; set; } = new List<ForecastIceAccumulation>();
+        public List<ForecastSnowfallAmount> SnowfallAmount { get; set; } = new List<ForecastSnowfallAmount>();
+
         public DateTime EndTime { get; set; }
 
+    }
+
+    public class ForecastCeilingHeight
+    {
+        public DateTime StartTime { get; set; }
+        public DateTime EndTime { get; set; }
+        public double Value { get; set; }
+        public string UnitCode { get; set; }
     }
 
     public class ForecastTemperature
     {
         public DateTime StartTime { get; set; }
-        public DateTime? EndTime { get; set; }
+        public DateTime EndTime { get; set; }
         public double Value { get; set; }
         public string UnitCode { get; set; }
     }
     public class ForecastDewPoint
     {
         public DateTime StartTime { get; set; }
-        public DateTime? EndTime { get; set; }
+        public DateTime EndTime { get; set; }
         public double Value { get; set; }
         public string UnitCode { get; set; }
     }
     public class ForecastRelativeHumidity
     {
         public DateTime StartTime { get; set; }
-        public DateTime? EndTime { get; set; }
+        public DateTime EndTime { get; set; }
         public double Value { get; set; }
         public string UnitCode { get; set; }
     }
-    public class ApparentTemperature
+    public class ForecastLowOccuranceVisibilityIndex
     {
         public DateTime StartTime { get; set; }
-        public DateTime? EndTime { get; set; }
+        public DateTime EndTime { get; set; }
         public double Value { get; set; }
         public string UnitCode { get; set; }
     }
+    public class ForecastApparentTemperature
+    {
+        public DateTime StartTime { get; set; }
+        public DateTime EndTime { get; set; }
+        public double Value { get; set; }
+        public string UnitCode { get; set; }
+    }
+    public class ForecastVisibility
+    {
+        public DateTime StartTime { get; set; }
+        public DateTime EndTime { get; set; }
+        public double Value { get; set; }
+        public string UnitCode { get; set; }
+    }
+    public class ForecastMaxTemperature
+    {
+        public DateTime StartTime { get; set; }
+        public DateTime EndTime { get; set; }
+        public double Value { get; set; }
+        public string UnitCode { get; set; }
+    }
+    public class ForecastMinTemperature
+    {
+        public DateTime StartTime { get; set; }
+        public DateTime EndTime { get; set; }
+        public double Value { get; set; }
+        public string UnitCode { get; set; }
+    }
+
     public class ForecastWind
     {
         public DateTime StartTime { get; set; }
-        public DateTime? EndTime { get; set; }
+        public DateTime EndTime { get; set; }
         public double Value { get; set; }
+        public string Direction { get; set; }
+        public string UnitCode { get; set; }
+    }
+    public class ForecastTransportWind
+    {
+        public DateTime StartTime { get; set; }
+        public DateTime EndTime { get; set; }
+        public double Value { get; set; }
+        public string Direction { get; set; }
         public string UnitCode { get; set; }
     }
     public class ForecastGusts
     {
         public DateTime StartTime { get; set; }
-        public DateTime? EndTime { get; set; }
+        public DateTime EndTime { get; set; }
         public double Value { get; set; }
         public string UnitCode { get; set; }
     }
     public class ForecastSkyCover
     {
         public DateTime StartTime { get; set; }
-        public DateTime? EndTime { get; set; }
+        public DateTime EndTime { get; set; }
         public double Value { get; set; }
         public string UnitCode { get; set; }
     }
     public class ForecastMixingHeight
     {
         public DateTime StartTime { get; set; }
-        public DateTime? EndTime { get; set; }
+        public DateTime EndTime { get; set; }
         public double Value { get; set; }
         public string UnitCode { get; set; }
     }
     public class ForecastWbgt
     {
         public DateTime StartTime { get; set; }
-        public DateTime? EndTime { get; set; }
+        public DateTime EndTime { get; set; }
         public double Value { get; set; }
         public string UnitCode { get; set; }
     }
     public class ForecastHeatRisk
     {
         public DateTime StartTime { get; set; }
-        public DateTime? EndTime { get; set; }
+        public DateTime EndTime { get; set; }
+        public int Value { get; set; }
+        public string UnitCode { get; set; }
+    }
+    public class ForecastHeatIndex
+    {
+        public DateTime StartTime { get; set; }
+        public DateTime EndTime { get; set; }
         public double Value { get; set; }
         public string UnitCode { get; set; }
     }
     public class ForecastWindChill
     {
         public DateTime StartTime { get; set; }
-        public DateTime? EndTime { get; set; }
+        public DateTime EndTime { get; set; }
+        public double Value { get; set; }
+        public string UnitCode { get; set; }
+    }
+    public class ForecastPrecipitation
+    {
+        public DateTime StartTime { get; set; }
+        public DateTime EndTime { get; set; }
+        public string Type { get; set; }
+        public double Value { get; set; }
+        public double Amount { get; set; }
+        public string UnitCode { get; set; }
+    }
+    public class ForecastIceAccumulation
+    {
+        public DateTime StartTime { get; set; }
+        public DateTime EndTime { get; set; }
+        public double Value { get; set; }
+        public string UnitCode { get; set; }
+    }
+    public class ForecastThunder
+    {
+        public DateTime StartTime { get; set; }
+        public DateTime EndTime { get; set; }
+        public double Value { get; set; }
+        public string UnitCode { get; set; }
+    }
+    public class ForecastSnowfallAmount
+    {
+        public DateTime StartTime { get; set; }
+        public DateTime EndTime { get; set; }
         public double Value { get; set; }
         public string UnitCode { get; set; }
     }
     public class ForecastWeatherStatement
     {
         public DateTime StartTime { get; set; }
-        public DateTime? EndTime { get; set; }
+        public DateTime EndTime { get; set; }
+        public string Value { get; set; }
+        public string UnitCode { get; set; }
+    }
+    public class ForecastShortForecast
+    {
+        public DateTime StartTime { get; set; }
+        public DateTime EndTime { get; set; }
         public string Value { get; set; }
         public string UnitCode { get; set; }
     }
     public class ForecastWmoDescription
     {
         public DateTime StartTime { get; set; }
-        public DateTime? EndTime { get; set; }
+        public DateTime EndTime { get; set; }
         public string Value { get; set; }
         public string UnitCode { get; set; }
     }
@@ -366,6 +462,119 @@ namespace ThePhotographersForecast.Services
 
     public static class NumberGroups
     {
+        public static string WindsToString(double w)
+        {
+
+            return w switch
+            {
+                >= 0 and <= 1 => "faint breeze",
+                >= 1 and <= 3 => "calm breeze",
+                >= 4 and <= 7 => "light breeze",
+                >= 8 and <= 12 => "gentle breeze",
+                >= 13 and <= 18 => "moderate breeze",
+                >= 19 and <= 24 => "fresh breeze",
+                >= 25 and <= 31 => "strong breeze",
+                >= 32 and <= 38 => "near gale force wind",
+                >= 39 and <= 46 => "gale force wind",
+                >= 47 and <= 54 => "severe gale force wind",
+                >= 55 and <= 63 => "storm wind",
+                >= 64 and <= 72 => "violent storm wind",
+                >= 73 => "hurricane force wind",
+                _ => ""
+            };
+
+        }
+
+        public static string TempCategory(double temp, double dewPoint, double relativeHumidity, double wbgt)
+        {
+            var sb = new StringBuilder();
+            sb.Append($"The temperature will be {NumberGroups.TempsToString(temp)} with a dew point {NumberGroups.DewPointToString(dewPoint)}. Expect ");
+            // --- Extreme heat danger (WBGT-based) ---
+            if (wbgt >= 90)
+            {
+                sb.Append("extreme dangerous heat this hour.");
+                return sb.ToString();
+            }
+            if (wbgt >= 82)
+            {
+                sb.Append("dangerous heat this hour.");
+                return sb.ToString();
+            }
+            if (wbgt >= 78)
+            {
+                sb.Append("very hot and humid this hour.");
+                return sb.ToString();
+            }
+            // --- RelativeHumidity / dew point discomfort ---
+            bool oppressiveHumidity = dewPoint >= 75 || relativeHumidity >= 85;
+            bool veryHumid = dewPoint >= 70 || relativeHumidity >= 75;
+            bool humid = dewPoint >= 65 || relativeHumidity >= 60;
+
+            // --- Cold stress ---
+            if (temp <= 20)
+            {
+                sb.Append("frigid conditions this hour.");
+                return sb.ToString();
+            }
+            if (temp <= 32)
+            {
+                sb.Append("freezing conditions this hour.");
+                return sb.ToString();
+            }
+            if (temp <= 40)
+            {
+                sb.Append(humid ? "raw and cold conditions this hour." : "cold conditions this hour.");
+                return sb.ToString();
+            }
+            // --- Cool to mild ---
+            if (temp <= 50)
+            {
+                sb.Append(humid ? "chilly and damp conditions this hour." : "cool conditions this hour.");
+                return sb.ToString();
+            }
+            if (temp <= 60)
+            {
+                sb.Append(humid ? "cool and humid conditions this hour." : "mildly cool conditions this hour.");
+                return sb.ToString();
+            }
+            // --- Mild to warm ---
+            if (temp <= 70)
+            {
+                sb.Append(humid ? "mild but humid conditions this hour." : "mild conditions this hour.");
+                return sb.ToString();
+            }
+            if (temp <= 80)
+            {
+                if (oppressiveHumidity) sb.Append("warm and oppressive conditions this hour.");
+                if (veryHumid) sb.Append("warm and very humid conditions this hour.");
+                if (humid) sb.Append("warm and humid conditions this hour.");
+                sb.Append("warm conditions this hour.");
+                return sb.ToString();
+            }
+
+            // --- Hot categories ---
+            if (temp <= 90)
+            {
+                if (oppressiveHumidity) sb.Append("hot and oppressive conditions this hour.");
+                if (veryHumid) sb.Append("hot and very humid conditions this hour.");
+                if (humid) sb.Append("hot and humid conditions this hour.");
+                sb.Append("hot conditions this hour.");
+                return sb.ToString();
+            }
+
+            // --- Extreme heat (temp-based) ---
+            if (temp > 90)
+            {
+                if (oppressiveHumidity) sb.Append("extremely hot and oppressive conditions this hour.");
+                if (veryHumid) sb.Append("extremely hot and very humid conditions this hour.");
+                sb.Append("extremely hot conditions this hour.");
+                return sb.ToString();
+            }
+
+            sb.Append("unknown");
+            return sb.ToString();
+        }
+
         public static string DewPointToString(double d)
         {
             string dp = string.Empty;
@@ -418,6 +627,19 @@ namespace ThePhotographersForecast.Services
             if (100 <= t) temp = "in the 100's";
 
             return temp;
+        }
+
+        public static string ThunderToString(double pct)
+        {
+            return pct switch
+            {
+                > 75 => " there is an extremely high risk wide spread and intense thunderstorms with strong winds.",
+                > 50 and <= 75 => " there is a high risk of thunderstorms and strong winds.",
+                > 30 and <= 50 => " there is a moderate risk of thunderstorms and strong winds.",
+                > 10 and <= 30 => " there is a slight risk of scattered thunderstorms possible.",
+                > 1 and <= 10 => " there is a low chance of thunderstorms.",
+                _ => " No thunderstorms expected."
+            };
         }
     }
 }

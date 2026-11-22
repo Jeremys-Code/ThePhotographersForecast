@@ -88,7 +88,7 @@ namespace ThePhotographersForecast.Services.Modules
 
             double gusts = v.Gusts?.FirstOrDefault()?.Value ?? 0;
 
-            var keywords = (v.WeatherStatement ?? new List<ForecastWeatherStatement>())
+            var keywords = v.ShortForecast
                 .Select(w => w?.Value ?? string.Empty)
                 .Where(s => !string.IsNullOrEmpty(s))
                 .ToArray();

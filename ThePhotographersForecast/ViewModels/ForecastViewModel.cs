@@ -5,724 +5,380 @@ using System.Collections.ObjectModel;
 using ThePhotographersForecast.Components;
 using ThePhotographersForecast.Models;
 using ThePhotographersForecast.Services;
+using ThePhotographersForecast.Services.ML;
 using ThePhotographersForecast.Shared;
 
 namespace ThePhotographersForecast.ViewModels;
 
 public partial class ForecastViewModel : ObservableObject
 {
-    private System.Timers.Timer _timer;
+    private readonly ISession _session;
+    private IDispatcherTimer? _timer;
 
     [ObservableProperty]
-    public partial string LocationName { get; set; }
-    [ObservableProperty]
-    public partial LinearGradientBrush BackgroundGradient { get; set; }
-    [ObservableProperty]
-    public partial string LocationTime { get; set; }
+    public partial string LocationName { get; set; } = string.Empty;
 
-    // Collections
     [ObservableProperty]
-    public partial CalendarDayModel[] Dates { get; set; }
-    [ObservableProperty]
-    public partial DayViewModel[] Days { get; set; }
-    [ObservableProperty]
-    public partial DayViewModel SelectedDay { get; set; }
-    [ObservableProperty]
-    public partial WeatherForecast[] WeatherForecasts { get; set; }
-    [ObservableProperty]
-    public partial ObservableCollection<WeatherStatementsValue?> AllWeatherStatementsValues { get; set; }
+    public partial string LocationTime { get; set; } = string.Empty;
 
-    // Selected Day Collections
     [ObservableProperty]
-    public partial EventTime[] SelectedDailyEvents { get; set; }
-    [ObservableProperty]
-    public partial ObservableCollection<DayPeriod> SelectedDayEventsByPeriod { get; set; }
+    public partial CalendarDayModel[] Dates { get; set; } = Array.Empty<CalendarDayModel>();
 
-    //Selected Day Properties
+    [ObservableProperty]
+    public partial CalendarDayModel? SelectedCalendarDay { get; set; }
+
     [ObservableProperty]
     public partial DateTime SelectedDate { get; set; }
-    [ObservableProperty]
-    public partial DailyForecast SelectedDaily { get; set; }
-    [ObservableProperty]
-    public partial string PeriodName { get; set; }
-    [ObservableProperty]
-    public partial string SelectedDayLength { get; set; }
-    [ObservableProperty]
-    public partial string SelectedSunshine { get; set; }
-    [ObservableProperty]
-    public partial string SelectedMoonPhase { get; set; }
-    [ObservableProperty]
-    public partial SKFileLottieImageSource SelectedMoonImage { get; set; }
-    [ObservableProperty]
-    public partial HourlyForecast SelectedEarlyHoursHourlyForecast { get; set; }
-    [ObservableProperty]
-    public partial HourlyForecast SelectedEarlyMorningHourlyForecast { get; set; }
-    [ObservableProperty]
-    public partial HourlyForecast SelectedMorningHourlyForecast { get; set; }
-    [ObservableProperty]
-    public partial HourlyForecast SelectedAfternoonHourlyForecast { get; set; }
-    [ObservableProperty]
-    public partial HourlyForecast SelectedEveningHourlyForecast { get; set; }
-    [ObservableProperty]
-    public partial HourlyForecast SelectedNightHourlyForecast { get; set; }
-    [ObservableProperty]
-    public partial Dictionary<DateOnly, LinearGradientBrush> DailyGradients { get; set; }
 
     [ObservableProperty]
-    public partial Services.TimeOfDayService.TimeOfDay SelectedTimeOfDay { get; set; }
+    public partial string DailySummaryTitle { get; set; } = string.Empty;
 
     [ObservableProperty]
-    public partial ISession _session { get; set; }
-    public ForecastViewModel(ISession _session)
+    public partial DailyForecast SelectedDaily { get; set; } = new DailyForecast();
+
+    [ObservableProperty]
+    public partial DayViewModel SelectedDay { get; set; } = new DayViewModel();
+
+    [ObservableProperty]
+    public partial ObservableCollection<DayPeriod> SelectedDayEventsByPeriod { get; set; } = new ObservableCollection<DayPeriod>();
+
+    [ObservableProperty]
+    public partial string SelectedHighTemp { get; set; } = "Daily high isn't available";
+
+    [ObservableProperty]
+    public partial string SelectedHighTime { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string SelectedLowTemp { get; set; } = "Daily low isn't available";
+
+    [ObservableProperty]
+    public partial string SelectedLowTime { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial SKFileLottieImageSource? SelectedDailyMeteocon { get; set; }
+
+    [ObservableProperty]
+    public partial string SelectedHealthSafetySummary { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string SelectedWeatherSummary { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string SelectedDayLength { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string SelectedNightLength { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string SelectedMoonPhase { get; set; } = string.Empty;
+
+    // Daily ONNX Prediction Summary & Hourly Predictions
+    [ObservableProperty]
+    public partial string SelectedDailyPhotoScoreText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string SelectedDailyDroneScoreText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string SelectedDailyDominantCondition { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string SelectedDailyScoreSummaryText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial bool HasSelectedDayPredictions { get; set; }
+
+    [ObservableProperty]
+    public partial string SelectedDailyBlueHourScoreText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string SelectedDailySunriseScoreText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string SelectedDailySunsetScoreText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string SelectedDailyLunarScoreText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string SelectedDailyGalaxyScoreText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string SelectedDailyBestHoursText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial ObservableCollection<HourlyForecastPrediction> SelectedDayHourlyPredictions { get; set; } = new ObservableCollection<HourlyForecastPrediction>();
+
+    // Kept for backward compatibility
+    [ObservableProperty]
+    public partial string PeriodName { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string SelectedSunshine { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial SKFileLottieImageSource? SelectedMoonImage { get; set; }
+
+    [ObservableProperty]
+    public partial EventTime[] SelectedDailyEvents { get; set; } = Array.Empty<EventTime>();
+
+    [ObservableProperty]
+    public partial HourlyForecast SelectedEarlyMorningHourlyForecast { get; set; } = new HourlyForecast();
+
+    [ObservableProperty]
+    public partial HourlyForecast SelectedMorningHourlyForecast { get; set; } = new HourlyForecast();
+
+    [ObservableProperty]
+    public partial HourlyForecast SelectedAfternoonHourlyForecast { get; set; } = new HourlyForecast();
+
+    [ObservableProperty]
+    public partial HourlyForecast SelectedEveningHourlyForecast { get; set; } = new HourlyForecast();
+
+    [ObservableProperty]
+    public partial HourlyForecast SelectedNightHourlyForecast { get; set; } = new HourlyForecast();
+
+    public ForecastViewModel(ISession session)
     {
-        _session = _session;
-        //_skyEngine = skyEngine;
-        MainThread.BeginInvokeOnMainThread(() => Dates = [.. _session.Dates]);
-        if (Dates.Length == _session.Dates.Length)
+        _session = session;
+        RefreshFromSession();
+        StartClock();
+    }
+
+    public void RefreshFromSession()
+    {
+        LocationName = _session.NwsData?.SelectedLocation?.DisplayName
+                       ?? _session.SelectedLocation?.DisplayName
+                       ?? string.Empty;
+
+        Dates = _session.Dates?.ToArray() ?? Array.Empty<CalendarDayModel>();
+
+        var matching = Dates.FirstOrDefault(d => d.Date.Date == SelectedDate.Date) ?? Dates.FirstOrDefault();
+        SelectedCalendarDay = matching;
+        SelectedDate = matching?.Date ?? DateTime.Today;
+
+        _ = UpdateForDate(SelectedDate);
+        UpdateLocationTime();
+    }
+
+    public void StartClock()
+    {
+        if (_timer == null)
         {
-            SelectedDate = Dates[0].Date;
-        }
-        //  MainThread.BeginInvokeOnMainThread(() => Days = [.. _session.Days]);
-        if (Dates?.Length == 0) return;
-        if (WeatherForecasts?.Length == 0) return;
-        if (_session.Days.Count == 0) return;
-        LocationName = _session.SelectedLocation.DisplayName;
-        SelectedDay = _session.Days.Where(d => d.Date.Date == Dates[0].Date).FirstOrDefault<DayViewModel>();
-        if (SelectedDay == null) return;
-        //MainThread.BeginInvokeOnMainThread(async ()=>
-        //{
-        //    DailyGradients = await _skyEngine.GetDailySkyColorGradientsAsync();
-        //    BackgroundGradient = DailyGradients.TryGetValue(DateOnly.FromDateTime(Dates[0].Time)) ? background : (LinearGradientBrush)Application.Current.Resources["Noon"];
-        //});
-
-        SelectedDaily = _session.WeatherForecasts.DailyForecasts.Where(w => w.Date == DateOnly.FromDateTime(SelectedDate)).SingleOrDefault();
-
-        SelectedTimeOfDay = TimeOfDayService.GetTimeOfDay(DateTime.UtcNow.AddSeconds(_session.SelectedTimeZoneOffset).Hour);
-
-        SelectedEarlyHoursHourlyForecast = SelectedDaily.HourlyForecasts.Where(x => x.HourlyTime.Date == SelectedDate.Date && x.TimeOfDay == "Early Hours" && x.WeatherCodeDescription != null).OrderByDescending(y => y.WeatherCode).FirstOrDefault();
-        SelectedEarlyMorningHourlyForecast = SelectedDaily.HourlyForecasts.Where(x => x.HourlyTime.Date == SelectedDate.Date && x.TimeOfDay == "Early Morning" && x.WeatherCodeDescription != null).OrderByDescending(y => y.WeatherCode).FirstOrDefault();
-        SelectedMorningHourlyForecast = SelectedDaily.HourlyForecasts.Where(x => x.HourlyTime.Date == SelectedDate.Date && x.TimeOfDay == "Morning" && x.WeatherCodeDescription != null).OrderByDescending(y => y.WeatherCode).FirstOrDefault();
-        SelectedAfternoonHourlyForecast = SelectedDaily.HourlyForecasts.Where(x => x.HourlyTime.Date == SelectedDate.Date && x.TimeOfDay == "Afternoon" && x.WeatherCodeDescription != null).OrderByDescending(y => y.WeatherCode).FirstOrDefault();
-        SelectedEveningHourlyForecast = SelectedDaily.HourlyForecasts.Where(x => x.HourlyTime.Date == SelectedDate.Date && x.TimeOfDay == "Evening" && x.WeatherCodeDescription != null).OrderByDescending(y => y.WeatherCode).FirstOrDefault();
-        SelectedNightHourlyForecast = SelectedDaily.HourlyForecasts.Where(x => x.HourlyTime.Date == SelectedDate.Date && x.TimeOfDay == "Night" && x.WeatherCodeDescription != null).OrderByDescending(y => y.WeatherCode).FirstOrDefault();
-
-        PeriodName = SelectedDaily?.TimePeriod ?? string.Empty;
-
-        SelectedDayLength = $"{SelectedDaily.DailyEvents.AstronomicalData.DayLength.Hours} h {SelectedDaily.DailyEvents.AstronomicalData.DayLength.Minutes} m";
-        SelectedSunshine = $"{TimeSpan.FromSeconds(SelectedDaily.SunshineDuration.Value).Hours} h {TimeSpan.FromSeconds(SelectedDaily.SunshineDuration.Value).Minutes} m";
-        SelectedMoonPhase = SelectedDaily.DailyEvents.AstronomicalData.MoonPhase;
-        SelectedMoonImage = SelectedDaily.DailyEvents.AstronomicalData.SkMoon;
-
-        SelectedDailyEvents = SelectedDaily.DailyEvents.EventTimes;
-        SelectedDayEventsByPeriod = SelectedDay.Periods;
-        //var earlyHours = new SKFileLottieImageSource();
-        //var earlyMorning = new SKFileLottieImageSource();
-        //var morning = new SKFileLottieImageSource();
-        //var afternoon = new SKFileLottieImageSource();
-        //var evening = new SKFileLottieImageSource();
-        //var night = new SKFileLottieImageSource();
-        //MainThread.BeginInvokeOnMainThread(async () =>
-        //{
-        //    earlyHours.File = await Helper.GetLottieFromRawResources(Path.Combine("meteocons", "time_late_night.json"));
-        //    earlyMorning.File = await Helper.GetLottieFromRawResources(Path.Combine("meteocons", "time_morning.json"));
-        //    morning.File = await Helper.GetLottieFromRawResources(Path.Combine("meteocons", "time_late_morning.json"));
-        //    afternoon.File = await Helper.GetLottieFromRawResources(Path.Combine("meteocons", "time_afternoon.json"));
-        //    evening.File = await Helper.GetLottieFromRawResources(Path.Combine("meteocons", "time_evening.json"));
-        //    night.File = await Helper.GetLottieFromRawResources(Path.Combine("meteocons", "time_night.json"));
-        //});
-        //EventsByPeriod = new ObservableCollection<DayPeriod>
-        // {
-        //        new DayPeriod
-        //        {
-        //            TimeOfDayName = "Early Hours",
-        //            Time = SelectedDate,
-        //            TimeOfDayEvents = new ObservableCollection<EventTime>(SelectedDailyEvents.Where(d => d.WeatherHour >= SelectedDate.Date && d.WeatherHour < SelectedDate.AddHours(3)).OrderBy(x => x.OrderTime)),
-        //            TimeOfDayBackgroundBrush = (LinearGradientBrush)Application.Current.Resources["PeriodEarlyHours"],
-        //            TimeOfDaySkAnimation = earlyHours,
-        //            HourlyName = SelectedEarlyHoursHourlyForecast.TimeOfDayName,
-        //            TimeOfDaySummary = SelectedEarlyHoursHourlyForecast.HourlyForecastSummary.WeatherSummary,
-        //            TimeOfDayWeatherImage = SelectedEarlyHoursHourlyForecast.SkHourlyMeteocon,
-        //            TimeOfDayStormSummary = SelectedEarlyHoursHourlyForecast.HourlyForecastSummary.StormSummary
-        //        },
-        //        new DayPeriod
-        //        {
-        //            TimeOfDayName = "Early Morning",
-        //            Time = SelectedDate,
-        //            TimeOfDayEvents = new ObservableCollection<EventTime>(SelectedDailyEvents.Where(d => d.WeatherHour >= SelectedDate.AddHours(3) && d.WeatherHour < SelectedDate.AddHours(6)).OrderBy(x => x.OrderTime)),
-        //            TimeOfDayBackgroundBrush = (LinearGradientBrush)Application.Current.Resources["PeriodEarlyMorning"],
-        //            TimeOfDaySkAnimation = earlyMorning,
-        //            HourlyName = SelectedEarlyMorningHourlyForecast.TimeOfDayName,
-        //            TimeOfDaySummary = SelectedEarlyMorningHourlyForecast.HourlyForecastSummary.WeatherSummary,
-        //            TimeOfDayWeatherImage = SelectedEarlyMorningHourlyForecast.SkHourlyMeteocon,
-        //            TimeOfDayStormSummary = SelectedEarlyMorningHourlyForecast.HourlyForecastSummary.StormSummary
-        //        },
-        //        new DayPeriod
-        //        {
-        //            TimeOfDayName = "Morning",
-        //            Time = SelectedDate,
-        //            TimeOfDayEvents = new ObservableCollection<EventTime>(SelectedDailyEvents.Where(d => d.WeatherHour >= SelectedDate.AddHours(6) && d.WeatherHour < SelectedDate.AddHours(12)).OrderBy(x => x.OrderTime)),
-        //            TimeOfDayBackgroundBrush = (LinearGradientBrush)Application.Current.Resources["PeriodMorning"],
-        //            TimeOfDaySkAnimation = morning,
-        //            HourlyName = SelectedMorningHourlyForecast.TimeOfDayName,
-        //            TimeOfDaySummary = SelectedMorningHourlyForecast.HourlyForecastSummary.WeatherSummary,
-        //            TimeOfDayWeatherImage = SelectedMorningHourlyForecast.SkHourlyMeteocon,
-        //            TimeOfDayStormSummary = SelectedMorningHourlyForecast.HourlyForecastSummary.StormSummary
-        //        },
-        //        new DayPeriod
-        //        {
-        //            TimeOfDayName = "Afternoon",
-        //            Time = SelectedDate,
-        //            TimeOfDayEvents = new ObservableCollection<EventTime>(SelectedDailyEvents.Where(d => d.WeatherHour >= SelectedDate.AddHours(12) && d.WeatherHour < SelectedDate.AddHours(18)).OrderBy(x => x.OrderTime)),
-        //            TimeOfDayBackgroundBrush = (LinearGradientBrush)Application.Current.Resources["PeriodAfternoon"],
-        //            TimeOfDaySkAnimation = afternoon,
-        //            HourlyName = SelectedAfternoonHourlyForecast.TimeOfDayName,
-        //            TimeOfDaySummary = SelectedAfternoonHourlyForecast.HourlyForecastSummary.WeatherSummary,
-        //            TimeOfDayWeatherImage = SelectedAfternoonHourlyForecast.SkHourlyMeteocon,
-        //            TimeOfDayStormSummary = SelectedAfternoonHourlyForecast.HourlyForecastSummary.StormSummary
-        //         },
-        //        new DayPeriod
-        //        {
-        //            TimeOfDayName = "Evening",
-        //            Time = SelectedDate,
-        //            TimeOfDayEvents = new ObservableCollection<EventTime>(SelectedDailyEvents.Where(d => d.WeatherHour >= SelectedDate.AddHours(18) && d.WeatherHour < SelectedDate.AddHours(22)).OrderBy(x => x.OrderTime)),
-        //            TimeOfDayBackgroundBrush = (LinearGradientBrush)Application.Current.Resources["PeriodEvening"],
-        //            TimeOfDaySkAnimation = evening,
-        //           HourlyName = SelectedEveningHourlyForecast.TimeOfDayName,
-        //            TimeOfDaySummary = SelectedEveningHourlyForecast.HourlyForecastSummary.WeatherSummary,
-        //            TimeOfDayWeatherImage = SelectedEveningHourlyForecast.SkHourlyMeteocon,
-        //            TimeOfDayStormSummary = SelectedEveningHourlyForecast.HourlyForecastSummary.StormSummary
-        //        },
-        //        new DayPeriod
-        //        {
-        //            TimeOfDayName = "Night",
-        //            Time = SelectedDate,
-        //            TimeOfDayEvents = new ObservableCollection<EventTime>(SelectedDailyEvents.Where(d => d.WeatherHour >= SelectedDate.AddHours(22) && d.WeatherHour < SelectedDate.AddHours(24)).OrderBy(x => x.OrderTime)),
-        //            TimeOfDayBackgroundBrush = (LinearGradientBrush)Application.Current.Resources["PeriodNight"],
-        //            TimeOfDaySkAnimation = night,
-        //            HourlyName = SelectedNightHourlyForecast.TimeOfDayName,
-        //            TimeOfDaySummary = SelectedNightHourlyForecast.HourlyForecastSummary.WeatherSummary,
-        //            TimeOfDayWeatherImage = SelectedNightHourlyForecast.SkHourlyMeteocon,
-        //            TimeOfDayStormSummary = SelectedNightHourlyForecast.HourlyForecastSummary.StormSummary
-        //        }
-        //};
-        // Initialize timer
-        LocationTime = $"as of {DateTime.UtcNow.AddSeconds(_session.SelectedTimeZoneOffset).ToString("F")}";
-        _timer = new System.Timers.Timer(1000); // 1 second interval
-        _timer.Elapsed += OnTimerElapsed;
-        _timer.Start();
-    }
-    [RelayCommand]
-    private void OnSelectedDateChanged(CalendarDayModel Value)
-    {
-        SelectedDate = Value.Date;
-        UpdateForDate(SelectedDate);
-    }
-
-    private void OnTimerElapsed(object? sender, System.Timers.ElapsedEventArgs e)
-    {
-        DateTime time = DateTime.UtcNow.AddSeconds(_session.SelectedTimeZoneOffset);
-        LocationTime = $"where the local time is: {time.ToString("F")}";
-    }
-
-    private string BuildStormSummaryByTimeOfDay(DateTime date, string timeOfDay)
-    {
-        try
-        {
-            var dayStorms = _session.NwsData.HourlySupplementals.Where(d => d.Time.Date == date.Date && d.TimeOfDay == timeOfDay && d.Weather != null).OrderBy(a => a.Time).ToArray();
-            if (dayStorms.Length > 0)
+            _timer = Application.Current?.Dispatcher.CreateTimer();
+            if (_timer != null)
             {
-                string stormTimeOfDay = string.Empty;
-                foreach (var item in dayStorms)
-                {
-                    stormTimeOfDay += item.SupplementalWeatherStatement;
-                }
-                return stormTimeOfDay;
+                _timer.Interval = TimeSpan.FromSeconds(1);
+                _timer.Tick += (_, _) => UpdateLocationTime();
             }
         }
-        catch (NullReferenceException)
+        if (_timer != null && !_timer.IsRunning)
         {
-            return "";
+            UpdateLocationTime();
+            _timer.Start();
+        }
+    }
 
-        }
-        catch (Exception)
-        {
-            return "";
-        }
-        return "";
+    public void StopClock()
+    {
+        _timer?.Stop();
+    }
+
+    private void UpdateLocationTime()
+    {
+        int offsetSeconds = _session.SelectedTimeZoneOffset != 0
+            ? _session.SelectedTimeZoneOffset
+            : (_session.NwsData?.TimezoneOffsetSeconds ?? 0);
+
+        DateTime localTime = DateTime.UtcNow.AddSeconds(offsetSeconds);
+        LocationTime = $"Location Current Time: {localTime:dddd, MMMM d, yyyy h:mm:ss tt}";
+    }
+
+    [RelayCommand]
+    public async Task SelectDate(CalendarDayModel? day)
+    {
+        if (day == null) return;
+        SelectedCalendarDay = day;
+        SelectedDate = day.Date;
+        await UpdateForDate(SelectedDate);
+    }
+
+    [RelayCommand]
+    private async Task OnSelectedDateChanged(CalendarDayModel? value)
+    {
+        if (value == null) return;
+        await SelectDate(value);
     }
 
     [RelayCommand]
     private async Task GoToNws()
     {
-        //await Launcher.OpenAsync("https://www.wpc.ncep.noaa.gov/heatrisk/");
         await Browser.Default.OpenAsync("https://www.wpc.ncep.noaa.gov/heatrisk/");
-        return;
     }
 
     private async Task UpdateForDate(DateTime date)
     {
         SelectedDate = date;
-        //    BackgroundGradient = DailyGradients.TryGetValue(DateOnly.FromDateTime(Dates[0].Time)) : (LinearGradientBrush)Application.Current.Resources["Noon"];
-        var forecast = _session.WeatherForecasts.DailyForecasts.Where(x => x.Date == DateOnly.FromDateTime(SelectedDate)).SingleOrDefault();
+        DailySummaryTitle = $"Daily Summary for {SelectedDate:dddd, MMMM d, yyyy}";
+
+        var forecast = _session.WeatherForecasts?.DailyForecasts?.FirstOrDefault(x => x.Date == DateOnly.FromDateTime(date))
+                       ?? new DailyForecast { Date = DateOnly.FromDateTime(date) };
         SelectedDaily = forecast;
 
-        if (SelectedDaily == null)
+        SelectedDay = _session.Days?.FirstOrDefault(d => d.Date.Date == date.Date) ?? new DayViewModel();
+        SelectedDayEventsByPeriod = SelectedDay.Periods ?? new ObservableCollection<DayPeriod>();
+
+        // Daily High and Low
+        if (forecast.DailyForecastSummary != null && !string.IsNullOrWhiteSpace(forecast.DailyForecastSummary.DailyHighAndTime))
         {
-            // No forecast available yet for this date - clear selections and return early
-            SelectedEarlyHoursHourlyForecast = null;
-            SelectedEarlyMorningHourlyForecast = null;
-            SelectedMorningHourlyForecast = null;
-            SelectedAfternoonHourlyForecast = null;
-            SelectedEveningHourlyForecast = null;
-            SelectedNightHourlyForecast = null;
-            PeriodName = string.Empty;
-            SelectedDayLength = string.Empty;
-            SelectedSunshine = string.Empty;
-            SelectedMoonPhase = string.Empty;
-            SelectedMoonImage = null;
-            SelectedDailyEvents = null;
-            SelectedDayEventsByPeriod = new ObservableCollection<DayPeriod>();
-            return;
+            var parts = forecast.DailyForecastSummary.DailyHighAndTime.Split('@');
+            SelectedHighTemp = parts[0].Trim();
+            SelectedHighTime = parts.Length > 1 ? $"~ {parts[1].Trim()}" : string.Empty;
+        }
+        else if (forecast.Temperature2mMax != null)
+        {
+            SelectedHighTemp = $"{Math.Round(forecast.Temperature2mMax.Value)} F";
+            SelectedHighTime = !string.IsNullOrWhiteSpace(forecast.TimeTempMax) ? $"~ {forecast.TimeTempMax}" : string.Empty;
+        }
+        else
+        {
+            SelectedHighTemp = "Daily high isn't available";
+            SelectedHighTime = string.Empty;
         }
 
-        SelectedEarlyHoursHourlyForecast = SelectedDaily.HourlyForecasts.Where(x => x.HourlyTime.Date == SelectedDate.Date && x.TimeOfDay == "Early Hours" && x.WeatherCodeDescription != null).OrderByDescending(y => y.WeatherCode).FirstOrDefault();
-        SelectedEarlyMorningHourlyForecast = SelectedDaily.HourlyForecasts.Where(x => x.HourlyTime.Date == SelectedDate.Date && x.TimeOfDay == "Early Morning" && x.WeatherCodeDescription != null).OrderByDescending(y => y.WeatherCode).FirstOrDefault();
-        SelectedMorningHourlyForecast = SelectedDaily.HourlyForecasts.Where(x => x.HourlyTime.Date == SelectedDate.Date && x.TimeOfDay == "Morning" && x.WeatherCodeDescription != null).OrderByDescending(y => y.WeatherCode).FirstOrDefault();
-        SelectedAfternoonHourlyForecast = SelectedDaily.HourlyForecasts.Where(x => x.HourlyTime.Date == SelectedDate.Date && x.TimeOfDay == "Afternoon" && x.WeatherCodeDescription != null).OrderByDescending(y => y.WeatherCode).FirstOrDefault();
-        SelectedEveningHourlyForecast = SelectedDaily.HourlyForecasts.Where(x => x.HourlyTime.Date == SelectedDate.Date && x.TimeOfDay == "Evening" && x.WeatherCodeDescription != null).OrderByDescending(y => y.WeatherCode).FirstOrDefault();
-        SelectedNightHourlyForecast = SelectedDaily.HourlyForecasts.Where(x => x.HourlyTime.Date == SelectedDate.Date && x.TimeOfDay == "Night" && x.WeatherCodeDescription != null).OrderByDescending(y => y.WeatherCode).FirstOrDefault();
+        if (forecast.DailyForecastSummary != null && !string.IsNullOrWhiteSpace(forecast.DailyForecastSummary.DailyLowAndTime))
+        {
+            var parts = forecast.DailyForecastSummary.DailyLowAndTime.Split('@');
+            SelectedLowTemp = parts[0].Trim();
+            SelectedLowTime = parts.Length > 1 ? $"~ {parts[1].Trim()}" : string.Empty;
+        }
+        else if (forecast.Temperature2mMin != null)
+        {
+            SelectedLowTemp = $"{Math.Round(forecast.Temperature2mMin.Value)} F";
+            SelectedLowTime = !string.IsNullOrWhiteSpace(forecast.TimeTempMin) ? $"~ {forecast.TimeTempMin}" : string.Empty;
+        }
+        else
+        {
+            SelectedLowTemp = "Daily low isn't available";
+            SelectedLowTime = string.Empty;
+        }
 
-        PeriodName = SelectedDaily.TimePeriod ?? string.Empty;
+        // Daily Lottie Meteocon
+        SelectedDailyMeteocon = forecast.SkDailyMeteocon ?? MeteoconsResolver.ResolveIcon(forecast.WeatherCode, true);
 
-        SelectedDayLength = SelectedDaily.DailyEvents?.AstronomicalData != null ? $"{SelectedDaily.DailyEvents.AstronomicalData.DayLength.Hours} h {SelectedDaily.DailyEvents.AstronomicalData.DayLength.Minutes} m" : string.Empty;
-        SelectedSunshine = SelectedDaily.SunshineDuration != null ? $"{TimeSpan.FromSeconds(SelectedDaily.SunshineDuration.Value).Hours} h {TimeSpan.FromSeconds(SelectedDaily.SunshineDuration.Value).Minutes} m" : string.Empty;
-        SelectedMoonPhase = SelectedDaily.DailyEvents?.AstronomicalData?.MoonPhase ?? string.Empty;
-        SelectedMoonImage = SelectedDaily.DailyEvents?.AstronomicalData?.SkMoon;
-        SelectedDailyEvents = SelectedDaily.DailyEvents.EventTimes;
+        // Health & Safety Summary
+        SelectedHealthSafetySummary = !string.IsNullOrWhiteSpace(forecast.DailyForecastSummary?.HealthSafetySummary)
+            ? forecast.DailyForecastSummary.HealthSafetySummary
+            : "Health & safety summary isn't available.";
 
-        //var earlyHours = new SKFileLottieImageSource();
-        //var earlyMorning = new SKFileLottieImageSource();
-        //var morning = new SKFileLottieImageSource();
-        //var afternoon = new SKFileLottieImageSource();
-        //var evening = new SKFileLottieImageSource();
-        //var night = new SKFileLottieImageSource();
-        //MainThread.BeginInvokeOnMainThread(async () =>
-        //{
-        //    earlyHours.File = await Helper.GetLottieFromRawResources(Path.Combine("meteocons", "time_late_night.json"));
-        //    earlyMorning.File = await Helper.GetLottieFromRawResources(Path.Combine("meteocons", "time_morning.json"));
-        //    morning.File = await Helper.GetLottieFromRawResources(Path.Combine("meteocons", "time_late_morning.json"));
-        //    afternoon.File = await Helper.GetLottieFromRawResources(Path.Combine("meteocons", "time_afternoon.json"));
-        //    evening.File = await Helper.GetLottieFromRawResources(Path.Combine("meteocons", "time_evening.json"));
-        //    night.File = await Helper.GetLottieFromRawResources(Path.Combine("meteocons", "time_night.json"));
-        //});
-        //EventsByPeriod = new ObservableCollection<DayPeriod>
-        // {
-        //        new DayPeriod
-        //        {
-        //            TimeOfDayName = "Early Hours",
-        //            Time = SelectedDate,
-        //            TimeOfDayEvents = new ObservableCollection<EventTime>(SelectedDailyEvents.Where(d => d.WeatherHour >= SelectedDate.Date && d.WeatherHour < SelectedDate.AddHours(3)).OrderBy(x => x.OrderTime)),
-        //            TimeOfDayBackgroundBrush = (LinearGradientBrush)Application.Current.Resources["PeriodEarlyHours"],
-        //            TimeOfDaySkAnimation = earlyHours,
-        //            HourlyName = SelectedEarlyHoursHourlyForecast.TimeOfDayName,
-        //            TimeOfDaySummary = SelectedEarlyHoursHourlyForecast.HourlyForecastSummary.WeatherSummary,
-        //            TimeOfDayWeatherImage = SelectedEarlyHoursHourlyForecast.SkHourlyMeteocon,
-        //            TimeOfDayStormSummary = SelectedEarlyHoursHourlyForecast.HourlyForecastSummary.StormSummary
-        //        },
-        //        new DayPeriod
-        //        {
-        //            TimeOfDayName = "Early Morning",
-        //            Time = SelectedDate,
-        //            TimeOfDayEvents = new ObservableCollection<EventTime>(SelectedDailyEvents.Where(d => d.WeatherHour >= SelectedDate.AddHours(3) && d.WeatherHour < SelectedDate.AddHours(6)).OrderBy(x => x.OrderTime)),
-        //            TimeOfDayBackgroundBrush = (LinearGradientBrush)Application.Current.Resources["PeriodEarlyMorning"],
-        //            TimeOfDaySkAnimation = earlyMorning,
-        //            HourlyName = SelectedEarlyMorningHourlyForecast.TimeOfDayName,
-        //            TimeOfDaySummary = SelectedEarlyMorningHourlyForecast.HourlyForecastSummary.WeatherSummary,
-        //            TimeOfDayWeatherImage = SelectedEarlyMorningHourlyForecast.SkHourlyMeteocon,
-        //            TimeOfDayStormSummary = SelectedEarlyMorningHourlyForecast.HourlyForecastSummary.StormSummary
-        //        },
-        //        new DayPeriod
-        //        {
-        //            TimeOfDayName = "Morning",
-        //            Time = SelectedDate,
-        //            TimeOfDayEvents = new ObservableCollection<EventTime>(SelectedDailyEvents.Where(d => d.WeatherHour >= SelectedDate.AddHours(6) && d.WeatherHour < SelectedDate.AddHours(12)).OrderBy(x => x.OrderTime)),
-        //            TimeOfDayBackgroundBrush = (LinearGradientBrush)Application.Current.Resources["PeriodMorning"],
-        //            TimeOfDaySkAnimation = morning,
-        //            HourlyName = SelectedMorningHourlyForecast.TimeOfDayName,
-        //            TimeOfDaySummary = SelectedMorningHourlyForecast.HourlyForecastSummary.WeatherSummary,
-        //            TimeOfDayWeatherImage = SelectedMorningHourlyForecast.SkHourlyMeteocon,
-        //            TimeOfDayStormSummary = SelectedMorningHourlyForecast.HourlyForecastSummary.StormSummary
-        //        },
-        //        new DayPeriod
-        //        {
-        //            TimeOfDayName = "Afternoon",
-        //            Time = SelectedDate,
-        //            TimeOfDayEvents = new ObservableCollection<EventTime>(SelectedDailyEvents.Where(d => d.WeatherHour >= SelectedDate.AddHours(12) && d.WeatherHour < SelectedDate.AddHours(18)).OrderBy(x => x.OrderTime)),
-        //            TimeOfDayBackgroundBrush = (LinearGradientBrush)Application.Current.Resources["PeriodAfternoon"],
-        //            TimeOfDaySkAnimation = afternoon,
-        //            HourlyName = SelectedAfternoonHourlyForecast.TimeOfDayName,
-        //            TimeOfDaySummary = SelectedAfternoonHourlyForecast.HourlyForecastSummary.WeatherSummary,
-        //            TimeOfDayWeatherImage = SelectedAfternoonHourlyForecast.SkHourlyMeteocon,
-        //            TimeOfDayStormSummary = SelectedAfternoonHourlyForecast.HourlyForecastSummary.StormSummary
-        //         },
-        //        new DayPeriod
-        //        {
-        //            TimeOfDayName = "Evening",
-        //            Time = SelectedDate,
-        //            TimeOfDayEvents = new ObservableCollection<EventTime>(SelectedDailyEvents.Where(d => d.WeatherHour >= SelectedDate.AddHours(18) && d.WeatherHour < SelectedDate.AddHours(22)).OrderBy(x => x.OrderTime)),
-        //            TimeOfDayBackgroundBrush = (LinearGradientBrush)Application.Current.Resources["PeriodEvening"],
-        //            TimeOfDaySkAnimation = evening,
-        //           HourlyName = SelectedEveningHourlyForecast.TimeOfDayName,
-        //            TimeOfDaySummary = SelectedEveningHourlyForecast.HourlyForecastSummary.WeatherSummary,
-        //            TimeOfDayWeatherImage = SelectedEveningHourlyForecast.SkHourlyMeteocon,
-        //            TimeOfDayStormSummary = SelectedEveningHourlyForecast.HourlyForecastSummary.StormSummary
-        //        },
-        //        new DayPeriod
-        //        {
-        //            TimeOfDayName = "Night",
-        //            Time = SelectedDate,
-        //            TimeOfDayEvents = new ObservableCollection<EventTime>(SelectedDailyEvents.Where(d => d.WeatherHour >= SelectedDate.AddHours(22) && d.WeatherHour < SelectedDate.AddHours(24)).OrderBy(x => x.OrderTime)),
-        //            TimeOfDayBackgroundBrush = (LinearGradientBrush)Application.Current.Resources["PeriodNight"],
-        //            TimeOfDaySkAnimation = night,
-        //            HourlyName = SelectedNightHourlyForecast.TimeOfDayName,
-        //            TimeOfDaySummary = SelectedNightHourlyForecast.HourlyForecastSummary.WeatherSummary,
-        //            TimeOfDayWeatherImage = SelectedNightHourlyForecast.SkHourlyMeteocon,
-        //            TimeOfDayStormSummary = SelectedNightHourlyForecast.HourlyForecastSummary.StormSummary
-        //        }
-        //};
+        // Weather Summary
+        SelectedWeatherSummary = !string.IsNullOrWhiteSpace(forecast.DailyForecastSummary?.WeatherSummary)
+            ? forecast.DailyForecastSummary.WeatherSummary
+            : (!string.IsNullOrWhiteSpace(forecast.WeatherCodeDescription)
+                ? $"{forecast.WeatherCodeDescription}. Winds from the {forecast.WindDirection10mDominant?.Description}."
+                : "Weather summary isn't available.");
+
+        // Sun & Moon Summary
+        if (forecast.DailyEvents?.AstronomicalData != null && forecast.DailyEvents.AstronomicalData.DayLength > TimeSpan.Zero)
+        {
+            var dayLen = forecast.DailyEvents.AstronomicalData.DayLength;
+            SelectedDayLength = $"{dayLen.Hours} h {dayLen.Minutes} m";
+            var nightLen = TimeSpan.FromHours(24) - dayLen;
+            SelectedNightLength = $"{nightLen.Hours} h {nightLen.Minutes} m";
+            SelectedMoonPhase = !string.IsNullOrWhiteSpace(forecast.DailyEvents.AstronomicalData.MoonPhase)
+                ? forecast.DailyEvents.AstronomicalData.MoonPhase
+                : "Not available";
+        }
+        else
+        {
+            SelectedDayLength = "Not available";
+            SelectedNightLength = "Not available";
+            SelectedMoonPhase = "Not available";
+        }
+
+        // Update photo and drone score summaries on periods from _session.ScoreSummaries
+        var dailyScore = _session.ScoreSummaries?.FirstOrDefault(s => s.Date == DateOnly.FromDateTime(date))
+                         ?? _session.DailyPhotoScoringSummary?.FirstOrDefault(s => s.Date == DateOnly.FromDateTime(date));
+
+        if (dailyScore != null)
+        {
+            HasSelectedDayPredictions = true;
+            SelectedDailyPhotoScoreText = $"Overall Photo Score: {dailyScore.DailyPhotoScore:F0}/100";
+            SelectedDailyDroneScoreText = $"Avg Drone Flight Score: {dailyScore.AverageDroneSafetyScore:F0}/100";
+            SelectedDailyDominantCondition = $"Dominant Condition: {dailyScore.DominantCondition}";
+            SelectedDailyScoreSummaryText = dailyScore.HumanReadableDailySummary;
+
+            var hourlyPreds = dailyScore.HourlyPredictions ?? Array.Empty<HourlyForecastPrediction>();
+            if (hourlyPreds.Count > 0)
+            {
+                SelectedDailyBlueHourScoreText = $"Peak Blue Hour: {hourlyPreds.Max(h => h.BlueHourScore):F0}/100";
+                SelectedDailySunriseScoreText = $"Peak Sunrise: {hourlyPreds.Max(h => h.SunriseScore):F0}/100";
+                SelectedDailySunsetScoreText = $"Peak Sunset: {hourlyPreds.Max(h => h.SunsetScore):F0}/100";
+                SelectedDailyLunarScoreText = $"Peak Lunar: {hourlyPreds.Max(h => h.LunarEventScore):F0}/100";
+                SelectedDailyGalaxyScoreText = $"Peak Galaxy: {hourlyPreds.Max(h => h.GalaxyScore):F0}/100";
+            }
+            else
+            {
+                SelectedDailyBlueHourScoreText = "Peak Blue Hour: N/A";
+                SelectedDailySunriseScoreText = "Peak Sunrise: N/A";
+                SelectedDailySunsetScoreText = "Peak Sunset: N/A";
+                SelectedDailyLunarScoreText = "Peak Lunar: N/A";
+                SelectedDailyGalaxyScoreText = "Peak Galaxy: N/A";
+            }
+
+            SelectedDailyBestHoursText = dailyScore.BestHours is { Count: > 0 }
+                ? $"Best Hours: {string.Join(", ", dailyScore.BestHours.Select(h => h.Timestamp.LocalDateTime.ToString("h tt")))}"
+                : "Best Hours: None";
+
+            SelectedDayHourlyPredictions = new ObservableCollection<HourlyForecastPrediction>(hourlyPreds);
+        }
+        else
+        {
+            HasSelectedDayPredictions = false;
+            SelectedDailyPhotoScoreText = "Overall Photo Score: N/A";
+            SelectedDailyDroneScoreText = "Avg Drone Flight Score: N/A";
+            SelectedDailyDominantCondition = string.Empty;
+            SelectedDailyBlueHourScoreText = string.Empty;
+            SelectedDailySunriseScoreText = string.Empty;
+            SelectedDailySunsetScoreText = string.Empty;
+            SelectedDailyLunarScoreText = string.Empty;
+            SelectedDailyGalaxyScoreText = string.Empty;
+            SelectedDailyBestHoursText = string.Empty;
+            SelectedDailyScoreSummaryText = "No AI predictions available for this date.";
+            SelectedDayHourlyPredictions = new ObservableCollection<HourlyForecastPrediction>();
+        }
+
+        if (SelectedDayEventsByPeriod != null)
+        {
+            foreach (var period in SelectedDayEventsByPeriod)
+            {
+                if (dailyScore?.HourlyPredictions != null && dailyScore.HourlyPredictions.Count > 0)
+                {
+                    var preds = dailyScore.HourlyPredictions
+                        .Where(p => TimeOfDayService.CalcTimeOfDay(p.LocalTime.DateTime.Hour) == period.TimeOfDayName)
+                        .ToList();
+
+                    if (preds.Count > 0)
+                    {
+                        float pScore = preds.Average(x => x.PhotoScore);
+                        float dScore = preds.Average(x => x.DroneSafetyScore);
+                        period.PhotoScore = $"Photo: {pScore:F0}/100";
+                        period.DroneScore = $"Drone: {dScore:F0}/100";
+                        period.ScoreSummary = preds.First().HumanReadableForecast;
+                    }
+                    else
+                    {
+                        period.PhotoScore = $"Photo: {dailyScore.DailyPhotoScore:F0}/100";
+                        period.DroneScore = $"Drone: {dailyScore.AverageDroneSafetyScore:F0}/100";
+                        period.ScoreSummary = dailyScore.HumanReadableDailySummary;
+                    }
+                }
+                else
+                {
+                    period.PhotoScore = "Photo: N/A";
+                    period.DroneScore = "Drone: N/A";
+                    period.ScoreSummary = "Score summary isn't available.";
+                }
+            }
+        }
     }
 }
-
-
-
-//Bound properties that do not change with the select day
-//[ObservableProperty]
-//public partial bool IsWorking { get; set; }
-//[ObservableProperty]
-//public partial PhotoLocation SelectedLocation { get; set; }
-
-//[ObservableProperty]
-//public partial ObservableCollection<HeatRiskValue?> AllHeatRiskValues { get; set; }
-
-
-//[ObservableProperty]
-//public partial string SelectedSummary { get; set; }
-//   [ObservableProperty]
-//    public partial HourlySupplement SelectedHourlySupplement { get; set; }
-//[ObservableProperty]
-//public partial string selectedNwsNightSummary { get; set; }
-//[ObservableProperty]
-//public partial string SelectedSafetySummary { get; set; }
-//[ObservableProperty]
-//public partial HeatRiskValue SelectDayHeatRiskValue { get; set; }
-//[ObservableProperty]
-//public partial string SelectedDailyStormSummary { get; set; }
-//[ObservableProperty]
-//public partial string SelectedDayHeatRiskSummary { get; set; }
-//[ObservableProperty]
-//public partial HourlyForecast SelectedHigh { get; set; }
-//[ObservableProperty]
-//public partial string SelectedTimeHighTemp { get; set; }
-//[ObservableProperty]
-//public partial HourlyForecast SelectedLow { get; set; }
-//[ObservableProperty]
-//public partial string SelectedTimeLowTemp { get; set; }
-//[ObservableProperty]
-//public partial SKFileLottieImageSource SelectedDailyWeatherImage { get; set; }
-//[ObservableProperty]
-//public partial ImageSource selectedImageDay { get; set; }
-//[ObservableProperty]
-//public partial ImageSource? selectedImageNight { get; set; }
-
-////[ObservableProperty]
-////public partial Color SelectedUvRiskColor { get; set; }
-
-//[ObservableProperty]
-//public partial SKFileLottieImageSource DailyHighAnimation { get; set; }
-//[ObservableProperty]
-//public partial SKFileLottieImageSource DailyLowAnimation { get; set; }
-//[ObservableProperty]
-//public partial double High { get; set; }
-//[ObservableProperty]
-//public partial HourlyForecast HighTime { get; set; }
-//[ObservableProperty]
-//public partial double Low { get; set; }
-//[ObservableProperty]
-//public partial HourlyForecast LowTime { get; set; }
-
-
-
-//private GetWeatherService _weatherService;
-//private GetNwsData _nwsWeatherService;
-//private GetEventService _eventService;
-//private GetMoonService _moonService;
-
-//        if (ISession.WeatherForecasts?.Select(x => x.DailyForecasts.SelectedDailyHourlyForecasts) == null || ISession.NwsData?.SelectedDailyHourlyForecasts == null) return;
-//  LocationName = _session.SelectedLocation.DisplayName;
-
-//     MainThread.BeginInvokeOnMainThread(() => WeatherForecasts = new ObservableCollection<WeatherForecasts>(_session.WeatherForecasts.ToList()));
-//    MainThread.BeginInvokeOnMainThread(() => Dates = new ObservableCollection<DateItem>(_session.Dates));
-//WeatherForecasts.CollectionChanged += (s, e) => MainThread.BeginInvokeOnMainThread(() =>
-//{
-//    foreach (var forecast in _session.WeatherForecasts.OrderBy(w => w.Time))
-//    {
-//        WeatherForecasts.Add(forecast);
-//        Debug.WriteLine($"WeatherForecasts.CollectionChanged invoked on thread {Environment.CurrentManagedThreadId}; count={WeatherForecasts.Count}");
-//        UpdateForDate(SelectedDate);
-//    }
-//});
-
-//if (_session.Dates == null)
-//{
-//    return;
-//}
-
-//var heatRisks = ISession.NwsData.HourlySupplementals.Where(z => z.ForecastHeatRisk?.Value != null).Select(x => x.ForecastHeatRisk).ToArray();
-//if (heatRisks.Length > 1)
-//{
-//    AllHeatRiskValues = new ObservableCollection<HeatRiskValue>(heatRisks);
-//}
-
-
-
-//    SelectedUvRiskColor = SelectedDaily?.DailyForecastSummary?.UVIndexColor ?? Colors.Green;
-
-// SelectDayHeatRiskValue = AllHeatRiskValues?.Where(x => x.Time.Time == SelectedDate.Time).First() ?? new HeatRiskValue { Time = SelectedDate, Value = 0 };
-//SelectedUvRiskColor = SelectedDaily?.DailyForecastSummary?.UVIndexColor ?? Colors.Green;
-
-//SelectedSummary = string.Empty;
-//SelectedSafetySummary = string.Empty;
-//SelectedUvRiskColor = default;
-//SelectedDailyStormSummary = string.Empty;
-//SelectedDayHeatRiskSummary = "There is no Heat Risk assigned today.";
-//SelectedHigh = null;
-//SelectedLow = null;
-//SelectedTimeHighTemp = string.Empty;
-//SelectedTimeLowTemp = string.Empty;
-//SelectedDailyWeatherImage = null;
-
-//SelectedSummary = SelectedDaily?.DailyForecastSummary?.WeatherSummary ?? "There are no forecast layers to load";
-//SelectedSafetySummary = SelectedDaily?.DailyForecastSummary?.HealthSafetySummary ?? "There are no health and safety layers to load";
-//SelectedDailyStormSummary = SelectedDaily?.DailyForecastSummary?.StormSummary ?? "There are no storms to report.";
-//SelectedDayHeatRiskSummary = ISession.NwsData?.HourlySupplementals?.Where(h => h.Time.Time == SelectedDate.Time).Select(x => x.ForecastHeatRisk?.HeatRiskDescription).ToString() ?? "There is no Heat Risk assigned today.";
-
-
-//SelectedEarlyHoursHourlyForecast = SelectedDaily.SelectedDailyHourlyForecasts.Where(x => x.HourlyTime.Time == SelectedDate.Time && x.TimeOfDay == "Early Hours" && x.WeatherCodeDescription != null).OrderByDescending(y => y.WeatherCode).FirstOrDefault();
-//SelectedEarlyMorningHourlyForecast = SelectedDaily.SelectedDailyHourlyForecasts.Where(x => x.HourlyTime.Time == SelectedDate.Time && x.TimeOfDay == "Early Morning" && x.WeatherCodeDescription != null).OrderByDescending(y => y.WeatherCode).FirstOrDefault();
-//SelectedMorningHourlyForecast = SelectedDaily.SelectedDailyHourlyForecasts.Where(x => x.HourlyTime.Time == SelectedDate.Time && x.TimeOfDay == "Morning" && x.WeatherCodeDescription != null).OrderByDescending(y => y.WeatherCode).FirstOrDefault();
-//SelectedAfternoonHourlyForecast = SelectedDaily.SelectedDailyHourlyForecasts.Where(x => x.HourlyTime.Time == SelectedDate.Time && x.TimeOfDay == "Afternoon" && x.WeatherCodeDescription != null).OrderByDescending(y => y.WeatherCode).FirstOrDefault();
-//SelectedEveningHourlyForecast = SelectedDaily.SelectedDailyHourlyForecasts.Where(x => x.HourlyTime.Time == SelectedDate.Time && x.TimeOfDay == "Evening" && x.WeatherCodeDescription != null).OrderByDescending(y => y.WeatherCode).FirstOrDefault();
-//SelectedNightHourlyForecast = SelectedDaily.SelectedDailyHourlyForecasts.Where(x => x.HourlyTime.Time == SelectedDate.Time && x.TimeOfDay == "Night" && x.WeatherCodeDescription != null).OrderByDescending(y => y.WeatherCode).FirstOrDefault();
-//PeriodName = SelectedDaily.TimePeriod ?? string.Empty;
-//SelectedSummary = SelectedDaily.DailyForecastSummary?.WeatherSummary ?? string.Empty;
-//SelectedSafetySummary = SelectedDaily.DailyForecastSummary?.HealthSafetySummary ?? string.Empty;
-//SelectedUvRiskColor = SelectedDaily.DailyForecastSummary?.UVIndexColor ?? default;
-//SelectedDailyStormSummary = SelectedDaily.DailyForecastSummary?.StormSummary ?? string.Empty;
-//SelectedDayHeatRiskSummary = AllHeatRiskValues?.Where(h => h.Time.Time == SelectedDate.Time).FirstOrDefault()?.HeatRiskDescription ?? "There is no Heat Risk assigned today.";
-
-//High = SelectedDaily.Temperature2mMax.Value;
-//HighTime = SelectedDaily?.SelectedDailyHourlyForecasts.Where(x => x.IsDay == 1 && x.Temperature2m.Value == High).OrderBy(t => t.HourlyTime).FirstOrDefault();
-//Low = SelectedDaily.Temperature2mMin.Value;
-//LowTime = SelectedDaily?.SelectedDailyHourlyForecasts.Where(x => x.IsDay == 0 && x.Temperature2m.Value == Low).OrderByDescending(t => t.HourlyTime).FirstOrDefault();
-//SelectedTimeHighTemp = $"{Math.Round((double)High, 0)}{HighTime.Temperature2m.Unit} at {HighTime.HourlyTime.ToString("htt")}.";
-//SelectedTimeLowTemp = $"{Math.Round((double)Low, 0)}{LowTime.Temperature2m.Unit} at {LowTime.HourlyTime.ToString("htt")}";
-
-//SelectedHigh = SelectedDaily.SelectedDailyHourlyForecasts?.Where(t => t.IsDay == 1).OrderByDescending(h => h.Temperature2m?.Value ?? double.MinValue).FirstOrDefault();
-//SelectedLow = SelectedDaily.SelectedDailyHourlyForecasts?.Where(t => t.IsDay == 0 && t.HourlyTime.Hour >= 12).OrderBy(c => c.Temperature2m?.Value ?? double.MaxValue).FirstOrDefault();
-
-//SelectedTimeHighTemp = SelectedHigh != null && SelectedHigh.Temperature2m != null ? $"{Math.Round(SelectedHigh.Temperature2m.Value, 0)}{SelectedHigh.Temperature2m.Unit} at {SelectedHigh.HourlyTime.ToString("h tt")}." : string.Empty;
-//SelectedTimeLowTemp = SelectedLow != null && SelectedLow.Temperature2m != null ? $"{Math.Round(SelectedLow.Temperature2m.Value, 0)}{SelectedLow.Temperature2m.Unit} at {SelectedLow.HourlyTime.ToString("h tt")}" : string.Empty;
-
-// SelectedDailyWeatherImage = SelectedDaily.SkDailyMeteocon;
-
-
-
-////private DateTime _selectedDate;
-////public DateTime SelectedDate
-////{
-////    get => _selectedDate;D
-////    set
-////    {
-////        if (SetProperty(ref _selectedDate, Value))
-////        {
-////            UpdateForDate(Value);
-////        }
-////    }
-////}
-
-////private DailyForecasts _selectedDaily;
-
-////{
-////    get => _selectedDaily;
-////    set => SetProperty(ref _selectedDaily, Value);
-////}
-
-
-////{
-////    get => _selectedDateItem;
-////    set
-////    {
-////        if (_selectedDateItem != Value)
-////        {
-////            _selectedDateItem = Value;
-////            OnPropertyChanged(nameof(SelectedDateItem));
-////            // Run the async update without blocking the UI thread
-////            SelectedDate = _selectedDateItem.Time;
-////            IsWorking = true;
-////            UpdateForDate(SelectedDateItem.Time);
-////            IsWorking = false;
-////        }
-////    }
-////}
-
-//// Gradient brush representing the sky color
-////private LinearGradientBrush _skyGradient = new LinearGradientBrush();
-////public LinearGradientBrush SkyGradient
-////{
-////    get => field;
-////    private set
-////    {
-////        field = Value;
-////        OnPropertyChanged(nameof(SkyGradient));
-////    }
-////} = new LinearGradientBrush();
-
-////[RelayCommand]
-////private void ViewDate(object parameter)
-////{
-////    if (parameter is DateTime selectedDate)
-////    {
-////        IsWorking = true;
-////        SelectedDate = selectedDate;
-////        //SelectedDateItem = selectedDateItem;
-////        //_selectedDateItem = SelectedDateItem;
-
-
-////        _selectedDaily = WeatherForecasts.Where(x => x.Time.Time == SelectedDate.Time).Select(d => d.DailyForecasts).FirstOrDefault();
-////        SelectedDaily = _selectedDaily;
-////        var storms = ISession.AdditionalWeatherDesc.Where(x => x.Time.Time == SelectedDate.Time).OrderBy(o => o.Time).Select(s => s.WeatherSummary).ToArray();
-////        if (storms.Any())
-////        {
-////            SelectedDailyStormSummary = String.Join(" ", storms);
-////        }
-////        else
-////        {
-////            SelectedDailyStormSummary = "There are no storms to report.";
-////        }
-////        var heatrisk = ISession.AllHeatriskDetails.Where(h => h.Time.Time == SelectedDate.Time).FirstOrDefault();
-////        if (heatrisk != null)
-////        {
-////            SelectedDailyHeatrisk = $"There is a ForecastHeatRisk today, category {heatrisk.Heatrisk}. {heatrisk.HeatriskDescription}";
-////        }
-////        else
-////        {
-////            SelectedDailyHeatrisk = "There has been no ForecastHeatRisk issued today.";
-////        }
-////        SelectedDailyEvents = SelectedDaily.DailyEvents.EventTimes;
-////        SelectedSummary = SelectedDaily.WeatherSummary;
-////        SelectedSafetySummary = SelectedDaily.HealthSafetySummary;
-////        SelectedImage = SelectedDaily.DailyIcon;
-////        SelectedLowTemp = SelectedDaily.Temperature2mMin.Value;
-////        SelectedTimeLowTemp = SelectedDaily.SelectedDailyHourlyForecasts.Where(h => h.Temperature2m.Value == SelectedLowTemp).FirstOrDefault().HourlyTime.ToString("hh:mm tt");
-////        SelectedHighTemp = SelectedDaily.Temperature2mMax.Value;
-////        SelectedTimeHighTemp = SelectedDaily.SelectedDailyHourlyForecasts.Where(h => h.Temperature2m.Value == SelectedHighTemp).FirstOrDefault().HourlyTime.ToString("hh:mm tt");
-////        SelectedDayLength = $"{SelectedDaily.DailyEvents.AstronomicalData.DayLength.Hours} h {SelectedDaily.DailyEvents.AstronomicalData.DayLength.Minutes} m";
-////        SelectedMoonPhase = SelectedDaily.DailyEvents.AstronomicalData.MoonPhase;
-////        SelectedSunshine = $"{TimeSpan.FromSeconds(SelectedDaily.SunshineDuration.Value).Hours} h {TimeSpan.FromSeconds(SelectedDaily.SunshineDuration.Value).Minutes} m";
-////        PeriodName = SelectedDaily.TimePeriod;
-
-////        EventsByPeriod = new ObservableCollection<DayPeriod>
-////           {
-
-////            new DayPeriod
-////            {
-////                TimeOfDayName = "EarlyHours",
-////                Time = SelectedDate,
-////                TimeOfDayEvents = new ObservableCollection<EventTime>(SelectedDailyEvents.Where(d => d.WeatherHour >= SelectedDate.Time && d.WeatherHour < SelectedDate.AddHours(3)).OrderBy(x => x.OrderTime)),
-////                TimeOfDayBackgroundBrush = (LinearGradientBrush)Application.Current.Resources["PeriodEarlyHours"],
-////                TimeOfDayStormSummary = BuildStormSummaryByTimeOfDay(SelectedDate, "EarlyHours"),
-////                Summary = SelectedDaily.SelectedDailyHourlyForecasts.Where(h => h.HourlyTime.Time == SelectedDate && h.HourlyTime.Hour == 1).FirstOrDefault().WeatherSummary ?? "",
-////                PrecipitationSummary = SelectedDaily.SelectedDailyHourlyForecasts.Where(h => h.HourlyTime.Time == SelectedDate && h.HourlyTime.Hour == 1).FirstOrDefault().PrecipitationSummary ?? "",
-////                SafetySummary = SelectedDaily.SelectedDailyHourlyForecasts.Where(h => h.HourlyTime.Time == SelectedDate && h.HourlyTime.Hour == 1).FirstOrDefault().HealthSafetySummary ?? "",
-////                TimeOfDayWeatherImage = SelectedDaily.SelectedDailyHourlyForecasts.Where(h => h.HourlyTime.Time == SelectedDate && h.HourlyTime.Hour == 1).FirstOrDefault().SkHourlyMeteocon ?? ""
-////            },
-////            new DayPeriod
-////            {
-////                TimeOfDayName = "Early Morning",
-////                Time = SelectedDate,
-////                TimeOfDayEvents = new ObservableCollection<EventTime>(SelectedDailyEvents.Where(d => d.WeatherHour >= SelectedDate.AddHours(3) && d.WeatherHour < SelectedDate.AddHours(6)).OrderBy(x => x.OrderTime)),
-////                TimeOfDayBackgroundBrush = (LinearGradientBrush)Application.Current.Resources["PeriodEarlyMorning"],
-////                TimeOfDayStormSummary = BuildStormSummaryByTimeOfDay(SelectedDate, "Early Morning"),
-////                Summary = SelectedDaily.SelectedDailyHourlyForecasts.Where(h => h.HourlyTime.Time == SelectedDate && h.HourlyTime.Hour == 3).FirstOrDefault().WeatherSummary,
-////                PrecipitationSummary = SelectedDaily.SelectedDailyHourlyForecasts.Where(h => h.HourlyTime.Time == SelectedDate && h.HourlyTime.Hour == 3).FirstOrDefault().PrecipitationSummary,
-////                SafetySummary = SelectedDaily.SelectedDailyHourlyForecasts.Where(h => h.HourlyTime.Time == SelectedDate && h.HourlyTime.Hour == 3).FirstOrDefault().HealthSafetySummary,
-////                TimeOfDayWeatherImage = SelectedDaily.SelectedDailyHourlyForecasts.Where(h => h.HourlyTime.Time == SelectedDate && h.HourlyTime.Hour == 3).FirstOrDefault().SkHourlyMeteocon
-////            },
-////            new DayPeriod
-////            {
-////                TimeOfDayName = "Morning",
-////                Time = SelectedDate,
-////                TimeOfDayEvents = new ObservableCollection<EventTime>(SelectedDailyEvents.Where(d => d.WeatherHour >= SelectedDate.AddHours(6) && d.WeatherHour < SelectedDate.AddHours(12)).OrderBy(x => x.OrderTime)),
-////                TimeOfDayBackgroundBrush = (LinearGradientBrush)Application.Current.Resources["PeriodMorning"],
-////                TimeOfDayStormSummary = BuildStormSummaryByTimeOfDay(SelectedDate, "Morning"),
-////                Summary = SelectedDaily.SelectedDailyHourlyForecasts.Where(h => h.HourlyTime.Time == SelectedDate && h.HourlyTime.Hour == 6).FirstOrDefault().WeatherSummary,
-////                PrecipitationSummary = SelectedDaily.SelectedDailyHourlyForecasts.Where(h => h.HourlyTime.Time == SelectedDate && h.HourlyTime.Hour == 6).FirstOrDefault().PrecipitationSummary,
-////                SafetySummary = SelectedDaily.SelectedDailyHourlyForecasts.Where(h => h.HourlyTime.Time == SelectedDate && h.HourlyTime.Hour == 6).FirstOrDefault().HealthSafetySummary,
-////                TimeOfDayWeatherImage = SelectedDaily.SelectedDailyHourlyForecasts.Where(h => h.HourlyTime.Time == SelectedDate && h.HourlyTime.Hour == 6).FirstOrDefault().SkHourlyMeteocon
-////            },
-////            new DayPeriod
-////            {
-////                TimeOfDayName = "Afternoon",
-////                Time = SelectedDate,
-////                TimeOfDayEvents = new ObservableCollection<EventTime>(SelectedDailyEvents.Where(d => d.WeatherHour >= SelectedDate.AddHours(12) && d.WeatherHour < SelectedDate.AddHours(18)).OrderBy(x => x.OrderTime)),
-////                TimeOfDayBackgroundBrush = (LinearGradientBrush)Application.Current.Resources["PeriodAfternoon"],
-////                TimeOfDayStormSummary = BuildStormSummaryByTimeOfDay(SelectedDate, "Afternoon"),
-////                Summary = SelectedDaily.SelectedDailyHourlyForecasts.Where(h => h.HourlyTime.Time == SelectedDate && h.HourlyTime.Hour == 12).FirstOrDefault().WeatherSummary,
-////                PrecipitationSummary = SelectedDaily.SelectedDailyHourlyForecasts.Where(h => h.HourlyTime.Time == SelectedDate && h.HourlyTime.Hour == 12).FirstOrDefault().PrecipitationSummary,
-////                SafetySummary = SelectedDaily.SelectedDailyHourlyForecasts.Where(h => h.HourlyTime.Time == SelectedDate && h.HourlyTime.Hour == 12).FirstOrDefault().HealthSafetySummary,
-////                TimeOfDayWeatherImage = SelectedDaily.SelectedDailyHourlyForecasts.Where(h => h.HourlyTime.Time == SelectedDate && h.HourlyTime.Hour == 12).FirstOrDefault().SkHourlyMeteocon
-////            },
-////            new DayPeriod
-////            {
-////                TimeOfDayName = "Evening",
-////                Time = SelectedDate,
-////                TimeOfDayEvents = new ObservableCollection<EventTime>(SelectedDailyEvents.Where(d => d.WeatherHour >= SelectedDate.AddHours(18) && d.WeatherHour < SelectedDate.AddHours(22)).OrderBy(x => x.OrderTime)),
-////                TimeOfDayBackgroundBrush = (LinearGradientBrush)Application.Current.Resources["PeriodEvening"],
-////                TimeOfDayStormSummary = BuildStormSummaryByTimeOfDay(SelectedDate, "Evening"),
-////                Summary = SelectedDaily.SelectedDailyHourlyForecasts.Where(h => h.HourlyTime.Time == SelectedDate && h.HourlyTime.Hour == 18).FirstOrDefault().WeatherSummary,
-////                PrecipitationSummary = SelectedDaily.SelectedDailyHourlyForecasts.Where(h => h.HourlyTime.Time == SelectedDate && h.HourlyTime.Hour == 18).FirstOrDefault().PrecipitationSummary,
-////                SafetySummary = SelectedDaily.SelectedDailyHourlyForecasts.Where(h => h.HourlyTime.Time == SelectedDate && h.HourlyTime.Hour == 18).FirstOrDefault().HealthSafetySummary,
-////                TimeOfDayWeatherImage = SelectedDaily.SelectedDailyHourlyForecasts.Where(h => h.HourlyTime.Time == SelectedDate && h.HourlyTime.Hour == 18).FirstOrDefault().SkHourlyMeteocon
-////            },
-////            new DayPeriod
-////            {
-////                TimeOfDayName = "Night",
-////                Time = SelectedDate,
-////                TimeOfDayEvents = new ObservableCollection<EventTime>(SelectedDailyEvents.Where(d => d.WeatherHour >= SelectedDate.AddHours(22) && d.WeatherHour < SelectedDate.AddHours(24)).OrderBy(x => x.OrderTime)),
-////                TimeOfDayBackgroundBrush = (LinearGradientBrush)Application.Current.Resources["PeriodNight"],
-////                TimeOfDayStormSummary = BuildStormSummaryByTimeOfDay(SelectedDate, "Night"),
-////                Summary = SelectedDaily.SelectedDailyHourlyForecasts.Where(h => h.HourlyTime.Time == SelectedDate && h.HourlyTime.Hour == 22).FirstOrDefault().WeatherSummary,
-////                PrecipitationSummary = SelectedDaily.SelectedDailyHourlyForecasts.Where(h => h.HourlyTime.Time == SelectedDate && h.HourlyTime.Hour == 22).FirstOrDefault().PrecipitationSummary,
-////                SafetySummary = SelectedDaily.SelectedDailyHourlyForecasts.Where(h => h.HourlyTime.Time == SelectedDate && h.HourlyTime.Hour == 22).FirstOrDefault().HealthSafetySummary,
-////                TimeOfDayWeatherImage = SelectedDaily.SelectedDailyHourlyForecasts.Where(h => h.HourlyTime.Time == SelectedDate && h.HourlyTime.Hour == 22).FirstOrDefault().HourlyIcon
-////            }
-////           };
-////        IsWorking = false;
-////    }
-////    return;
-////}
-
-////[RelayCommand]
-////private void ViewDate(object args)
-////{
-////    // CollectionView passes a SelectionChangedEventArgs: handle both possibilities.
-////    if (args is SelectionChangedEventArgs sce && sce.CurrentSelection?.FirstOrDefault() is DateTime dt)
-////    {
-////        SelectedDate = dt;
-////        return;
-////    }
-////    if (args is DateTime dt2)
-////    {
-////        SelectedDate = dt2;
-////    }
-////}

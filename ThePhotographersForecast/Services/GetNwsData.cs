@@ -4,7 +4,9 @@ using System.Text;
 using System.Text.Json;
 using ThePhotographersForecast.Data;
 using ThePhotographersForecast.Models;
+using ThePhotographersForecast.Models.ObserverCalc;
 using ThePhotographersForecast.Services.JsonConverters;
+using ThePhotographersForecast.Services.ML;
 using ThePhotographersForecast.Services.Modules;
 using ThePhotographersForecast.Shared;
 
@@ -15,7 +17,9 @@ public partial class GetNwsData : ObservableObject, IGetNwsData
 {
     private readonly HttpClient _client;
     private ISession _session;
+    private ISkyMetricsService _skyService;
     private IForecastService _forecastService;
+    private PhotographersForecastOnnxService _onnxService;
     [ObservableProperty]
     public partial string DailyUrl { get; set; } = string.Empty;
     [ObservableProperty]
@@ -25,11 +29,13 @@ public partial class GetNwsData : ObservableObject, IGetNwsData
     [ObservableProperty]
     public partial NwsWeatherModel NwsData { get; set; } = new NwsWeatherModel();
 
-    public GetNwsData(HttpClient client, ISession session, IForecastService forecastService, ISkyColorEngine skyEngine)
+    public GetNwsData(HttpClient client, ISession session, IForecastService forecastService, ISkyColorEngine skyEngine, PhotographersForecastOnnxService onnxService, ISkyMetricsService skyService)
     {
         _client = client;
         _session = session;
         _forecastService = forecastService;
+        _onnxService = onnxService;
+        _skyService = skyService;
     }
     private async Task<T?> GetDataAsync<T>(HttpRequestMessage request, string name, CancellationToken cancellationToken = default)
     {
@@ -50,12 +56,14 @@ public partial class GetNwsData : ObservableObject, IGetNwsData
 
             // pass the cancellation token to DeserializeAsync so the read can be cancelled cleanly
             var result = await JsonSerializer.DeserializeAsync<T>(stream, options, cancellationToken);
+#if DEBUG
             string jsonFileContent = JsonSerializer.Serialize(result, new JsonSerializerOptions
             {
                 WriteIndented = true // optional: for readable output
             });
 
             File.WriteAllText(Path.Combine(FileSystem.Current.CacheDirectory, $"nws_{DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss")}_{name}.json"), jsonFileContent);
+#endif
             return result;
         }
         catch (OperationCanceledException)
@@ -280,14 +288,13 @@ public partial class GetNwsData : ObservableObject, IGetNwsData
                     Temperature = new NwsHourlyForecast.TemperatureHourly { Value = pd[d].temperature.value },
                     ProbabilityOfPrecipitation = new NwsHourlyForecast.ProbabilityOfPrecipitationHourly { Value = pd[d].probabilityOfPrecipitation.value, UnitCode = "%" },
                     DewPoint = new NwsHourlyForecast.DewPointHourly { Value = pd[d].dewpoint.value },
-                    RelativeHumidity = new NwsHourlyForecast.RelativeHumidityHourly { Value = pd[d].relativeHumidity.value, UnitCode = "%" },
+                    RelativeHumidity = new NwsHourlyForecast.RelativeHumidityHourly { Value = pd[d].relativeHumidity.value },
                     Icon = icon,
                     WindDirection = GetWindDirection(pd[d].windDirection),
                     WindSpeed = new NwsHourlyForecast.WindSpeedHourly { Value = pd[d].windSpeed.value },
                     WindGust = pd[d].windGust != null ? new NwsHourlyForecast.WindGustHourly { Value = pd[d].windGust.value } : null,
                     ShortForecast = pd[d].shortForecast,
                     SkHourlyAnimation = lotties,
-
                 };
             }
             return nwsHourlies;
@@ -305,10 +312,10 @@ public partial class GetNwsData : ObservableObject, IGetNwsData
         for (int s = 0; s < NwsData.HourlyForecasts.Length; s++)
         {
             var supplemental = NwsData.HourlySupplementals.Where(d => d.Time == NwsData.HourlyForecasts[s].StartTime).FirstOrDefault() ?? new NwsHourlySupplemental();
-            NwsData.HourlyForecasts[s].DetailedForecast = CreateHourlyDetailDescription(NwsData.HourlyForecasts[s]);
             Debug.WriteLine($"{s}Adding DetailedForecast to Hourly Forecast.");
             NwsData.HourlyForecasts[s].Supplemental = supplemental;
             Debug.WriteLine($"{s}Adding supplemental to hourly");
+            NwsData.HourlyForecasts[s].DetailedForecast = CreateHourlyDetailDescription(NwsData.HourlyForecasts[s]);
         }
 
 
@@ -320,13 +327,6 @@ public partial class GetNwsData : ObservableObject, IGetNwsData
             Debug.WriteLine($"Nws Hourly Detail Forecast created for {NwsData.DailyForecasts[i].StartTime.ToString("MM/dd HH:MM")}");
         }
 
-        NwsData.HourlySupplementals = new NwsHourlySupplemental[NwsData.HourlySupplementals.Length];
-        for (int s = 0; s < NwsData.HourlySupplementals.Length; s++)
-        {
-            Debug.WriteLine($"Adding #{s} nws hourly supplemental.");
-            NwsData.HourlySupplementals[s] = NwsData.HourlySupplementals[s];
-        }
-
         return NwsData;
     }
 
@@ -334,21 +334,123 @@ public partial class GetNwsData : ObservableObject, IGetNwsData
     private string CreateHourlyDetailDescription(NwsHourlyForecast nwsHourly)
     {
         var detailForecast = new StringBuilder();
-        detailForecast.Append(nwsHourly.ShortForecast);
-        string windGusts = string.Empty;
-        if (nwsHourly.WindGust?.Value != null && nwsHourly.WindGust?.Value is double gusts)
-        {
-            windGusts = $" and gusts up to {gusts} mph.";
-        }
-        string wind = $" Winds from the {nwsHourly.WindDirection} at {nwsHourly.WindSpeed.Value}{nwsHourly.WindSpeed.UnitCode}{(windGusts != string.Empty ? windGusts : ".")}";
+        detailForecast.Append($"Hello, this is the forecast for {nwsHourly.StartTime:h tt}. ");
+        detailForecast.Append($"{nwsHourly.ShortForecast} and {NumberGroups.TempCategory(nwsHourly.Temperature.Value, nwsHourly.DewPoint.Value, nwsHourly.RelativeHumidity.Value, nwsHourly.Supplemental.WetBulbGlobeTemperature.Value)} ");
+        detailForecast.Append($"There is a {NumberGroups.WindsToString(nwsHourly.WindSpeed.Value)},");
+        detailForecast.Append($" about {nwsHourly.WindSpeed.Value}mph, from the {nwsHourly.WindDirection}. ");
 
-        detailForecast.Append($", and {nwsHourly.TempAndUnit}.{wind} Dew Point: {nwsHourly.DewPoint.Value}{nwsHourly.DewPoint.UnitCode} Relative Humidity: {nwsHourly.RelativeHumidity.Value}%");
+        if (nwsHourly.WindGust != null)
+        {
+            detailForecast.Append($"May the wind gusts, with speeds up to {nwsHourly.WindGust.Value}mph, work in your favor. ");
+        }
+        detailForecast.AppendLine($" Dew Point: {nwsHourly.DewPoint.Value}{nwsHourly.DewPoint.UnitCode} Relative Humidity: {nwsHourly.RelativeHumidity.Value}%");
+
         return detailForecast.ToString();
     }
 
     private int RoundToNearest10(int number)
     {
         return (int)(Math.Round(number / 10.0, MidpointRounding.AwayFromZero) * 10);
+    }
+
+    private async Task<IReadOnlyList<DailyForecastSummary>> CreateHourlyNwsInputAsync(GridDetailData.Rootobject suppData)
+    {
+        var skyDataPoints = await _skyService.GetSkyModelDataAsync() ?? Array.Empty<SkyHourData>();
+        var skyByHour = new Dictionary<DateTime, SkyHourData>();
+        foreach (var s in skyDataPoints)
+        {
+            if (DateTime.TryParse(s.Time, out var dt))
+            {
+                var key = new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, 0, 0);
+                skyByHour.TryAdd(key, s);
+            }
+        }
+
+        var supplementals = await ParseSupplementalDataAsync(suppData) ?? Array.Empty<NwsHourlySupplemental>();
+        List<HourlyNwsInput> hours = new List<HourlyNwsInput>(supplementals.Length);
+
+        double lat = _session.SelectedLocation?.Latitude ?? 0;
+        double lon = _session.SelectedLocation?.Longitude ?? 0;
+
+        for (int i = 0; i < supplementals.Length; i++)
+        {
+            var supp = supplementals[i];
+            var hourKey = new DateTime(supp.Time.Year, supp.Time.Month, supp.Time.Day, supp.Time.Hour, 0, 0);
+            skyByHour.TryGetValue(hourKey, out var sky);
+
+            float tempC = supp.Temperature != null
+                ? (float)Math.Round((supp.Temperature.Value - 32) / 1.8, 8)
+                : (sky?.Temperature2m?.Value ?? 0f);
+            float apparentC = supp.ApparentTemperature != null
+                ? (float)Math.Round((supp.ApparentTemperature.Value - 32) / 1.8, 8)
+                : (sky?.ApparentTemperature?.Value ?? tempC);
+            float dewpointC = supp.DewPoint != null
+                ? (float)Math.Round((supp.DewPoint.Value - 32) / 1.8, 8)
+                : tempC - 5f;
+            float rhPct = supp.RelativeHumidity != null
+                ? (float)supp.RelativeHumidity.Value
+                : (sky?.RelativeHumidity2m?.Value ?? 50f);
+
+            float windSpeedKmh = supp.WindSpeed != null
+                ? (float)(supp.WindSpeed.Value * 1.609344)
+                : 0f;
+            float? windGustKmh = supp.WindGust != null
+                ? (float)(supp.WindGust.Value * 1.609344)
+                : sky?.WindGusts10m?.Value;
+            float windDirDeg = supp.WindDirection != null
+                ? (float)supp.WindDirection.Value
+                : (sky?.WindDirection120m?.Value ?? 0f);
+            float skyCoverPct = supp.Skycover != null
+                ? (float)supp.Skycover.Value
+                : (sky?.CloudCover?.Value ?? 0f);
+            float precipProbPct = supp.ProbabilityOfPrecipitation != null
+                ? (float)supp.ProbabilityOfPrecipitation.Value
+                : (sky?.PrecipitationProbability?.Value ?? 0f);
+
+            float solarElevDeg = (float)(SunCalc.GetPosition(supp.Time, lat, lon).Altitude * (180.0 / Math.PI));
+            float ceilingM = supp.CeilingHeight != null
+                ? (float)Math.Round(supp.CeilingHeight.Value / 3.2808, 8)
+                : 10000f;
+
+            float cloudLow = sky?.CloudCoverLow?.Value ?? skyCoverPct;
+            float cloudMid = sky?.CloudCoverMid?.Value ?? skyCoverPct;
+            float cloudHigh = sky?.CloudCoverHigh?.Value ?? skyCoverPct;
+            float visibilityKm = sky?.Visibility != null ? sky.Visibility.Value / 1000f : 16f;
+            float wind120Kmh = sky?.WindSpeed120m?.Value ?? (windSpeedKmh * 1.25f);
+            float precipMm = sky?.Precipitation?.Value ?? 0f;
+
+            float moonElevDeg = (float)(MoonCalc.GetMoonPosition(supp.Time, lat, lon).Altitude * (180.0 / Math.PI));
+            float moonIllum = (float)MoonCalc.GetMoonIllumination(supp.Time).Fraction;
+
+            var hourly = new HourlyNwsInput(
+                (DateTimeOffset)supp.Time,
+                tempC,
+                apparentC,
+                dewpointC,
+                rhPct,
+                windSpeedKmh,
+                windGustKmh,
+                windDirDeg,
+                skyCoverPct,
+                precipProbPct,
+                solarElevDeg,
+                ceilingM,
+                cloudLow,
+                cloudMid,
+                cloudHigh,
+                visibilityKm,
+                wind120Kmh,
+                precipMm,
+                moonElevDeg,
+                moonIllum);
+
+            hours.Add(hourly);
+        }
+
+        IReadOnlyList<HourlyNwsInput> hour = hours;
+        var summary = await _onnxService.PredictForecastAsync(hour);
+        _session.DailyPhotoScoringSummary = summary;
+        return summary;
     }
 
     private async Task<NwsHourlySupplemental[]> GetNwsHourlySupplementalAsync(string gridUrl)
@@ -362,610 +464,862 @@ public partial class GetNwsData : ObservableObject, IGetNwsData
         if (suppData == null) return null;
 
         await GetNwsGridCoordinates(suppData);
+
+
         if (_session.Coordinates != null)
         {
             Debug.WriteLine($"The mapsui coordinates where unable to be captured");
         }
-        try
-        {
-            var wx = suppData.properties.weather;
-            if (wx.values?.Length > 0 && wx.values[0]?.value[0]?.weather != null)
-            {
-                for (int i = 0; i < wx.values?.Length; i++)
-                {
-                    string finishedWeather = string.Empty;
-                    List<string> hourlyWeatherDescription = new();
-                    var weatherStmts = new WeatherStatementsValue[wx.values[i].value.Length];
-                    var date = ParseNwsInterval(wx.values[i].validTime);
-                    for (int x = 0; x < wx.values[i].value?.Length; x++)
-                    {
-                        for (int dur = 0; dur < date.duration; dur++)
-                        {
-                            DateTime newTime = date.time.AddHours(dur);
 
-                            if (wx.values[i].value[x].weather != null)
-                            {
+        var supplementals = await ParseSupplementalDataAsync(suppData);
+        return supplementals;
 
-
-                                weatherStmts[x] = new WeatherStatementsValue
-                                {
-                                    Weather = wx.values[i].value[x].weather ?? string.Empty,
-                                    Coverage = wx.values[i].value[x].coverage ?? string.Empty,
-                                    Intensity = wx.values[i].value[x].intensity ?? string.Empty,
-                                    Time = newTime,
-                                    Duration = date.duration - dur,
-                                    Statement = CoverageStmt(wx.values[i].value[x].coverage, wx.values[i].value[x].intensity, wx.values[i].value[x].weather)
-                                };
-
-
-                                hourlyWeatherDescription.Add(weatherStmts[x].Statement);
-                            }
-
-
-                            var stmt = hourlyWeatherDescription.ToArray();
-                            finishedWeather = $"At " + newTime.ToString("h tt") + ", ";
-                            for (int s = 0; s < stmt.Length; s++)
-                            {
-                                if (s == stmt.Length - 1)
-                                {
-                                    finishedWeather += stmt[s] + ". ";
-                                }
-
-                                else if (stmt.Length - 2 == s)
-                                {
-                                    finishedWeather += stmt[s] + " and ";
-                                }
-                                else
-                                {
-                                    finishedWeather += stmt[s] + ", ";
-                                }
-                            }
-                            supp.Add(new NwsHourlySupplemental
-                            {
-                                Time = newTime,
-                                SupplementalWeatherStatement = finishedWeather,
-                                Weather = weatherStmts
-                            });
-                        }
-                    }
-                }
-            }
-            else
-            {
-                var date = ParseNwsInterval(suppData.properties.validTimes);
-                supp.Add(new NwsHourlySupplemental
-                {
-                    Time = date.time,
-                    SupplementalWeatherStatement = "There are no storms to report."
-                });
-            }
-
-            // 2. Apparent Temperature
-            var apparentTemp = suppData.properties.apparentTemperature;
-            if (apparentTemp.values?.Length > 0 && apparentTemp.values[0]?.value != null)
-            {
-                for (int a = 0; a < apparentTemp.values?.Length; a++)
-                {
-                    var date = ParseNwsInterval(apparentTemp.values[a].validTime);
-                    for (int dur = 0; dur < date.duration; dur++)
-                    {
-                        DateTime newTime = date.time.AddHours(dur);
-
-                        if (apparentTemp.values[a].value is double at)
-                        {
-                            supp.Add(new NwsHourlySupplemental
-                            {
-                                Time = newTime,
-                                ApparentTemperature = new ApparentTemperatureValue { Value = at, Duration = date.duration - dur }
-                            });
-                        }
-                    }
-                }
-            }
-            var windspeed = suppData.properties.windSpeed;
-            if (windspeed.values?.Length > 0 && windspeed.values[0]?.value != null)
-            {
-                for (int a = 0; a < windspeed.values?.Length; a++)
-                {
-                    var date = ParseNwsInterval(windspeed.values[a].validTime);
-                    for (int dur = 0; dur < date.duration; dur++)
-                    {
-                        DateTime newTime = date.time.AddHours(dur);
-                        if (windspeed.values[a].value is double at)
-                        {
-
-                            supp.Add(new NwsHourlySupplemental
-                            {
-                                Time = newTime,
-                                WindSpeed = new WindSpeedValue { Value = at, Duration = date.duration - dur }
-                            });
-                        }
-                    }
-                }
-            }
-            var direction = suppData.properties.windDirection;
-            if (direction.values?.Length > 0 && direction.values[0]?.value != null)
-            {
-                for (int a = 0; a < direction.values?.Length; a++)
-                {
-                    var date = ParseNwsInterval(direction.values[a].validTime);
-                    for (int dur = 0; dur < date.duration; dur++)
-                    {
-                        DateTime newTime = date.time.AddHours(dur);
-                        if (direction.values[a].value is int d)
-                        {
-                            supp.Add(new NwsHourlySupplemental
-                            {
-                                Time = newTime,
-                                WindDirection = new WindDirectionValue { Value = d, Duration = date.duration - dur }
-                            });
-                        }
-                    }
-                }
-            }
-            var gust = suppData.properties.windGust;
-            if (gust != null && gust.values.Length > 0 && gust.values[0]?.value != null)
-            {
-                for (int a = 0; a < gust.values.Length; a++)
-                {
-                    var date = ParseNwsInterval(gust.values[a].validTime);
-                    for (int dur = 0; dur < date.duration; dur++)
-                    {
-                        DateTime newTime = date.time.AddHours(dur);
-                        if (gust.values[a].value > 1 && gust.values[a].value is double at)
-                        {
-                            supp.Add(new NwsHourlySupplemental
-                            {
-                                Time = newTime,
-                                WindGust = new WindGustValue { Value = at, Duration = date.duration - dur }
-                            });
-                        }
-                    }
-                }
-            }
-
-            // 3. SkyCover
-            var skyCover = suppData.properties.skyCover;
-            if (skyCover.values?.Length > 0 && skyCover.values[0]?.value != null)
-            {
-                for (int a = 0; a < skyCover.values?.Length; a++)
-                {
-                    var date = ParseNwsInterval(skyCover.values[a].validTime);
-                    for (int dur = 0; dur < date.duration; dur++)
-                    {
-                        DateTime newTime = date.time.AddHours(dur);
-                        if (skyCover.values[a].value is double sc)
-                        {
-                            supp.Add(new NwsHourlySupplemental
-                            {
-                                Time = newTime,
-                                Skycover = new SkyCoverValue { Value = sc, UnitCode = skyCover.uom, Duration = date.duration - dur }
-                            });
-                        }
-                    }
-                }
-            }
-
-            // 3. Mixing Height
-            var mixingHeight = suppData.properties.mixingHeight;
-            if (mixingHeight.values?.Length > 0 && mixingHeight.values[0]?.value != null)
-            {
-                for (int a = 0; a < mixingHeight.values?.Length; a++)
-                {
-                    var date = ParseNwsInterval(mixingHeight.values[a].validTime);
-                    for (int dur = 0; dur < date.duration; dur++)
-                    {
-                        DateTime newTime = date.time.AddHours(dur);
-                        if (mixingHeight.values[a].value is double mh)
-                        {
-                            supp.Add(new NwsHourlySupplemental
-                            {
-                                Time = newTime,
-                                MixingHeight = new MixingHeightValue { Value = mh, Duration = date.duration - dur }
-                            });
-                        }
-                    }
-                }
-            }
-
-
-            // 5. Quantitative Precipitation
-            var qp = suppData.properties.quantitativePrecipitation;
-            if (qp.values?.Length > 0 && qp.values[0]?.value != null)
-            {
-                for (int a = 0; a < qp.values?.Length; a++)
-                {
-                    if (qp.values[a].value is double quanPrec)
-                    {
-                        var date = ParseNwsInterval(qp.values[a].validTime);
-                        for (int dur = 0; dur <= date.duration; dur++)
-                        {
-                            DateTime newTime = date.time.AddHours(dur);
-                            supp.Add(new NwsHourlySupplemental
-                            {
-                                Time = newTime,
-                                QuantitativePrecipitation = new QuantitativePrecipitationValue { Value = quanPrec, Time = newTime, Duration = date.duration - dur }
-                            });
-                        }
-                    }
-                }
-            }
-
-            // 6. ForecastHeatRisk (This Feels like temperature with a humidity factor
-            var heat = suppData.properties.heatRisk;
-
-            if (heat != null && heat.values?.Length > 0 && heat.values[0]?.value != null)
-            {
-                for (int h = 0; h < heat.values?.Length; h++)
-                {
-                    if (heat.values[h].value > 0 && heat.values[h].value is int heatrisknbr)
-                    {
-                        var date = ParseNwsInterval(heat.values[h].validTime);
-                        for (int dur = 0; dur < date.duration; dur++)
-                        {
-                            DateTime newTime = date.time.AddHours(dur);
-                            var heatrisk = new NwsHourlySupplemental
-                            {
-                                Time = newTime,
-                                HeatRisk = new HeatRiskValue { Value = heatrisknbr, Duration = date.duration - dur }
-                            };
-                            supp.Add(heatrisk);
-                        }
-                    }
-                }
-            }
-
-            // 7. ApparentTemperature and humidity
-            var heatIndex = suppData.properties.heatIndex;
-            if (heatIndex != null && heatIndex.values?.Length > 0 && heatIndex.values[0]?.value != default)
-            {
-                for (int h = 0; h < heatIndex.values?.Length; h++)
-                {
-                    if (heatIndex.values[h].value > 0 && heatIndex.values[h].value is double heatindexdb)
-                    {
-                        var date = ParseNwsInterval(heatIndex.values[h].validTime);
-                        for (int dur = 0; dur <= date.duration; dur++)
-                        {
-                            DateTime newTime = date.time.AddHours(dur);
-                            var nwsHeatIndex = new NwsHourlySupplemental
-                            {
-                                Time = newTime,
-                                HeatIndex = new HeatIndexValue { Value = heatindexdb, UnitCode = heatIndex.uom, Duration = date.duration - dur }
-                            };
-                            supp.Add(nwsHeatIndex);
-                        }
-                    }
-                }
-            }
-
-            // 8. WindChill
-            var windchill = suppData.properties.windChill;
-            if (windchill != null && windchill.values?.Length > 0 && windchill.values[0]?.value != null)
-            {
-                for (int h = 0; h < windchill.values?.Length; h++)
-                {
-                    if (windchill.values[h].value > -60 && windchill.values[h].value is double wc)
-                    {
-                        var date = ParseNwsInterval(windchill.values[h].validTime);
-                        for (int dur = 0; dur <= date.duration; dur++)
-                        {
-                            DateTime newTime = date.time.AddHours(dur);
-                            var windChill = new NwsHourlySupplemental
-                            {
-                                Time = newTime,
-                                WindChill = new WindchillValue { Value = wc, Duration = date.duration - dur }
-                            };
-                            supp.Add(windChill);
-                        }
-                    }
-                }
-            }
-
-            // 9. Daily Minimum Temperature
-            var mintemp = suppData.properties.minTemperature;
-
-            if (mintemp.values?.Length > 0 && mintemp.values[0]?.value != null)
-            {
-                for (int h = 0; h < mintemp.values?.Length; h++)
-                {
-                    if (mintemp.values[h].value is double mt)
-                    {
-                        var date = ParseNwsInterval(mintemp.values[h].validTime);
-                        for (int dur = 0; dur <= date.duration; dur++)
-                        {
-                            DateTime newTime = date.time.AddHours(dur);
-                            var minTemp = new NwsHourlySupplemental
-                            {
-                                Time = newTime,
-                                MinTemperature = new MinTemperatureValue { Value = mt, Duration = date.duration - dur }
-                            };
-                            supp.Add(minTemp);
-                        }
-                    }
-                }
-            }
-
-            // 10. Daily Maximum Temperature
-            var maxtemp = suppData.properties.maxTemperature;
-
-            if (maxtemp.values?.Length > 0 && maxtemp.values[0]?.value != null)
-            {
-                for (int h = 0; h < maxtemp.values?.Length; h++)
-                {
-                    if (maxtemp.values[h].value is double mt)
-                    {
-                        var date = ParseNwsInterval(maxtemp.values[h].validTime);
-                        for (int dur = 0; dur <= date.duration; dur++)
-                        {
-                            DateTime newTime = date.time.AddHours(dur);
-                            var maxTemp = new NwsHourlySupplemental
-                            {
-                                Time = newTime,
-                                MaxTemperature = new MaxTemperatureValue { Value = mt, Duration = date.duration - dur }
-                            };
-                            supp.Add(maxTemp);
-                        }
-                    }
-                }
-            }
-
-            // 11. Relative RelativeHumidity
-            var rh = suppData.properties.relativeHumidity;
-
-            if (rh.values?.Length > 0 && rh.values[0]?.value != null)
-            {
-                for (int h = 0; h < rh.values?.Length; h++)
-                {
-                    if (rh.values[h].value is double relHum)
-                    {
-                        var date = ParseNwsInterval(rh.values[h].validTime);
-                        for (int dur = 0; dur <= date.duration; dur++)
-                        {
-                            DateTime newTime = date.time.AddHours(dur);
-                            var rhValue = new NwsHourlySupplemental
-                            {
-                                Time = newTime,
-                                RelativeHumidity = new RelativeHumidityValue { Value = relHum, UnitCode = rh.uom, Duration = date.duration - dur }
-                            };
-                            supp.Add(rhValue);
-                        }
-                    }
-                }
-            }
-
-            // 12: Dew Point
-            var dp = suppData.properties.dewpoint;
-
-            if (dp.values?.Length > 0 && dp.values[0]?.value != null)
-            {
-                for (int h = 0; h < dp.values?.Length; h++)
-                {
-                    if (dp.values[h].value is double dew)
-                    {
-                        var date = ParseNwsInterval(dp.values[h].validTime);
-                        for (int dur = 0; dur <= date.duration; dur++)
-                        {
-                            DateTime newTime = date.time.AddHours(dur);
-                            var dewPoint = new NwsHourlySupplemental
-                            {
-                                Time = newTime,
-                                DewPoint = new DewPointValue { Value = dew, Duration = date.duration - dur }
-                            };
-                            supp.Add(dewPoint);
-                        }
-                    }
-                }
-            }
-            // 13. Temperature
-            var temp = suppData.properties.temperature;
-
-            if (temp.values?.Length > 0 && temp.values[0]?.value != null)
-            {
-                for (int h = 0; h < temp.values?.Length; h++)
-                {
-                    if (temp.values[h].value is double tmp)
-                    {
-                        var date = ParseNwsInterval(temp.values[h].validTime);
-                        for (int dur = 0; dur <= date.duration; dur++)
-                        {
-                            DateTime newTime = date.time.AddHours(dur);
-                            var temperature = new NwsHourlySupplemental
-                            {
-                                Time = newTime,
-                                Temperature = new TemperatureValue { Value = tmp, Duration = date.duration - dur }
-                            };
-                            supp.Add(temperature);
-                        }
-                    }
-                }
-            }
-
-            // 14. Thunder
-            var thunder = suppData.properties.probabilityOfThunder;
-
-            if (thunder.values?.Length > 0 && thunder.values[0]?.value != null)
-            {
-                for (int h = 0; h < thunder.values?.Length; h++)
-                {
-                    if (thunder.values[h].value is double ts)
-                    {
-                        var date = ParseNwsInterval(thunder.values[h].validTime);
-                        for (int dur = 0; dur <= date.duration; dur++)
-                        {
-                            DateTime newTime = date.time.AddHours(dur);
-                            var tstorm = new NwsHourlySupplemental
-                            {
-                                Time = newTime,
-                                ProbabilityOfThunder = new ProbabilityOfThunderValue
-                                {
-                                    Time = newTime,
-                                    Duration = date.duration - dur,
-                                    Value = ts,
-                                }
-                            };
-                            supp.Add(tstorm);
-                        }
-                    }
-                }
-            }
-
-            // 15. Low DistanceVisible Occurence Risk Index
-            var lvori = suppData.properties.lowVisibilityOccurrenceRiskIndex;
-
-            if (lvori.values?.Length > 0 && lvori.values[0]?.value != null)
-            {
-                for (int h = 0; h < lvori.values?.Length; h++)
-                {
-                    if (lvori.values[h].value is double vis)
-                    {
-                        var date = ParseNwsInterval(lvori.values[h].validTime);
-                        for (int dur = 0; dur <= date.duration; dur++)
-                        {
-                            DateTime newTime = date.time.AddHours(dur);
-                            var lvoriValue = new NwsHourlySupplemental
-                            {
-                                Time = newTime,
-                                LowVisibilityOccurrenceRiskIndex = new LowVisibilityOccurrenceRiskIndexValue
-                                {
-                                    Duration = date.duration - dur,
-                                    Value = vis,
-
-                                }
-                            };
-                            supp.Add(lvoriValue);
-                        }
-                    }
-                }
-            }
-
-            // 16. Ice Accumulation
-            var ice = suppData.properties.iceAccumulation;
-
-            if (ice.values?.Length > 0 && ice.values[0]?.value != null)
-            {
-                for (int h = 0; h < ice.values?.Length; h++)
-                {
-                    if (ice.values[h].value is double iceAccum)
-                    {
-                        var date = ParseNwsInterval(ice.values[h].validTime);
-                        for (int dur = 0; dur <= date.duration; dur++)
-                        {
-                            DateTime newTime = date.time.AddHours(dur);
-                            var iceAccumulate = new NwsHourlySupplemental
-                            {
-                                Time = newTime,
-                                IceAccumulation = new IceAccumulationValue { Value = iceAccum, Duration = date.duration - dur }
-                            };
-                            supp.Add(iceAccumulate);
-                        }
-                    }
-                }
-            }
-
-            // 17. Snowfall Amount
-            var snow = suppData.properties.snowfallAmount;
-
-            if (snow.values?.Length > 0 && snow.values[0]?.value != null)
-            {
-                for (int h = 0; h < snow.values?.Length; h++)
-                {
-                    if (snow.values[h].value is double snowy)
-                    {
-                        var date = ParseNwsInterval(snow.values[h].validTime);
-                        for (int dur = 0; dur <= date.duration; dur++)
-                        {
-                            DateTime newTime = date.time.AddHours(dur);
-                            var snowFall = new NwsHourlySupplemental
-                            {
-                                Time = newTime,
-                                SnowfallAmount = new SnowFallAmountValue { Value = snowy, Duration = date.duration - dur }
-                            };
-                            supp.Add(snowFall);
-                        }
-                    }
-                }
-            }
-
-            // 18. Probability Of Precipitation
-            var precip = suppData.properties.probabilityOfPrecipitation;
-
-            if (precip.values?.Length > 0 && precip.values[0]?.value != null)
-            {
-                for (int h = 0; h < precip.values?.Length; h++)
-                {
-                    if (precip.values[h].value is double rain)
-                    {
-                        var date = ParseNwsInterval(precip.values[h].validTime);
-                        for (int dur = 0; dur <= date.duration; dur++)
-                        {
-                            DateTime newTime = date.time.AddHours(dur);
-                            var probPrecip = new NwsHourlySupplemental
-                            {
-                                Time = newTime,
-                                ProbabilityOfPrecipitation = new ProbabilityOfPrecipitationValue { Value = rain, UnitCode = precip.uom, Duration = date.duration - dur }
-                            };
-                            supp.Add(probPrecip);
-                        }
-                    }
-                }
-            }
-            var wbgt = suppData.properties.wetBulbGlobeTemperature;
-
-            if (wbgt.values?.Length > 0 && wbgt.values[0]?.value != null)
-            {
-                for (int h = 0; h < wbgt.values?.Length; h++)
-                {
-                    if (wbgt.values[h].value is double wet)
-                    {
-                        var date = ParseNwsInterval(wbgt.values[h].validTime);
-                        for (int dur = 0; dur <= date.duration; dur++)
-                        {
-                            DateTime newTime = date.time.AddHours(dur);
-                            var wetBulb = new NwsHourlySupplemental
-                            {
-                                Time = newTime,
-                                WetBulbGlobeTemperature = new WetBulbGlobeTemperatureValue { Value = wet, Duration = date.duration - dur }
-                            };
-                            supp.Add(wetBulb);
-                        }
-                    }
-                }
-            }
-
-            NwsHourlySupplemental[] supplementals = supp.OrderBy(o => o.Time).GroupBy(g => g.Time).Select(w => new NwsHourlySupplemental
-            {
-                Time = w.Key,
-                ApparentTemperature = w.Where(x => x.ApparentTemperature != null).Max(y => y.ApparentTemperature) as ApparentTemperatureValue,
-                IceAccumulation = w.Where(x => x.IceAccumulation != null).Max(y => y.IceAccumulation) as IceAccumulationValue,
-                SnowfallAmount = w.Where(x => x.SnowfallAmount != null).Max(y => y.SnowfallAmount) as SnowFallAmountValue,
-                DewPoint = w.Where(x => x.DewPoint != null).Max(y => y.DewPoint) as DewPointValue,
-                HeatIndex = w.Where(x => x.HeatIndex != null).Max(y => y.HeatIndex) as HeatIndexValue,
-                HeatRisk = w.Where(x => x.HeatRisk != null).Max(y => y.HeatRisk) as HeatRiskValue,
-                LowVisibilityOccurrenceRiskIndex = w.Where(x => x.LowVisibilityOccurrenceRiskIndex != null).Max(y => y.LowVisibilityOccurrenceRiskIndex) as LowVisibilityOccurrenceRiskIndexValue,
-                MaxTemperature = w.Where(x => x.MaxTemperature != null).Max(y => y.MaxTemperature) as MaxTemperatureValue,
-                MinTemperature = w.Where(x => x.MinTemperature != null).Max(y => y.MinTemperature) as MinTemperatureValue,
-                ProbabilityOfPrecipitation = w.Where(x => x.ProbabilityOfPrecipitation != null).Max(y => y.ProbabilityOfPrecipitation) as ProbabilityOfPrecipitationValue,
-                ProbabilityOfThunder = w.Where(x => x.ProbabilityOfThunder != null).Max(y => y.ProbabilityOfThunder) as ProbabilityOfThunderValue,
-                QuantitativePrecipitation = w.Where(x => x.QuantitativePrecipitation != null).Max(y => y.QuantitativePrecipitation) as QuantitativePrecipitationValue,
-                RelativeHumidity = w.Where(x => x.RelativeHumidity != null).Max(y => y.RelativeHumidity) as RelativeHumidityValue,
-                Skycover = w.Where(x => x.Skycover != null).Max(y => y.Skycover) as SkyCoverValue,
-                Temperature = w.Where(x => x.Temperature != null).Max(y => y.Temperature) as TemperatureValue,
-                Weather = w.Where(x => x.Weather != null).Max(y => y.Weather.ToArray()) as WeatherStatementsValue[],
-                WetBulbGlobeTemperature = w.Where(x => x.WetBulbGlobeTemperature != null).Max(y => y.WetBulbGlobeTemperature) as WetBulbGlobeTemperatureValue,
-                WindChill = w.Where(x => x.WindChill != null).Max(y => y.WindChill) as WindchillValue,
-                WindGust = w.Where(x => x.WindGust != null).Max(y => y.WindGust) as WindGustValue,
-                WindSpeed = w.Where(x => x.WindSpeed != null).Max(y => y.WindSpeed) as WindSpeedValue,
-                WindDirection = w.Where(x => x.WindDirection != null).Max(y => y.WindDirection) as WindDirectionValue
-            }).ToArray();
-
-            return supplementals;
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"Error while processing NwsData Supplementals: {ex}");
-        }
-        return default;
     }
+
+    private async Task<NwsHourlySupplemental[]> ParseSupplementalDataAsync(GridDetailData.Rootobject suppData)
+    {
+        var lookup = new Dictionary<DateTime, NwsHourlySupplemental>();
+
+        NwsHourlySupplemental GetOrCreate(DateTime time)
+        {
+            if (!lookup.TryGetValue(time, out var item))
+            {
+                item = new NwsHourlySupplemental { Time = time };
+                lookup[time] = item;
+            }
+            return item;
+        }
+
+        // 1. Weather phenomena and coverage statements
+
+        var wx = suppData.properties.weather;
+        bool hasWeatherData = false;
+
+        if (wx?.values != null && wx.values.Length > 0)
+        {
+            for (int i = 0; i < wx.values.Length; i++)
+            {
+                var valEntry = wx.values[i];
+                if (valEntry?.value == null || valEntry.value.Length == 0)
+                    continue;
+
+                var validLayers = valEntry.value
+                    .Where(v => v != null && !string.IsNullOrWhiteSpace(v.weather))
+                    .ToArray();
+
+                if (validLayers.Length == 0)
+                    continue;
+
+                hasWeatherData = true;
+                var (startTime, duration) = ParseNwsInterval(valEntry.validTime);
+
+                for (int dur = 0; dur < duration; dur++)
+                {
+                    DateTime targetTime = startTime.AddHours(dur);
+                    int remainingDuration = duration - dur;
+
+                    var statements = new List<string>();
+                    var weatherStmts = new WeatherStatementsValue[validLayers.Length];
+
+                    for (int x = 0; x < validLayers.Length; x++)
+                    {
+                        var layer = validLayers[x];
+                        string stmt = CoverageStmt(layer.coverage, layer.weather, layer.intensity);
+
+                        weatherStmts[x] = new WeatherStatementsValue
+                        {
+                            Weather = layer.weather ?? string.Empty,
+                            Coverage = layer.coverage ?? string.Empty,
+                            Intensity = layer.intensity ?? string.Empty,
+                            Time = targetTime,
+                            Duration = remainingDuration,
+                            Statement = stmt
+                        };
+
+                        if (!string.IsNullOrWhiteSpace(stmt))
+                        {
+                            statements.Add(stmt);
+                        }
+                    }
+
+                    string finishedWeather = string.Empty;
+                    if (statements.Count > 0)
+                    {
+                        finishedWeather = statements.Count == 1
+                            ? $"At {targetTime:h tt}, {statements[0]}."
+                            : $"At {targetTime:h tt}, {string.Join(", ", statements.Take(statements.Count - 1))} and {statements.Last()}.";
+                    }
+
+                    var record = GetOrCreate(targetTime);
+                    record.Weather = weatherStmts;
+                    record.SupplementalWeatherStatement = finishedWeather;
+                }
+            }
+        }
+
+        if (!hasWeatherData && !string.IsNullOrEmpty(suppData.properties.validTimes))
+        {
+            var (startTime, _) = ParseNwsInterval(suppData.properties.validTimes);
+            var record = GetOrCreate(startTime);
+            record.SupplementalWeatherStatement = "There are no storms to report.";
+        }
+
+        // 2. Apparent Temperature
+        ExpandMetric<double>(suppData.properties.apparentTemperature, lookup, ParseNwsInterval,
+            (rec, val, dur, _) => rec.ApparentTemperature = new ApparentTemperatureValue { Value = val, Duration = dur });
+
+        // 3. Wind Speed
+        ExpandMetric<double>(suppData.properties.windSpeed, lookup, ParseNwsInterval,
+            (rec, val, dur, _) => rec.WindSpeed = new WindSpeedValue { Value = val, Duration = dur });
+
+        // 4. Wind Direction (int)
+        ExpandMetric<int>(suppData.properties.windDirection, lookup, ParseNwsInterval,
+            (rec, val, dur, _) => rec.WindDirection = new WindDirectionValue { Value = val, Duration = dur });
+
+        // 5. Wind Gust (value > 1.0)
+        ExpandMetric<double>(suppData.properties.windGust, lookup, ParseNwsInterval,
+            (rec, val, dur, _) => rec.WindGust = new WindGustValue { Value = val, Duration = dur },
+            predicate: val => val > 1.0);
+
+        // 6. Sky Cover
+        ExpandMetric<double>(suppData.properties.skyCover, lookup, ParseNwsInterval,
+            (rec, val, dur, _) => rec.Skycover = new SkyCoverValue { Value = val, Duration = dur });
+
+        // 7. Mixing Height
+        ExpandMetric<double>(suppData.properties.mixingHeight, lookup, ParseNwsInterval,
+            (rec, val, dur, _) => rec.MixingHeight = new MixingHeightValue { Value = val, Duration = dur });
+
+        // 8. Quantitative Precipitation
+        ExpandMetric<double>(suppData.properties.quantitativePrecipitation, lookup, ParseNwsInterval,
+            (rec, val, dur, _) => rec.QuantitativePrecipitation = new QuantitativePrecipitationValue { Value = val, Time = rec.Time, Duration = dur });
+
+        // 9. Forecast Heat Risk (int, value > 0)
+        ExpandMetric<int>(suppData.properties.heatRisk, lookup, ParseNwsInterval,
+            (rec, val, dur, _) => rec.HeatRisk = new HeatRiskValue { Value = val, Duration = dur },
+            predicate: val => val > 0);
+
+        // 10. Heat Index (value > 0.0)
+        ExpandMetric<double>(suppData.properties.heatIndex, lookup, ParseNwsInterval,
+            (rec, val, dur, _) => rec.HeatIndex = new HeatIndexValue { Value = val, Duration = dur },
+            predicate: val => val > 0.0);
+
+        // 11. Wind Chill (value > -60.0)
+        ExpandMetric<double>(suppData.properties.windChill, lookup, ParseNwsInterval,
+            (rec, val, dur, _) => rec.WindChill = new WindchillValue { Value = val, Duration = dur },
+            predicate: val => val > -60.0 && val != default && val != null);
+
+        // 12. Daily Minimum Temperature
+        ExpandMetric<double>(suppData.properties.minTemperature, lookup, ParseNwsInterval,
+            (rec, val, dur, _) => rec.MinTemperature = new MinTemperatureValue { Value = val, Duration = dur });
+
+        // 13. Daily Maximum Temperature
+        ExpandMetric<double>(suppData.properties.maxTemperature, lookup, ParseNwsInterval,
+            (rec, val, dur, _) => rec.MaxTemperature = new MaxTemperatureValue { Value = val, Duration = dur });
+
+        // 14. Relative Humidity
+        ExpandMetric<double>(suppData.properties.relativeHumidity, lookup, ParseNwsInterval,
+            (rec, val, dur, _) => rec.RelativeHumidity = new RelativeHumidityValue { Value = val, Duration = dur });
+
+        // 15. Dew Point
+        ExpandMetric<double>(suppData.properties.dewpoint, lookup, ParseNwsInterval,
+            (rec, val, dur, _) => rec.DewPoint = new DewPointValue { Value = val, Duration = dur });
+
+        // 16. Temperature
+        ExpandMetric<double>(suppData.properties.temperature, lookup, ParseNwsInterval,
+            (rec, val, dur, _) => rec.Temperature = new TemperatureValue { Value = val, Duration = dur });
+
+        // 17. Probability Of Thunder
+        ExpandMetric<double>(suppData.properties.probabilityOfThunder, lookup, ParseNwsInterval,
+            (rec, val, dur, _) => rec.ProbabilityOfThunder = new ProbabilityOfThunderValue { Value = val, Time = rec.Time, Duration = dur });
+
+        // 18. Low Visibility Occurrence Risk Index
+        ExpandMetric<double>(suppData.properties.lowVisibilityOccurrenceRiskIndex, lookup, ParseNwsInterval,
+            (rec, val, dur, _) => rec.LowVisibilityOccurrenceRiskIndex = new LowVisibilityOccurrenceRiskIndexValue { Value = val, Duration = dur });
+
+        // 19. Ice Accumulation
+        ExpandMetric<double>(suppData.properties.iceAccumulation, lookup, ParseNwsInterval,
+            (rec, val, dur, _) => rec.IceAccumulation = new IceAccumulationValue { Value = val, Duration = dur });
+
+        // 20. Snowfall Amount
+        ExpandMetric<double>(suppData.properties.snowfallAmount, lookup, ParseNwsInterval,
+            (rec, val, dur, _) => rec.SnowfallAmount = new SnowFallAmountValue { Value = val, Duration = dur });
+
+        // 21. Probability Of Precipitation
+        ExpandMetric<double>(suppData.properties.probabilityOfPrecipitation, lookup, ParseNwsInterval,
+            (rec, val, dur, _) => rec.ProbabilityOfPrecipitation = new ProbabilityOfPrecipitationValue { Value = val, Duration = dur });
+
+        // 22. Wet Bulb Globe Temperature
+        ExpandMetric<double>(suppData.properties.wetBulbGlobeTemperature, lookup, ParseNwsInterval,
+            (rec, val, dur, _) => rec.WetBulbGlobeTemperature = new WetBulbGlobeTemperatureValue { Value = val, Duration = dur });
+        // 23. Transport Wind Speed
+        ExpandMetric<double>(suppData.properties.transportWindSpeed, lookup, ParseNwsInterval,
+            (rec, val, dur, _) => rec.TransportWindSpeed = new TransportWindSpeedValue { Value = val, Duration = dur });
+        //24. Transport Wind Direction
+        ExpandMetric<int>(suppData.properties.transportWindDirection, lookup, ParseNwsInterval,
+            (rec, val, dur, _) => rec.TransportWindDirection = new TransportWindDirectionValue { Value = val, Duration = dur });
+        //25. Ceiling Height
+        ExpandMetric<double>(suppData.properties.ceilingHeight, lookup, ParseNwsInterval,
+            (rec, val, dur, _) => rec.CeilingHeight = new CeilingHeightValue { Value = val, Duration = dur });
+        //26. Visibility
+        ExpandMetric<double>(suppData.properties.visibility, lookup, ParseNwsInterval,
+            (rec, val, dur, _) => rec.Visibility = new VisibilitiesValue { Value = val, Duration = dur });
+
+        return lookup.Values.OrderBy(x => x.Time).ToArray();
+        //Daily Scoring for outdoor photography
+        //var dailyForecastSummaries = await CreateHourlyNwsInputAsync(suppData);
+        //if (dailyForecastSummaries != null)
+        //{
+        //    for (int y = 0; y < supplementals.Length; y++)
+        //    {
+        //        var dailyResults = dailyForecastSummaries.Where(x => x.Date == DateOnly.FromDateTime(supplementals[y].Time)).FirstOrDefault();
+        //        supplementals[y]
+        //    }
+        //}
+    }
+
+    private static void ExpandMetric<T>(
+    NwsGridpointProperty<T>? properties,
+    Dictionary<DateTime, NwsHourlySupplemental> lookup,
+    Func<string, (DateTime time, int duration)> parseInterval,
+    Action<NwsHourlySupplemental, T, int, string?> assign,
+    Func<T, bool>? predicate = null) where T : struct
+    {
+        if (properties?.Values == null || properties.Values.Length == 0)
+            return;
+
+        for (int i = 0; i < properties.Values.Length; i++)
+        {
+            var entry = properties.Values[i];
+
+            // HasValue handles null checking cleanly for Nullable<T> structs
+            if (!entry.Value.HasValue)
+                continue;
+
+            T actualValue = entry.Value.Value;
+
+            if (predicate != null && !predicate(actualValue))
+                continue;
+
+            var (startTime, duration) = parseInterval(entry.ValidTime);
+
+            for (int dur = 0; dur < duration; dur++)
+            {
+                DateTime targetTime = startTime.AddHours(dur);
+                int remainingDuration = duration - dur;
+
+                if (!lookup.TryGetValue(targetTime, out var item))
+                {
+                    item = new NwsHourlySupplemental { Time = targetTime };
+                    lookup[targetTime] = item;
+                }
+
+                assign(item, actualValue, remainingDuration, properties.Uom);
+            }
+        }
+    }
+
+
+
+    //try
+    //{
+    //    var wx = suppData.properties.weather;
+    //    if (wx.values?.Length > 0 && wx.values[0]?.value[0]?.weather != null)
+    //    {
+    //        for (int i = 0; i < wx.values?.Length; i++)
+    //        {
+    //            string finishedWeather = string.Empty;
+    //            List<string> hourlyWeatherDescription = new();
+    //            var weatherStmts = new WeatherStatementsValue[wx.values[i].value.Length];
+    //            var date = ParseNwsInterval(wx.values[i].validTime);
+    //            for (int x = 0; x < wx.values[i].value?.Length; x++)
+    //            {
+    //                for (int dur = 0; dur < date.duration; dur++)
+    //                {
+    //                    DateTime newTime = date.time.AddHours(dur);
+
+    //                    if (wx.values[i].value[x].weather != null)
+    //                    {
+
+
+    //                        weatherStmts[x] = new WeatherStatementsValue
+    //                        {
+    //                            Weather = wx.values[i].value[x].weather ?? string.Empty,
+    //                            Coverage = wx.values[i].value[x].coverage ?? string.Empty,
+    //                            Intensity = wx.values[i].value[x].intensity ?? string.Empty,
+    //                            Time = newTime,
+    //                            Duration = date.duration - dur,
+    //                            Statement = CoverageStmt(wx.values[i].value[x].coverage, wx.values[i].value[x].intensity, wx.values[i].value[x].weather)
+    //                        };
+
+
+    //                        hourlyWeatherDescription.Add(weatherStmts[x].Statement);
+    //                    }
+
+
+    //                    var stmt = hourlyWeatherDescription.ToArray();
+    //                    finishedWeather = $"At " + newTime.ToString("h tt") + ", ";
+    //                    for (int s = 0; s < stmt.Length; s++)
+    //                    {
+    //                        if (s == stmt.Length - 1)
+    //                        {
+    //                            finishedWeather += stmt[s] + ". ";
+    //                        }
+
+    //                        else if (stmt.Length - 2 == s)
+    //                        {
+    //                            finishedWeather += stmt[s] + " and ";
+    //                        }
+    //                        else
+    //                        {
+    //                            finishedWeather += stmt[s] + ", ";
+    //                        }
+    //                    }
+    //                    supp.Add(new NwsHourlySupplemental
+    //                    {
+    //                        Time = newTime,
+    //                        SupplementalWeatherStatement = finishedWeather,
+    //                        Weather = weatherStmts
+    //                    });
+    //                }
+    //            }
+    //        }
+    //    }
+    //    else
+    //    {
+    //        var date = ParseNwsInterval(suppData.properties.validTimes);
+    //        supp.Add(new NwsHourlySupplemental
+    //        {
+    //            Time = date.time,
+    //            SupplementalWeatherStatement = "There are no storms to report."
+    //        });
+    //    }
+
+    //    // 2. Apparent Temperature
+    //    var apparentTemp = suppData.properties.apparentTemperature;
+    //    if (apparentTemp.values?.Length > 0 && apparentTemp.values[0]?.value != null)
+    //    {
+    //        for (int a = 0; a < apparentTemp.values?.Length; a++)
+    //        {
+    //            var date = ParseNwsInterval(apparentTemp.values[a].validTime);
+    //            for (int dur = 0; dur < date.duration; dur++)
+    //            {
+    //                DateTime newTime = date.time.AddHours(dur);
+
+    //                if (apparentTemp.values[a].value is double at)
+    //                {
+    //                    supp.Add(new NwsHourlySupplemental
+    //                    {
+    //                        Time = newTime,
+    //                        ApparentTemperature = new ApparentTemperatureValue { Value = at, Duration = date.duration - dur }
+    //                    });
+    //                }
+    //            }
+    //        }
+    //    }
+    //    var windspeed = suppData.properties.windSpeed;
+    //    if (windspeed.values?.Length > 0 && windspeed.values[0]?.value != null)
+    //    {
+    //        for (int a = 0; a < windspeed.values?.Length; a++)
+    //        {
+    //            var date = ParseNwsInterval(windspeed.values[a].validTime);
+    //            for (int dur = 0; dur < date.duration; dur++)
+    //            {
+    //                DateTime newTime = date.time.AddHours(dur);
+    //                if (windspeed.values[a].value is double at)
+    //                {
+
+    //                    supp.Add(new NwsHourlySupplemental
+    //                    {
+    //                        Time = newTime,
+    //                        WindSpeed = new WindSpeedValue { Value = at, Duration = date.duration - dur }
+    //                    });
+    //                }
+    //            }
+    //        }
+    //    }
+    //    var direction = suppData.properties.windDirection;
+    //    if (direction.values?.Length > 0 && direction.values[0]?.value != null)
+    //    {
+    //        for (int a = 0; a < direction.values?.Length; a++)
+    //        {
+    //            var date = ParseNwsInterval(direction.values[a].validTime);
+    //            for (int dur = 0; dur < date.duration; dur++)
+    //            {
+    //                DateTime newTime = date.time.AddHours(dur);
+    //                if (direction.values[a].value is int d)
+    //                {
+    //                    supp.Add(new NwsHourlySupplemental
+    //                    {
+    //                        Time = newTime,
+    //                        WindDirection = new WindDirectionValue { Value = d, Duration = date.duration - dur }
+    //                    });
+    //                }
+    //            }
+    //        }
+    //    }
+    //    var gust = suppData.properties.windGust;
+    //    if (gust != null && gust.values.Length > 0 && gust.values[0]?.value != null)
+    //    {
+    //        for (int a = 0; a < gust.values.Length; a++)
+    //        {
+    //            var date = ParseNwsInterval(gust.values[a].validTime);
+    //            for (int dur = 0; dur < date.duration; dur++)
+    //            {
+    //                DateTime newTime = date.time.AddHours(dur);
+    //                if (gust.values[a].value > 1 && gust.values[a].value is double at)
+    //                {
+    //                    supp.Add(new NwsHourlySupplemental
+    //                    {
+    //                        Time = newTime,
+    //                        WindGust = new WindGustValue { Value = at, Duration = date.duration - dur }
+    //                    });
+    //                }
+    //            }
+    //        }
+    //    }
+
+    //    // 3. SkyCover
+    //    var skyCover = suppData.properties.skyCover;
+    //    if (skyCover.values?.Length > 0 && skyCover.values[0]?.value != null)
+    //    {
+    //        for (int a = 0; a < skyCover.values?.Length; a++)
+    //        {
+    //            var date = ParseNwsInterval(skyCover.values[a].validTime);
+    //            for (int dur = 0; dur < date.duration; dur++)
+    //            {
+    //                DateTime newTime = date.time.AddHours(dur);
+    //                if (skyCover.values[a].value is double sc)
+    //                {
+    //                    supp.Add(new NwsHourlySupplemental
+    //                    {
+    //                        Time = newTime,
+    //                        Skycover = new SkyCoverValue { Value = sc, UnitCode = skyCover.uom, Duration = date.duration - dur }
+    //                    });
+    //                }
+    //            }
+    //        }
+    //    }
+
+    //    // 3. Mixing Height
+    //    var mixingHeight = suppData.properties.mixingHeight;
+    //    if (mixingHeight.values?.Length > 0 && mixingHeight.values[0]?.value != null)
+    //    {
+    //        for (int a = 0; a < mixingHeight.values?.Length; a++)
+    //        {
+    //            var date = ParseNwsInterval(mixingHeight.values[a].validTime);
+    //            for (int dur = 0; dur < date.duration; dur++)
+    //            {
+    //                DateTime newTime = date.time.AddHours(dur);
+    //                if (mixingHeight.values[a].value is double mh)
+    //                {
+    //                    supp.Add(new NwsHourlySupplemental
+    //                    {
+    //                        Time = newTime,
+    //                        MixingHeight = new MixingHeightValue { Value = mh, Duration = date.duration - dur }
+    //                    });
+    //                }
+    //            }
+    //        }
+    //    }
+
+
+    //    // 5. Quantitative Precipitation
+    //    var qp = suppData.properties.quantitativePrecipitation;
+    //    if (qp.values?.Length > 0 && qp.values[0]?.value != null)
+    //    {
+    //        for (int a = 0; a < qp.values?.Length; a++)
+    //        {
+    //            if (qp.values[a].value is double quanPrec)
+    //            {
+    //                var date = ParseNwsInterval(qp.values[a].validTime);
+    //                for (int dur = 0; dur <= date.duration; dur++)
+    //                {
+    //                    DateTime newTime = date.time.AddHours(dur);
+    //                    supp.Add(new NwsHourlySupplemental
+    //                    {
+    //                        Time = newTime,
+    //                        QuantitativePrecipitation = new QuantitativePrecipitationValue { Value = quanPrec, Time = newTime, Duration = date.duration - dur }
+    //                    });
+    //                }
+    //            }
+    //        }
+    //    }
+
+    //    // 6. ForecastHeatRisk (This Feels like temperature with a humidity factor
+    //    var heat = suppData.properties.heatRisk;
+
+    //    if (heat != null && heat.values?.Length > 0 && heat.values[0]?.value != null)
+    //    {
+    //        for (int h = 0; h < heat.values?.Length; h++)
+    //        {
+    //            if (heat.values[h].value > 0 && heat.values[h].value is int heatrisknbr)
+    //            {
+    //                var date = ParseNwsInterval(heat.values[h].validTime);
+    //                for (int dur = 0; dur < date.duration; dur++)
+    //                {
+    //                    DateTime newTime = date.time.AddHours(dur);
+    //                    var heatrisk = new NwsHourlySupplemental
+    //                    {
+    //                        Time = newTime,
+    //                        HeatRisk = new HeatRiskValue { Value = heatrisknbr, Duration = date.duration - dur }
+    //                    };
+    //                    supp.Add(heatrisk);
+    //                }
+    //            }
+    //        }
+    //    }
+
+    //    // 7. ApparentTemperature and humidity
+    //    var heatIndex = suppData.properties.heatIndex;
+    //    if (heatIndex != null && heatIndex.values?.Length > 0 && heatIndex.values[0]?.value != default)
+    //    {
+    //        for (int h = 0; h < heatIndex.values?.Length; h++)
+    //        {
+    //            if (heatIndex.values[h].value > 0 && heatIndex.values[h].value is double heatindexdb)
+    //            {
+    //                var date = ParseNwsInterval(heatIndex.values[h].validTime);
+    //                for (int dur = 0; dur <= date.duration; dur++)
+    //                {
+    //                    DateTime newTime = date.time.AddHours(dur);
+    //                    var nwsHeatIndex = new NwsHourlySupplemental
+    //                    {
+    //                        Time = newTime,
+    //                        HeatIndex = new HeatIndexValue { Value = heatindexdb, UnitCode = heatIndex.uom, Duration = date.duration - dur }
+    //                    };
+    //                    supp.Add(nwsHeatIndex);
+    //                }
+    //            }
+    //        }
+    //    }
+
+    //    // 8. WindChill
+    //    var windchill = suppData.properties.windChill;
+    //    if (windchill != null && windchill.values?.Length > 0 && windchill.values[0]?.value != null)
+    //    {
+    //        for (int h = 0; h < windchill.values?.Length; h++)
+    //        {
+    //            if (windchill.values[h].value > -60 && windchill.values[h].value is double wc)
+    //            {
+    //                var date = ParseNwsInterval(windchill.values[h].validTime);
+    //                for (int dur = 0; dur <= date.duration; dur++)
+    //                {
+    //                    DateTime newTime = date.time.AddHours(dur);
+    //                    var windChill = new NwsHourlySupplemental
+    //                    {
+    //                        Time = newTime,
+    //                        WindChill = new WindchillValue { Value = wc, Duration = date.duration - dur }
+    //                    };
+    //                    supp.Add(windChill);
+    //                }
+    //            }
+    //        }
+    //    }
+
+    //    // 9. Daily Minimum Temperature
+    //    var mintemp = suppData.properties.minTemperature;
+
+    //    if (mintemp.values?.Length > 0 && mintemp.values[0]?.value != null)
+    //    {
+    //        for (int h = 0; h < mintemp.values?.Length; h++)
+    //        {
+    //            if (mintemp.values[h].value is double mt)
+    //            {
+    //                var date = ParseNwsInterval(mintemp.values[h].validTime);
+    //                for (int dur = 0; dur <= date.duration; dur++)
+    //                {
+    //                    DateTime newTime = date.time.AddHours(dur);
+    //                    var minTemp = new NwsHourlySupplemental
+    //                    {
+    //                        Time = newTime,
+    //                        MinTemperature = new MinTemperatureValue { Value = mt, Duration = date.duration - dur }
+    //                    };
+    //                    supp.Add(minTemp);
+    //                }
+    //            }
+    //        }
+    //    }
+
+    //    // 10. Daily Maximum Temperature
+    //    var maxtemp = suppData.properties.maxTemperature;
+
+    //    if (maxtemp.values?.Length > 0 && maxtemp.values[0]?.value != null)
+    //    {
+    //        for (int h = 0; h < maxtemp.values?.Length; h++)
+    //        {
+    //            if (maxtemp.values[h].value is double mt)
+    //            {
+    //                var date = ParseNwsInterval(maxtemp.values[h].validTime);
+    //                for (int dur = 0; dur <= date.duration; dur++)
+    //                {
+    //                    DateTime newTime = date.time.AddHours(dur);
+    //                    var maxTemp = new NwsHourlySupplemental
+    //                    {
+    //                        Time = newTime,
+    //                        MaxTemperature = new MaxTemperatureValue { Value = mt, Duration = date.duration - dur }
+    //                    };
+    //                    supp.Add(maxTemp);
+    //                }
+    //            }
+    //        }
+    //    }
+
+    //    // 11. Relative RelativeHumidity
+    //    var rh = suppData.properties.relativeHumidity;
+
+    //    if (rh.values?.Length > 0 && rh.values[0]?.value != null)
+    //    {
+    //        for (int h = 0; h < rh.values?.Length; h++)
+    //        {
+    //            if (rh.values[h].value is double relHum)
+    //            {
+    //                var date = ParseNwsInterval(rh.values[h].validTime);
+    //                for (int dur = 0; dur <= date.duration; dur++)
+    //                {
+    //                    DateTime newTime = date.time.AddHours(dur);
+    //                    var rhValue = new NwsHourlySupplemental
+    //                    {
+    //                        Time = newTime,
+    //                        RelativeHumidity = new RelativeHumidityValue { Value = relHum, UnitCode = rh.uom, Duration = date.duration - dur }
+    //                    };
+    //                    supp.Add(rhValue);
+    //                }
+    //            }
+    //        }
+    //    }
+
+    //    // 12: Dew Point
+    //    var dp = suppData.properties.dewpoint;
+
+    //    if (dp.values?.Length > 0 && dp.values[0]?.value != null)
+    //    {
+    //        for (int h = 0; h < dp.values?.Length; h++)
+    //        {
+    //            if (dp.values[h].value is double dew)
+    //            {
+    //                var date = ParseNwsInterval(dp.values[h].validTime);
+    //                for (int dur = 0; dur <= date.duration; dur++)
+    //                {
+    //                    DateTime newTime = date.time.AddHours(dur);
+    //                    var dewPoint = new NwsHourlySupplemental
+    //                    {
+    //                        Time = newTime,
+    //                        DewPoint = new DewPointValue { Value = dew, Duration = date.duration - dur }
+    //                    };
+    //                    supp.Add(dewPoint);
+    //                }
+    //            }
+    //        }
+    //    }
+    //    // 13. Temperature
+    //    var temp = suppData.properties.temperature;
+
+    //    if (temp.values?.Length > 0 && temp.values[0]?.value != null)
+    //    {
+    //        for (int h = 0; h < temp.values?.Length; h++)
+    //        {
+    //            if (temp.values[h].value is double tmp)
+    //            {
+    //                var date = ParseNwsInterval(temp.values[h].validTime);
+    //                for (int dur = 0; dur <= date.duration; dur++)
+    //                {
+    //                    DateTime newTime = date.time.AddHours(dur);
+    //                    var temperature = new NwsHourlySupplemental
+    //                    {
+    //                        Time = newTime,
+    //                        Temperature = new TemperatureValue { Value = tmp, Duration = date.duration - dur }
+    //                    };
+    //                    supp.Add(temperature);
+    //                }
+    //            }
+    //        }
+    //    }
+
+    //    // 14. Thunder
+    //    var thunder = suppData.properties.probabilityOfThunder;
+
+    //    if (thunder.values?.Length > 0 && thunder.values[0]?.value != null)
+    //    {
+    //        for (int h = 0; h < thunder.values?.Length; h++)
+    //        {
+    //            if (thunder.values[h].value is double ts)
+    //            {
+    //                var date = ParseNwsInterval(thunder.values[h].validTime);
+    //                for (int dur = 0; dur <= date.duration; dur++)
+    //                {
+    //                    DateTime newTime = date.time.AddHours(dur);
+    //                    var tstorm = new NwsHourlySupplemental
+    //                    {
+    //                        Time = newTime,
+    //                        ProbabilityOfThunder = new ProbabilityOfThunderValue
+    //                        {
+    //                            Time = newTime,
+    //                            Duration = date.duration - dur,
+    //                            Value = ts,
+    //                        }
+    //                    };
+    //                    supp.Add(tstorm);
+    //                }
+    //            }
+    //        }
+    //    }
+
+    //    // 15. Low DistanceVisible Occurence Risk Index
+    //    var lvori = suppData.properties.lowVisibilityOccurrenceRiskIndex;
+
+    //    if (lvori.values?.Length > 0 && lvori.values[0]?.value != null)
+    //    {
+    //        for (int h = 0; h < lvori.values?.Length; h++)
+    //        {
+    //            if (lvori.values[h].value is double vis)
+    //            {
+    //                var date = ParseNwsInterval(lvori.values[h].validTime);
+    //                for (int dur = 0; dur <= date.duration; dur++)
+    //                {
+    //                    DateTime newTime = date.time.AddHours(dur);
+    //                    var lvoriValue = new NwsHourlySupplemental
+    //                    {
+    //                        Time = newTime,
+    //                        LowVisibilityOccurrenceRiskIndex = new LowVisibilityOccurrenceRiskIndexValue
+    //                        {
+    //                            Duration = date.duration - dur,
+    //                            Value = vis,
+
+    //                        }
+    //                    };
+    //                    supp.Add(lvoriValue);
+    //                }
+    //            }
+    //        }
+    //    }
+
+    //    // 16. Ice Accumulation
+    //    var ice = suppData.properties.iceAccumulation;
+
+    //    if (ice.values?.Length > 0 && ice.values[0]?.value != null)
+    //    {
+    //        for (int h = 0; h < ice.values?.Length; h++)
+    //        {
+    //            if (ice.values[h].value is double iceAccum)
+    //            {
+    //                var date = ParseNwsInterval(ice.values[h].validTime);
+    //                for (int dur = 0; dur <= date.duration; dur++)
+    //                {
+    //                    DateTime newTime = date.time.AddHours(dur);
+    //                    var iceAccumulate = new NwsHourlySupplemental
+    //                    {
+    //                        Time = newTime,
+    //                        IceAccumulation = new IceAccumulationValue { Value = iceAccum, Duration = date.duration - dur }
+    //                    };
+    //                    supp.Add(iceAccumulate);
+    //                }
+    //            }
+    //        }
+    //    }
+
+    //    // 17. Snowfall Amount
+    //    var snow = suppData.properties.snowfallAmount;
+
+    //    if (snow.values?.Length > 0 && snow.values[0]?.value != null)
+    //    {
+    //        for (int h = 0; h < snow.values?.Length; h++)
+    //        {
+    //            if (snow.values[h].value is double snowy)
+    //            {
+    //                var date = ParseNwsInterval(snow.values[h].validTime);
+    //                for (int dur = 0; dur <= date.duration; dur++)
+    //                {
+    //                    DateTime newTime = date.time.AddHours(dur);
+    //                    var snowFall = new NwsHourlySupplemental
+    //                    {
+    //                        Time = newTime,
+    //                        SnowfallAmount = new SnowFallAmountValue { Value = snowy, Duration = date.duration - dur }
+    //                    };
+    //                    supp.Add(snowFall);
+    //                }
+    //            }
+    //        }
+    //    }
+
+    //    // 18. Probability Of Precipitation
+    //    var precip = suppData.properties.probabilityOfPrecipitation;
+
+    //    if (precip.values?.Length > 0 && precip.values[0]?.value != null)
+    //    {
+    //        for (int h = 0; h < precip.values?.Length; h++)
+    //        {
+    //            if (precip.values[h].value is double rain)
+    //            {
+    //                var date = ParseNwsInterval(precip.values[h].validTime);
+    //                for (int dur = 0; dur <= date.duration; dur++)
+    //                {
+    //                    DateTime newTime = date.time.AddHours(dur);
+    //                    var probPrecip = new NwsHourlySupplemental
+    //                    {
+    //                        Time = newTime,
+    //                        ProbabilityOfPrecipitation = new ProbabilityOfPrecipitationValue { Value = rain, UnitCode = precip.uom, Duration = date.duration - dur }
+    //                    };
+    //                    supp.Add(probPrecip);
+    //                }
+    //            }
+    //        }
+    //    }
+    //    var wbgt = suppData.properties.wetBulbGlobeTemperature;
+
+    //    if (wbgt.values?.Length > 0 && wbgt.values[0]?.value != null)
+    //    {
+    //        for (int h = 0; h < wbgt.values?.Length; h++)
+    //        {
+    //            if (wbgt.values[h].value is double wet)
+    //            {
+    //                var date = ParseNwsInterval(wbgt.values[h].validTime);
+    //                for (int dur = 0; dur <= date.duration; dur++)
+    //                {
+    //                    DateTime newTime = date.time.AddHours(dur);
+    //                    var wetBulb = new NwsHourlySupplemental
+    //                    {
+    //                        Time = newTime,
+    //                        WetBulbGlobeTemperature = new WetBulbGlobeTemperatureValue { Value = wet, Duration = date.duration - dur }
+    //                    };
+    //                    supp.Add(wetBulb);
+    //                }
+    //            }
+    //        }
+    //    }
+
+    //    NwsHourlySupplemental[] supplementals = supp.OrderBy(o => o.Time).GroupBy(g => g.Time).Select(w => new NwsHourlySupplemental
+    //    {
+    //        Time = w.Key,
+    //        ApparentTemperature = w.Where(x => x.ApparentTemperature != null).Max(y => y.ApparentTemperature) as ApparentTemperatureValue,
+    //        IceAccumulation = w.Where(x => x.IceAccumulation != null).Max(y => y.IceAccumulation) as IceAccumulationValue,
+    //        SnowfallAmount = w.Where(x => x.SnowfallAmount != null).Max(y => y.SnowfallAmount) as SnowFallAmountValue,
+    //        DewPoint = w.Where(x => x.DewPoint != null).Max(y => y.DewPoint) as DewPointValue,
+    //        HeatIndex = w.Where(x => x.HeatIndex != null).Max(y => y.HeatIndex) as HeatIndexValue,
+    //        HeatRisk = w.Where(x => x.HeatRisk != null).Max(y => y.HeatRisk) as HeatRiskValue,
+    //        LowVisibilityOccurrenceRiskIndex = w.Where(x => x.LowVisibilityOccurrenceRiskIndex != null).Max(y => y.LowVisibilityOccurrenceRiskIndex) as LowVisibilityOccurrenceRiskIndexValue,
+    //        MaxTemperature = w.Where(x => x.MaxTemperature != null).Max(y => y.MaxTemperature) as MaxTemperatureValue,
+    //        MinTemperature = w.Where(x => x.MinTemperature != null).Max(y => y.MinTemperature) as MinTemperatureValue,
+    //        ProbabilityOfPrecipitation = w.Where(x => x.ProbabilityOfPrecipitation != null).Max(y => y.ProbabilityOfPrecipitation) as ProbabilityOfPrecipitationValue,
+    //        ProbabilityOfThunder = w.Where(x => x.ProbabilityOfThunder != null).Max(y => y.ProbabilityOfThunder) as ProbabilityOfThunderValue,
+    //        QuantitativePrecipitation = w.Where(x => x.QuantitativePrecipitation != null).Max(y => y.QuantitativePrecipitation) as QuantitativePrecipitationValue,
+    //        RelativeHumidity = w.Where(x => x.RelativeHumidity != null).Max(y => y.RelativeHumidity) as RelativeHumidityValue,
+    //        Skycover = w.Where(x => x.Skycover != null).Max(y => y.Skycover) as SkyCoverValue,
+    //        Temperature = w.Where(x => x.Temperature != null).Max(y => y.Temperature) as TemperatureValue,
+    //        Weather = w.Where(x => x.Weather != null).Max(y => y.Weather.ToArray()) as WeatherStatementsValue[],
+    //        WetBulbGlobeTemperature = w.Where(x => x.WetBulbGlobeTemperature != null).Max(y => y.WetBulbGlobeTemperature) as WetBulbGlobeTemperatureValue,
+    //        WindChill = w.Where(x => x.WindChill != null).Max(y => y.WindChill) as WindchillValue,
+    //        WindGust = w.Where(x => x.WindGust != null).Max(y => y.WindGust) as WindGustValue,
+    //        WindSpeed = w.Where(x => x.WindSpeed != null).Max(y => y.WindSpeed) as WindSpeedValue,
+    //        WindDirection = w.Where(x => x.WindDirection != null).Max(y => y.WindDirection) as WindDirectionValue
+    //    }).ToArray();
+
+    //    return supplementals;
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        Debug.WriteLine($"Error while processing NwsData Supplementals: {ex}");
+    //    }
+    //    return default;
+    //}
 
     private async Task GetNwsGridCoordinates(GridDetailData.Rootobject suppData)
     {
@@ -1026,8 +1380,6 @@ public partial class GetNwsData : ObservableObject, IGetNwsData
 
     private double CreateAverageHourlyTemperatureChangeRate()
     {
-        double day = 0;
-        double night = 0;
         var dates = NwsData.DailyForecasts.Select(x => x.StartTime).Distinct().ToList();
         List<double> tempChangeRate = new List<double>();
         foreach (var d in dates)
@@ -1043,7 +1395,7 @@ public partial class GetNwsData : ObservableObject, IGetNwsData
         return tempRate;
     }
 
-    public static string CoverageStmt(string coverage, string intensity, string weather)
+    public static string CoverageStmt(string coverage, string weather, string intensity = "")
     {
         string weatherDescription = string.Empty;
         weatherDescription += coverage switch
@@ -1068,20 +1420,45 @@ public partial class GetNwsData : ObservableObject, IGetNwsData
             "" => "",
             _ => "",
         };
+        if (intensity == null) { intensity = ""; }
 
-        weatherDescription += " " + intensity ?? "";
-        weatherDescription += " " + weather;
+
+        weatherDescription += " " + intensity.Replace("_", " ").ToLowerInvariant() ?? "";
+
+        weatherDescription += " " + weather.Replace("_", " ").ToLowerInvariant();
         return weatherDescription;
     }
 
-    public (int duration, DateTime time) ParseNwsInterval(string interval)
+    public (DateTime time, int duration) ParseNwsInterval(string interval)
     {
-        // Splits "2024-05-06T12:00:00+00:00/PT1H" and takes the first part
+        // Example: "2024-05-06T12:00:00+00:00/PT1H" or "2024-05-06T00:00:00+00:00/P1D"
+        if (string.IsNullOrWhiteSpace(interval))
+            return (DateTime.MinValue, 0);
+
         var parts = interval.Split('/');
-        var index = parts[1].IndexOf("T");
-        var duration = int.TryParse(parts[1].Remove(index + 1).Replace("H", ""), out int d) ? d : 0;
-        var time = DateTimeOffset.Parse(parts[0]).DateTime;
-        return (duration, time);
+        var time = DateTimeOffset.TryParse(parts[0], out var dto) ? dto.LocalDateTime : DateTime.MinValue;
+        int duration = 0;
+
+        if (parts.Length > 1 && !string.IsNullOrWhiteSpace(parts[1]))
+        {
+            try
+            {
+                var ts = System.Xml.XmlConvert.ToTimeSpan(parts[1]);
+                duration = (int)Math.Max(1, Math.Round(ts.TotalHours));
+            }
+            catch
+            {
+                var match = System.Text.RegularExpressions.Regex.Match(parts[1], @"P(?:(\d+)D)?(?:T(?:(\d+)H)?)?");
+                if (match.Success)
+                {
+                    int days = int.TryParse(match.Groups[1].Value, out int d) ? d : 0;
+                    int hours = int.TryParse(match.Groups[2].Value, out int h) ? h : 0;
+                    duration = days * 24 + hours;
+                }
+            }
+        }
+
+        return (time, duration);
     }
     public static string GetWindDirection(string windDirection)
     {

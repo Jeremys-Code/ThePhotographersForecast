@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using ThePhotographersForecast.Components;
 using ThePhotographersForecast.Models;
+using ThePhotographersForecast.Services.ML;
 
 namespace ThePhotographersForecast.Shared
 {
@@ -24,6 +25,9 @@ namespace ThePhotographersForecast.Shared
         LinearGradientBrush SkyGradient { get; set; }
         DateTime StartDate { get; set; }
         WeatherForecast WeatherForecasts { get; set; }
+        IReadOnlyList<DailyForecastSummary> DailyPhotoScoringSummary { get; set; }
+        IReadOnlyList<DailyForecastSummary> ScoreSummaries { get; set; }
+        SkyHourData[] SkyData { get; set; }
 
         Task ResetSessionAsync();
     }

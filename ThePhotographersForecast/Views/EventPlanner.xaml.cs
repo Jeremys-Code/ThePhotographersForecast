@@ -7,6 +7,7 @@ namespace ThePhotographersForecast.Views;
 
 public partial class EventPlanner : ContentPage
 {
+    private IDispatcherTimer _timer;
     private EventPlannerViewModel _vm;
     //   private IBackgroundMapService _mapService
     private double Pane2GridHeight { get; set; }
@@ -31,9 +32,6 @@ public partial class EventPlanner : ContentPage
     protected override void OnAppearing()
     {
         base.OnAppearing();
-
-        var _timer = new System.Timers.Timer(1500);
-        _timer.Elapsed += NextFloat;
     }
 
     private void NextFloat(object? sender, ElapsedEventArgs e)

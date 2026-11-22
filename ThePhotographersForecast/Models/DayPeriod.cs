@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using SkiaSharp.Extended.UI.Controls;
 using System.Collections.ObjectModel;
+using ThePhotographersForecast.Services;
 
 namespace ThePhotographersForecast.Models;
 
@@ -45,15 +46,17 @@ public partial class DayViewModel : ObservableObject
     public partial EventModel Events { get; set; }
     [ObservableProperty]
     public partial string DailyDetailedForecast { get; set; }
+    [ObservableProperty]
+    public partial string DailyScore { get; set; }
     //[ObservableProperty]
     //public partial FutureMoonPhase[] MoonPhases { get; set; }
     [ObservableProperty]
-    public partial LinearGradientBrush DailySkyBrush { get; set; } = (LinearGradientBrush)Application.Current.Resources["GpsBackground"];
+    public partial LinearGradientBrush DailySkyBrush { get; set; }
     public string DailyLowStatement { get; set; }
     public string DailyHighStatement { get; set; }
     public SKFileLottieImageSource SkLowAnimation => new SKFileLottieImageSource { File = "thermometer_colder.json" };
     public SKFileLottieImageSource SkHighAnimation => new SKFileLottieImageSource { File = "thermometer_warmer.json" };
-
+    public Color TimeOfDayTextColor => TimeOfDayService.GetTimeOfDayTextColor(Name.ToLower().Contains("night") ? 22 : 12);
 
 }
 public partial class DayPeriod : ObservableObject
@@ -82,6 +85,13 @@ public partial class DayPeriod : ObservableObject
     public partial string TimeOfDayTemperature { get; set; }
     [ObservableProperty]
     public partial string TimeOfDayForecast { get; set; }
+    [ObservableProperty]
+    public partial string PhotoScore { get; set; }
+    [ObservableProperty]
+    public partial string DroneScore { get; set; }
+    [ObservableProperty]
+    public partial string ScoreSummary { get; set; }
+    public Color TimeOfDayTextColor => TimeOfDayService.GetTimeOfDayTextColor(this.StartTime.Hour);
 
 }
 

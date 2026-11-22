@@ -1,18 +1,24 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Maui.Core.Extensions;
+using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Text;
 using ThePhotographersForecast.Models;
+using ThePhotographersForecast.Services.Modules;
 using ThePhotographersForecast.Shared;
 
 namespace ThePhotographersForecast.Services
 {
     public partial class GetDays : ObservableObject, IGetDays
     {
+        private ISkyColorEngine _skyEngine;
         private ISession _session;
-        public GetDays(ISession session)
+        private IForecastService _forecastService;
+        public GetDays(ISession session, ISkyColorEngine skyEngine, IForecastService forecastService)
         {
             _session = session;
+            _skyEngine = skyEngine;
+            _forecastService = forecastService;
         }
         public async Task<ObservableCollection<DayViewModel>> GetDaysAsync()
         {
@@ -22,47 +28,61 @@ namespace ThePhotographersForecast.Services
 
             try
             {
-                NwsDailyForecast[] dailyForecasts = _session.NwsData.DailyForecasts.ToArray();
-                if (dailyForecasts != null)
+                for (int d = 0; d < _session.Dates.Length; d++)
                 {
-                    // Something is broke below
-                    for (int p = 0; p < dailyForecasts.Length; p++)
+                    var date = _session.Dates[d].Date;
+                    //days.Add(new DayViewModel
+                    //{
+                    //    Date = date,
+                    //    Day = date.Day,
+                    //    DailyForecasts = _session.NwsData.DailyForecasts.ToArray(),
+                    //    IsEventDay = true,
+                    //    Events = _session.EventsData.Where(x => x.Date.Date == date.Date).First(),
+                    //    TimeOfDayForecasts = _session.NwsData.TimeOfDayForecasts.Where(x => x.StartTime.Date == date.Date).ToArray(),
+                    //    CurrentForecast = _session.NwsData.HourlyForecasts.First(),
+
+
+                    //});
+
+
+                    //var date = day.Key;
+                    //var dayInfo = day.ToArray();
+                    //var dayGroups = dayInfo.GroupBy(x => x.TimeOfDay);
+                    //if (dayInfo != null)
+                    //{
+                    //    for (int p = 0; p < dayInfo.Length; p++)
+                    //    {
+                    var selectedDate = date.Date;
+                    var hl = GetDailyHighLow(date.Date);
+                    days.Add(new DayViewModel
                     {
-                        var timeOfDays = dailyForecasts[p].TimeOfDayForecasts.ToArray();
-
-                        var selectedDate = dailyForecasts[p].StartTime;
-                        var hl = GetDailyHighLow(selectedDate);
-                        days.Add(new DayViewModel
-                        {
-                            Date = selectedDate,
-                            Day = selectedDate.Day,
-                            Events = _session.EventsData.Where(e => e.Date == selectedDate.Date).FirstOrDefault<EventModel>() ?? new EventModel(),
-                            IsEmpty = false,
-                            IsEventDay = true,
-                            IsFlipped = false,
-                            IsToday = selectedDate.Date == DateTime.UtcNow.AddSeconds(_session.SelectedTimeZoneOffset).Date,
-                            SelectedLocation = new PhotoLocation(_session.NwsData.SelectedLocation),
-                            Name = _session.NwsData.DailyForecasts[p].Name,
-                            Periods = CreatePeriods(timeOfDays),
-                            SelectedDailyForecast = _session.NwsData.DailyForecasts[p],
-                            TimeOfDayForecasts = _session.NwsData.DailyForecasts[p].TimeOfDayForecasts,
-                            DailyDetailedForecast = CreateDailyDescription(_session.NwsData.DailyForecasts[p]),
-                            DailyHighStatement = hl.high,
-                            DailyLowStatement = hl.low,
-                            DailySkyBrush = _session.NwsData.DailyForecasts[p].IsDaytime == true ? _session.NwsData.DailyForecasts[p].SkyColor ?? (LinearGradientBrush)Application.Current.Resources["GpsBackground"] : (LinearGradientBrush)Application.Current.Resources["NightBackground"]
+                        Date = selectedDate,
+                        Day = selectedDate.Day,
+                        Events = _session.EventsData.Where(e => e.Date == selectedDate.Date).FirstOrDefault<EventModel>() ?? new EventModel(),
+                        IsEmpty = false,
+                        IsEventDay = true,
+                        IsFlipped = false,
+                        IsToday = selectedDate.Date == DateTime.UtcNow.AddSeconds(_session.SelectedTimeZoneOffset).Date,
+                        SelectedLocation = new PhotoLocation(_session.NwsData.SelectedLocation),
+                        Name = _session.NwsData.TimeOfDayForecasts.FirstOrDefault().TimeOfDayName,
+                        Periods = CreatePeriods(_session.NwsData.TimeOfDayForecasts.Where(x => x.StartTime.Date == date.Date).ToArray()),
+                        //            SelectedDailyForecast = dayInfo[p],
+                        TimeOfDayForecasts = _session.NwsData.TimeOfDayForecasts.Where(x => x.StartTime.Date == date.Date).ToArray(),
+                        DailyDetailedForecast = _session.NwsData.TimeOfDayForecasts.Where(x => x.StartTime.Date == date.Date).FirstOrDefault().LongForecast,
+                        DailyScore = _session.DailyPhotoScoringSummary.Where(x => x.Date == DateOnly.FromDateTime(selectedDate)).FirstOrDefault().HumanReadableDailySummary ?? "Missing Summary!!!",
+                        DailyHighStatement = hl.high,
+                        DailyLowStatement = hl.low,
+                        DailySkyBrush = _session.NwsData.TimeOfDayForecasts.Where(x => x.IsDay == true).Any() ? (LinearGradientBrush)Application.Current.Resources["Dusk"] : (LinearGradientBrush)Application.Current.Resources["Night"]
+                    });
 
 
-                        });
+                    // This requires the method called on line
 
-
-                        // This requires the method called on line
-
-                        Debug.WriteLine($"Completed Day for {days[p].Name} {days[p].Date.ToString("F")}");
-                    }//Finish processing all days
-                }
-                return days;
-
+                    //Debug.WriteLine($"Completed Day for {days[p].Name} {days[p].Date.ToString("F")}");
+                    return days;
+                }//Finish processing all days
             }
+
             catch (Exception ex)
             {
                 Debug.WriteLine($"Error processing Days: {ex}");
@@ -88,7 +108,7 @@ namespace ThePhotographersForecast.Services
         }
         private ObservableCollection<DayPeriod> CreatePeriods(NwsTimeOfDayForecast[] timeOfDayForecast)
         {
-            // var dh = _session.NwsData.TimeOfDayForecasts;
+            var dh = _session.NwsData.TimeOfDayForecasts;
             var periods = new ObservableCollection<DayPeriod>();
             try
             {
@@ -115,12 +135,12 @@ namespace ThePhotographersForecast.Services
                         ForecastName = timeOfDayForecast[t].TimeOfDayName,
                         TimeOfDayBackgroundBrush = timeOfDayForecast[t].TimeOfDayGradientBrush,
                         TimeOfDaySkAnimation = timeOfDayForecast[t].SKTimeOfDayAnimation,
-                        TimeOfDayForecast = String.Join(". ", timeOfDayForecast[t].TimeOfDayForecast),
+                        TimeOfDayForecast = timeOfDayForecast[t].LongForecast,
                         TimeOfDaySkWeatherAnimations = lotties,
                         SelectedTimeOfDaySkWeatherAnimation = lotties.FirstOrDefault(),
                         HourlyWeather = timeOfDayForecast[t].Forecasts.ToArray(),
-                        TimeOfDayEvents = new ObservableCollection<EventTime>(timeOfDayForecast[t].TimeOfDayEvents),
-                        TimeOfDayTemperature = timeOfDayForecast[t].TimeOfDayTemperature
+                        TimeOfDayEvents = _session.EventTimes.Where(x => timeOfDayForecast[t].StartTime <= x.WeatherHour && x.WeatherHour <= timeOfDayForecast[t].EndTime).Select(e => e).ToObservableCollection(),
+                        TimeOfDayTemperature = _forecastService.TempCategory(timeOfDayForecast[t].MaxTemp, timeOfDayForecast[t].DewPointAvg, timeOfDayForecast[t].RelativeHumidityAvg, timeOfDayForecast[t].Forecasts.Select(x => x.Supplemental.WetBulbGlobeTemperature.Value).Average()),
                     };
                     periods.Add(dp);
                 }

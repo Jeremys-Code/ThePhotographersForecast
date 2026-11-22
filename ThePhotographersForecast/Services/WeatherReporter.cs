@@ -39,11 +39,13 @@ namespace ThePhotographersForecast.Services
 
         private IImageCacheService _cacheService;
         private ISession _session;
-        public WeatherReporter(ISession session, IImageCacheService cacheService)
+        private IForecastService _forecastService;
+        public WeatherReporter(ISession session, IImageCacheService cacheService, IForecastService forecastService)
         {
 
             _session = session;
             _cacheService = cacheService;
+            _forecastService = forecastService;
         }
         /// <summary>
         /// Daily Weather Reporter - Produces a story-like forecast from 
@@ -72,7 +74,7 @@ namespace ThePhotographersForecast.Services
             string firstStatement = dailyForecast.WeatherCode < 10 ? dailyForecast.WeatherCodeDescription : GetDailyPrecipitation(dailyForecast);
             string gustStatement = dailyForecast.WindGusts10mMax.Value > dailyForecast.WindSpeed10mMax.Value * 1.5 ? $" and wind gusts up to {dailyForecast.WindGusts10mMax.Value}{dailyForecast.WindGusts10mMax.Unit.Replace(@"/", "")}." : ".";
 
-            fs.WeatherSummary = $"Here's your daily forecast at {_session.SelectedLocation.City} on {dailyForecast.Date.ToString("DDDD, MMMM DD")} : {firstStatement} " +
+            fs.WeatherSummary = $"Here's your daily forecast at {_session.SelectedLocation.City} on {dailyForecast.Date.ToString("dddd, MMMM dd")} : {firstStatement} " +
                $"The high temperature is {dailyForecast.Temperature2mMax.Value}{dailyForecast.Temperature2mMax.Unit} and the low is {dailyForecast.Temperature2mMin.Value}{dailyForecast.Temperature2mMin.Unit}. " +
                 //  $"{CloudCoverSummary.BuildCondensedSummary(BuildDailyBins(dailyForecast))} " +
                 $"Winds from the {dailyForecast.WindDirection10mDominant.Description} at {dailyForecast.WindSpeed10mMax.Value} {(dailyForecast.WindSpeed10mMax.Unit == "mp/h" ? "mph" : dailyForecast.WindSpeed10mMax.Unit)}{gustStatement}";
@@ -122,65 +124,70 @@ namespace ThePhotographersForecast.Services
             var uvIndexColor = Colors.Green;
             //Sun healthSummary and safety
             //Working outside healthSummary and safety information
-            string healthSummary = String.Concat("Outside feels like ", day.ApparentTemperatureMin.Value, day.ApparentTemperatureMin.Unit, " to ", day.ApparentTemperatureMax.Value, day.ApparentTemperatureMax.Unit, " and ");
-            if (day.DewPoint2mMean.Unit.EndsWith("F"))
-            {
-                switch (day.DewPoint2mMean.Value)
-                {
-                    case <= 30:
-                        healthSummary += "dry. ";
-                        break;
-                    case > 40 and <= 60:
-                        healthSummary += "comfortable. ";
-                        break;
-                    case > 60 and <= 70:
-                        healthSummary += "sticky. ";
-                        break;
-                    case > 70:
-                        healthSummary += "tropical. ";
-                        break;
-                }
-            }
-            else if (day.DewPoint2mMean.Unit.EndsWith("C"))
-            {
-                switch (day.DewPoint2mMean.Value)
-                {
-                    case <= -1.111:
-                        healthSummary += "dry. ";
-                        break;
-                    case > 4.444 and <= 15.555:
-                        healthSummary += "comfortable. ";
-                        break;
-                    case > 15.555 and <= 21:
-                        healthSummary += "sticky. ";
-                        break;
-                    case > 21:
-                        healthSummary += "tropical. ";
-                        break;
-                }
-            }
 
-            healthSummary += "The UV Index is {day.UvIndexMax.Value}: ";
+            var outside = _forecastService.TempCategory(((day.Temperature2mMin.Value + day.Temperature2mMax.Value) / 2), day.DewPoint2mMean.Value, day.RelativeHumidity2mMean.Value, ((day.WetBulbTemperature2mMax.Value + day.WetBulbTemperature2mMin.Value) / 2));
+            string healthSummary = String.Concat("Outside feels like ", outside);
+
+
+
+            //if (day.DewPoint2mMean.Unit.EndsWith("F"))
+            //{
+            //    switch (day.DewPoint2mMean.Value)
+            //    {
+            //        case <= 30:
+            //            healthSummary += "dry. ";
+            //            break;
+            //        case > 40 and <= 60:
+            //            healthSummary += "comfortable. ";
+            //            break;
+            //        case > 60 and <= 70:
+            //            healthSummary += "sticky. ";
+            //            break;
+            //        case > 70:
+            //            healthSummary += "tropical. ";
+            //            break;
+            //    }
+            //}
+            //else if (day.DewPoint2mMean.Unit.EndsWith("C"))
+            //{
+            //    switch (day.DewPoint2mMean.Value)
+            //    {
+            //        case <= -1.111:
+            //            healthSummary += "dry. ";
+            //            break;
+            //        case > 4.444 and <= 15.555:
+            //            healthSummary += "comfortable. ";
+            //            break;
+            //        case > 15.555 and <= 21:
+            //            healthSummary += "sticky. ";
+            //            break;
+            //        case > 21:
+            //            healthSummary += "tropical. ";
+            //            break;
+            //    }
+            //}
+
+            healthSummary += @$"The UV Index is {day.UvIndexMax.Value}: ";
             double uv = day.UvIndexMax.Value;
             switch (uv)
             {
                 case < 3.0:
-                    healthSummary += $"Low/Green. You can safely enjoy being outside.";
+                    healthSummary += @$"Low/Green. You can safely enjoy being outside.";
                     break;
                 case >= 3.0 and < 6.0:
-                    healthSummary += $"Moderate/Yellow. Seek shade during the afternoon hours. Put on a shirt, use sunscreen, and wear a hat.";
+                    healthSummary += @$"Moderate/Yellow. Seek shade during the afternoon hours. Put on a shirt, use sunscreen, and wear a hat.";
                     uvIndexColor = Colors.Yellow;
                     break;
                 case >= 6.0 and < 8.0:
-                    healthSummary += $"High/Orange. Seek shade during the afternoon hours. Put on a shirt, use sunscreen, and wear a hat.";
+                    healthSummary += @$"High/Orange. Seek shade during the afternoon hours. Put on a shirt, use sunscreen, and wear a hat.";
                     uvIndexColor = Colors.Orange;
                     break;
                 case >= 8.0 and < 11.0:
-                    healthSummary += $"Very High/Red. Avoid being outside during afternoon hours. Make sure you seek shade. Shirt, sunscreen and hat are a must.";
+                    healthSummary += @$"Very High/Red. Avoid being outside during afternoon hours. Make sure you seek shade. Shirt, sunscreen and hat are a must.";
                     uvIndexColor = Colors.Red;
                     break;
                 case >= 11.0:
-                    healthSummary += $"Extreme/Purple. Protect yourself from the sun. Avoid being outside during afternoon hours. Make sure you seek shade. Shirt, sunscreen and hat are a must.";
+                    healthSummary += @$"Extreme/Purple. Protect yourself from the sun. Avoid being outside during afternoon hours. Make sure you seek shade. Shirt, sunscreen and hat are a must.";
                     uvIndexColor = Colors.Purple;
                     break;
                 default:
@@ -234,25 +241,27 @@ namespace ThePhotographersForecast.Services
         // Daily End
 
         // Build the Bins to use with the Engines Start
-        //public MeteorologisticAgent BuildDailyBins(DailyForecasts dailyForecast)
+        //public MeteorologisticAgent BuildDailyBins(DateTime date)
         //{
 
         //    // Filter hourlies for this day
-        //    var groups = dailyForecast.SelectedDailyHourlyForecasts
-        //        .OrderBy(h => h.HourlyTime)
-        //        .GroupBy(t => t.TimeOfDay)
+        //    var groups = _session.NwsData.HourlySupplementals.Select(x => new
+        //    {
+        //        x,
+        //        Temp = x.Temperature.Value,
+        //        DewPoint = x.DewPoint.Value,
+        //        RelativeHumidity = x.RelativeHumidity.Value,
+        //        Wbgt = x.WetBulbGlobeTemperature.Value
+        //    })
+        //        .OrderBy(h => h.x.Time)
+        //        .GroupBy(t => t.x.TimeOfDay)
         //        .ToDictionary(g => g.Key, g => g
         //        .ToList());
-
-
-
 
         //    // Build the agent
         //    var agent = new MeteorologisticAgent
         //    {
-        //        BinDate = dailyForecast.Time.ToDateTime(TimeOnly.MinValue),
-
-        //        EarlyHours = BuildBin("Early Hours", groups),
+        //        BinDate = date,
         //        EarlyMorning = BuildBin("Early Morning", groups),
         //        Morning = BuildBin("Morning", groups),
         //        Afternoon = BuildBin("Afternoon", groups),
@@ -262,19 +271,21 @@ namespace ThePhotographersForecast.Services
 
         //    return agent;
         //}
-        //private Bin BuildBin(string label, Dictionary<string, List<HourlyForecast>> groups)
+        //private static Bin BuildBin(string label, Dictionary<string, List<(NwsHourlySupplemental, double, double, double, double)>> groups)
+        //{
+        //    if (!groups.TryGetValue(label, out var list))
+        //        return new Bin { Label = label, Values = new List<(double, double, double, double)>() };
+        //    return new Bin();
+        //}
+
+        //private static Bin BuildTempBin(string label, Dictionary<string, List<(DateTime, String, double, double, double)>> groups)
         //{
         //    if (!groups.TryGetValue(label, out var list))
         //        return new Bin { Label = label, Values = new List<double>() };
-
-        //    return new Bin
-        //    {
-        //        Label = label,
-        //        Values = list.Select(h => h.CloudCover.Value).ToList()
-        //    };
+        //    return new Bin();
         //}
 
-        //// Bins End
+        // Bins End
 
 
 
@@ -288,7 +299,7 @@ namespace ThePhotographersForecast.Services
             };
             fs.WeatherSummary =
             String.Concat($"Here's your forecast for {hourlyForecast.HourlyTime.ToString("htt")}: ", hourlyForecast.WeatherCode > 10 ? GetHourlyPrecipitation(hourlyForecast) + " " : "",
-                Math.Round(hourlyForecast.Temperature2m.Value, 0), hourlyForecast.Temperature2m.Unit, " and ", CloudCoverEngine.Category(hourlyForecast.CloudCover.Value / 100), ". ",
+                 Math.Round(hourlyForecast.Temperature2m.Value, 0), hourlyForecast.Temperature2m.Unit, " and ", CloudCoverEngine.Category(hourlyForecast.CloudCover.Value / 100), ". ",
                 "Winds from the ", hourlyForecast.WindDirection10m.Description, " at ", hourlyForecast.WindSpeed10m.Value, hourlyForecast.WindSpeed10m.Unit == "mp/h" ? "mph" : hourlyForecast.WindSpeed10m.Unit);
 
             fs.WeatherSummary += hourlyForecast.WindGusts10m.Value > (hourlyForecast.WindSpeed10m.Value * 1.5) ? " and wind gusts up to " + hourlyForecast.WindGusts10m.Value + hourlyForecast.WindGusts10m.Unit + "." : ".";
@@ -374,15 +385,15 @@ namespace ThePhotographersForecast.Services
                 }
             }
 
-            healthSummary += "The UV Index is {day.UvIndexMax.Value}: ";
+            healthSummary += @$"The UV Index is {hour.UvIndex.Value}: ";
             double uv = hour.UvIndex.Value;
             switch (uv)
             {
                 case < 3.0:
-                    healthSummary += $"Low/Green. You can safely enjoy being outside.";
+                    healthSummary += @$"Low/Green. You can safely enjoy being outside.";
                     break;
                 case >= 3.0 and < 6.0:
-                    healthSummary += $"Moderate/Yellow. Seek shade during the afternoon hours. Put on a shirt, use sunscreen, and wear a hat.";
+                    healthSummary += @$"Moderate/Yellow. Seek shade during the afternoon hours. Put on a shirt, use sunscreen, and wear a hat.";
                     uvIndexColor = Colors.Yellow;
                     break;
                 case >= 6.0 and < 8.0:

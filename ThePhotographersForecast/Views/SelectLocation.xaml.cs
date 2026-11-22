@@ -1,7 +1,4 @@
 using Microsoft.Maui.Controls.Shapes;
-using System.Net.Http.Json;
-using System.Net.Sockets;
-using ThePhotographersForecast.Data;
 using ThePhotographersForecast.Models;
 using ThePhotographersForecast.ViewModels;
 
@@ -11,27 +8,21 @@ public partial class SelectLocation : ContentPage
 {
 
     private SelectLocationViewModel _vm;
-    private CancellationTokenSource? _cts;
-    private readonly HttpClient _client;
     private bool _isFlipping = false;
     const double a = 300; // ellipse radius X
     const double b = 200;  // ellipse radius Y
     const int duration = 3000; // ms
 
-    public SelectLocation(SelectLocationViewModel vm, IHttpClientFactory client)
+    public SelectLocation(SelectLocationViewModel vm)
     {
         _vm = vm;
         InitializeComponent();
         BindingContext = _vm;
-        _client = client.CreateClient("photographer");
-
-
 
         // Guarded subscription: ensure the named control exists in XAML
-
         if (InputLocation.IsLoaded)
         {
-            InputLocation.IsReadOnly = true;
+            _vm.IsSearchReadOnly = true;
         }
 
         _vm.PropertyChanged += async (s, e) =>
@@ -39,92 +30,13 @@ public partial class SelectLocation : ContentPage
             if (e.PropertyName == nameof(_vm.Progress))
             {
                 await DataProgressBar.ProgressTo(_vm.Progress, 500, Easing.BounceIn);
-
             }
         };
-
     }
 
     private void _vm_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
         PercentComplete.Text = $"Completed {_vm.Progress}%";
-    }
-
-    private async void InputLocation_TextChanged(object? sender, TextChangedEventArgs e)
-    {
-
-        if (_vm.IsWorking == true)
-        {
-            InputLocation.Text = _vm.DisplayName;
-        }
-        if (_vm.StopQuerying)
-        {
-            InputLocation.IsReadOnly = true;
-            InputLocation.TextChanged -= InputLocation_TextChanged;
-            return;
-        }
-        if (e.NewTextValue.Length < 3)
-        {
-            return;
-        }
-        // Cancel & dispose previous pending request
-        _cts?.Cancel();
-        _cts?.Dispose();
-        _cts = new CancellationTokenSource();
-        var token = _cts.Token;
-
-        _vm.Debounce(async () =>
-        {
-            try
-            {
-                _vm.Suggestions = new List<Models.PhotoLocation>();
-                _vm.ShowSuggestions = false;
-
-                string input = e.NewTextValue;
-                string escaped = Uri.EscapeDataString(input);
-                string apiString = $@"https://nominatim.openstreetmap.org/search?q={escaped}&format=geocodejson&addressdetails=1&countrycodes=us";
-                var request = new HttpRequestMessage(HttpMethod.Get, new Uri(apiString));
-                var results = new GeocodeResult.Rootobject();
-                try
-                {
-                    results = await _client.GetFromJsonAsync<GeocodeResult.Rootobject>(apiString, cancellationToken: token);
-                }
-                catch (IOException ex) when (ex.InnerException is SocketException se && se.SocketErrorCode == SocketError.OperationAborted) { }
-                if (results == null || token.IsCancellationRequested)
-                    return;
-
-                _vm.Suggestions.Clear();
-                _vm.ShowSuggestions = false;
-                if (results != null)
-                {
-                    for (int i = 0; i < results.features.Length; i++)
-                    {
-                        var result = results.features[i];
-                        _vm.Suggestions.Add(new Models.PhotoLocation
-                        {
-                            Longitude = Double.Parse(result.geometry.coordinates[0].ToString()),
-                            Latitude = Double.Parse(result.geometry.coordinates[1].ToString()),
-                            City = result.properties.geocoding.name ?? result.properties.geocoding.city,
-                            County = result.properties.geocoding.county,
-                            State = result.properties.geocoding.state,
-                            Country = result.properties.geocoding.country,
-                            GeocodeDisplayName = result.properties.geocoding.label
-                        });
-                    }
-                }
-
-                _vm.ShowSuggestions = _vm.Suggestions.Count > 0;
-
-            }
-            catch (OperationCanceledException)
-            {
-                // cancelled -ignore
-            }
-            catch (Exception)
-            {
-                // cancelled - ignore
-            }
-        }, TimeSpan.FromMilliseconds(900));
     }
 
     private async void OnPageSizeChanged(object? sender, EventArgs e)
@@ -146,7 +58,7 @@ public partial class SelectLocation : ContentPage
     {
         if (sender is Shape gpsButton)
         {
-            InputLocation.IsReadOnly = true;
+            _vm.IsSearchReadOnly = true;
             await Task.WhenAll(
                 gpsButton.ScaleYToAsync(0.85, 180, Easing.CubicOut),
                 gpsButton.TranslateToAsync(0, 4, 180, Easing.CubicOut)
@@ -163,16 +75,11 @@ public partial class SelectLocation : ContentPage
 
     private void TapGestureRecognizer_Tapped(object sender, TappedEventArgs e)
     {
-
-        InputLocation.IsReadOnly = false;
-        OnPropertyChanged(nameof(InputLocation));
-        if (InputLocation.Width > 0)
-            if (InputLocation.IsReadOnly == false)
-            {
-                InputLocation.TextChanged += InputLocation_TextChanged;
-                InputLocation.Focus();
-            }
-
+        _vm.EnableLocationSearchCommand.Execute(null);
+        if (InputLocation.Width > 0 && !_vm.IsSearchReadOnly)
+        {
+            InputLocation.Focus();
+        }
     }
     private async void OnCardTapped(object? sender, TappedEventArgs e)
     {
@@ -257,7 +164,8 @@ public partial class SelectLocation : ContentPage
                 }
             }
 
-            if (sender is BindableObject bo && bo.BindingContext is DayViewModel daily)
+            //   if (sender is BindableObject bo && bo.BindingContext is DayViewModel daily)
+            if (sender is BindableObject bo && bo.BindingContext is NwsTimeOfDayForecast daily)
             {
                 if (bo == Daily)
                 {
@@ -268,7 +176,8 @@ public partial class SelectLocation : ContentPage
         }
         catch (Exception)
         {
-            if (sender is BindableObject bo && bo.BindingContext is DayViewModel daily)
+            //   if (sender is BindableObject bo && bo.BindingContext is DayViewModel daily)
+            if (sender is BindableObject bo && bo.BindingContext is NwsTimeOfDayForecast daily)
                 if (bo == Daily)
                 {
                     Daily.SelectedItem = daily;
@@ -278,5 +187,11 @@ public partial class SelectLocation : ContentPage
         {
             _isFlipping = false;
         }
+    }
+
+    private async Task GoToDetailsTapped(object sender, TappedEventArgs e)
+    {
+        var index = _vm.Days.IndexOf(_vm.SelectedDay);
+        await Shell.Current.GoToAsync(nameof(ForecastDetails));
     }
 }

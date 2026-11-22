@@ -1,6 +1,7 @@
-﻿using SunCalcSharp;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using ThePhotographersForecast.Models;
+using ThePhotographersForecast.Models.ObserverCalc;
+using ThePhotographersForecast.Models.ObserverCalc.Dtos;
 using ThePhotographersForecast.Shared;
 
 namespace ThePhotographersForecast.Services

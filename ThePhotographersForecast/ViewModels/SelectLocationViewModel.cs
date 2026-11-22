@@ -1,12 +1,18 @@
 using CommunityToolkit.Maui.Core.Extensions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Maui.Controls.Foldable;
 using SkiaSharp.Extended.UI.Controls;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Net.Http.Json;
+using System.Net.Sockets;
+using System.Text;
 using ThePhotographersForecast.Components;
+using ThePhotographersForecast.Data;
 using ThePhotographersForecast.Models;
 using ThePhotographersForecast.Services;
+using ThePhotographersForecast.Services.ML;
 using ThePhotographersForecast.Services.Modules;
 using ThePhotographersForecast.Shared;
 
@@ -16,7 +22,14 @@ namespace ThePhotographersForecast.ViewModels
     {
         //private event EventHandler? DataCollectionCompleted;
         private CancellationTokenSource? _cts;
+        private CancellationTokenSource? _searchCts;
         // Use shared _session store's GfsData and EventsData to avoid shadowing and ensure persistence
+        [ObservableProperty]
+        public partial string SearchText { get; set; } = string.Empty;
+
+        [ObservableProperty]
+        public partial bool IsSearchReadOnly { get; set; }
+
         [ObservableProperty]
         public partial List<PhotoLocation> Suggestions { get; set; }
 
@@ -44,6 +57,8 @@ namespace ThePhotographersForecast.ViewModels
         public partial bool IsWorking { get; set; }
         [ObservableProperty]
         public partial string ProgressMessage { get; set; }
+        [ObservableProperty]
+        private TwoPaneViewPriority _activePanePriority = TwoPaneViewPriority.Pane1;
         [ObservableProperty]
         public partial DateTime StartDate { get; set; }
         [ObservableProperty]
@@ -102,6 +117,16 @@ namespace ThePhotographersForecast.ViewModels
         public partial bool BackFlipped { get; set; } = false;
         [ObservableProperty]
         public partial int Level { get; set; } = -100;
+        [ObservableProperty]
+        public partial IReadOnlyList<DailyForecastSummary> DailyPhotoScoringSummary { get; set; }
+        [ObservableProperty]
+        public partial ObservableCollection<Inference> Scores { get; set; } = new ObservableCollection<Inference>();
+        [ObservableProperty]
+        public partial Inference SelectedScore { get; set; }
+        [ObservableProperty]
+        public partial ObservableCollection<(DateTime, string)> BestTimes { get; set; } = new ObservableCollection<(DateTime, string)>();
+        [ObservableProperty]
+        public partial string SelectedBestTime { get; set; }
 
         //public int ModelChangesCount
         //{
@@ -109,8 +134,8 @@ namespace ThePhotographersForecast.ViewModels
         //    set => SetProperty(ref field, value);
         //}
 
-        public readonly DateTime MinDate = DateTime.Now.Date;
-        public readonly DateTime MaxDate = DateTime.Now.AddDays(15).Date;
+        public DateTime MinDate { get; } = DateTime.Now.Date;
+        public DateTime MaxDate { get; } = DateTime.Now.AddDays(15).Date;
 
         //UI Input Commands
         //private IGetEventService _eventService;
@@ -123,8 +148,19 @@ namespace ThePhotographersForecast.ViewModels
         private IForecastService _forecastService;
         private ISkyColorEngine _skyEngine;
         private IGetDays _daysService;
+        private ISkyColorCalculator _sky;
+        private readonly HttpClient _client;
 
-        public SelectLocationViewModel(IGetWeatherService weatherService, ISession session, IGetEphemerisService ephemerisService, IGetMoonService moonService, IGetNwsData nwsService, IForecastService forecastService, ISkyColorEngine skyEngine, IGetDays daysService)
+        public SelectLocationViewModel(IGetWeatherService weatherService,
+            ISession session,
+            IGetEphemerisService ephemerisService,
+            IGetMoonService moonService,
+            IGetNwsData nwsService,
+            IForecastService forecastService,
+            ISkyColorEngine skyEngine,
+            IGetDays daysService,
+            ISkyColorCalculator sky,
+            IHttpClientFactory httpClientFactory)
         {
             // 3. Properly assign the matching types
             _session = session;
@@ -135,6 +171,8 @@ namespace ThePhotographersForecast.ViewModels
             _forecastService = forecastService;
             _skyEngine = skyEngine;
             _daysService = daysService;
+            _sky = sky;
+            _client = httpClientFactory.CreateClient("photographer");
             StopQuerying = false;
             WeatherForecasts = new WeatherForecast();
             _session.NwsData = new NwsWeatherModel();
@@ -287,7 +325,19 @@ namespace ThePhotographersForecast.ViewModels
                 Debug.WriteLine($"Longitude: {Longitude}");
                 OnCompletedChanged(); //1. GPS Complete
                 ProgressMessage = "Setting Dates...";
-                //await ValidateDates();
+                await CollectAndProcessData();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("$ERROR Processing GPS location");
+            }
+            return;
+        }
+
+        private async Task CollectAndProcessData()
+        {
+            try
+            {
                 int nbrOfDays = EndDate.Date.Subtract(StartDate.Date).Days + 1;
                 var currentDate = StartDate.Date;
                 Dates = new CalendarDayModel[nbrOfDays];
@@ -335,10 +385,12 @@ namespace ThePhotographersForecast.ViewModels
 
                 ProgressMessage = $"Calling the station in {_session.NwsData.SelectedLocation.City} for the weather...";
 
-                WeatherForecasts = await _weatherService.BuildWeatherForecastsAsync();
+                _session.WeatherForecasts = await _weatherService.BuildWeatherForecastsAsync();
 
                 if (_session.WeatherForecasts.DailyForecasts.Length > 0)
                 {
+                    WeatherForecasts = new WeatherForecast(_session.WeatherForecasts);
+
                     Debug.WriteLine($"The weather service completed successfully.");
 
                 }
@@ -360,7 +412,12 @@ namespace ThePhotographersForecast.ViewModels
                 ProgressMessage = "Building the most sophisticated forecast...";
                 if (_session.NwsData.DailyForecasts.Length > 0 && _session.NwsData.HourlyForecasts.Length > 0 && _session.NwsData.HourlySupplementals.Length > 0 && _session.EventsData.Length > 0)
                 {
-                    TimeOfDayForecasts = await _forecastService.BuildTimeOfDayForecastsAsync(_session.NwsData.DailyForecasts);
+                    var result = await _forecastService.BuildTimeOfDayForecastsAsync(_session.NwsData.HourlyForecasts);
+                    if (result != null)
+                    {
+                        _session.NwsData.TimeOfDayForecasts = result.ToArray();
+                    }
+                    TimeOfDayForecasts = result.ToArray();
                     if (TimeOfDayForecasts != null && TimeOfDayForecasts.Length > 0)
                     {
                         _session.NwsData.TimeOfDayForecasts = TimeOfDayForecasts.ToArray();
@@ -377,12 +434,13 @@ namespace ThePhotographersForecast.ViewModels
                             _session.NwsData.DailyForecasts[c].SkyColor = gradient;
                         }
                     }
+
                     OnCompletedChanged();//7. SkyColor
                     // Time of Day Forecast are finished processing here:
                 }
 
 
-                if (_session.NwsData.TimeOfDayForecasts != null && _session.NwsData.TimeOfDayForecasts.Where(x => x.TimeOfDayForecast != null).Any())
+                if (_session.NwsData.TimeOfDayForecasts != null)
                 {
                     ProgressMessage = "Populating intriguing event and forecast models...";
                     Days = new ObservableCollection<DayViewModel>();
@@ -410,8 +468,69 @@ namespace ThePhotographersForecast.ViewModels
 
 
                     OnCompletedChanged();//9. Finished Counting everything
-                    ProgressMessage = "Finished organizing Forecasts and Events.";
+                    if (_session.DailyPhotoScoringSummary != null)
+                    {
+                        DailyPhotoScoringSummary = _session.DailyPhotoScoringSummary;
+                        Scores.Clear();
 
+                        foreach (var date in DailyPhotoScoringSummary)
+                        {
+                            BestTimes = new ObservableCollection<(DateTime, string)>();
+                            foreach (var h in date.BestHours)
+                            {
+                                var sb = new StringBuilder();
+                                sb.AppendLine($"When: {h.LocalTime:h:mm tt}");
+                                sb.AppendLine($"Drone Safety: {Math.Round(h.DroneSafetyScore)}%");
+                                sb.AppendLine($"Photo Score: {Math.Round(h.PhotoScore)}%");
+                                sb.AppendLine($"Confidence: {h.ConditionConfidence:P0}");
+                                sb.AppendLine($"Conditions: {h.Condition}");
+                                sb.AppendLine($"Forecast: {h.HumanReadableForecast}");
+                                sb.AppendLine($"Blue Hour: {Math.Round(h.BlueHourScore)}%");
+                                sb.AppendLine($"Sunrise: {Math.Round(h.SunriseScore)}%");
+                                sb.AppendLine($"Sunset: {Math.Round(h.SunsetScore)}%");
+                                sb.AppendLine($"Moon: {Math.Round(h.LunarEventScore)}%");
+                                sb.AppendLine($"Galaxy: {Math.Round(h.GalaxyScore)}%");
+                                BestTimes.Add((h.LocalTime.DateTime, sb.ToString()));
+                            }
+                            SelectedBestTime = BestTimes.Where(x => x.Item1.Date == SelectedDay.Date).Select(y => y.Item2).FirstOrDefault();
+
+                            var preds = date.HourlyPredictions ?? Array.Empty<HourlyForecastPrediction>();
+                            float maxBlue = preds.Count > 0 ? preds.Max(p => p.BlueHourScore) : 0f;
+                            float maxSunrise = preds.Count > 0 ? preds.Max(p => p.SunriseScore) : 0f;
+                            float maxSunset = preds.Count > 0 ? preds.Max(p => p.SunsetScore) : 0f;
+                            float maxMoon = preds.Count > 0 ? preds.Max(p => p.LunarEventScore) : 0f;
+                            float maxGalaxy = preds.Count > 0 ? preds.Max(p => p.GalaxyScore) : 0f;
+
+                            Scores.Add(new Inference
+                            {
+                                Date = date.Date,
+                                DateString = $"for {date.Date:dddd, MMMM dd, yyyy}",
+                                AvgDroneSafetyScore = $"{Math.Round(date.AverageDroneSafetyScore)}%",
+                                BlueHourScore = $"{Math.Round(maxBlue)}%",
+                                SurnriseScore = $"{Math.Round(maxSunrise)}%",
+                                SunsetScore = $"{Math.Round(maxSunset)}%",
+                                MoonScore = $"{Math.Round(maxMoon)}%",
+                                GalaxyScore = $"{Math.Round(maxGalaxy)}%",
+                                BestHours = BestTimes,
+                                BestHoursText = string.Join("\n", BestTimes.Select(b => b.Item2.Trim())),
+                                DailyScore = $"{Math.Round(date.DailyPhotoScore)}%",
+                                DominantCondition = date.DominantCondition.ToString(),
+                                DailySummary = date.HumanReadableDailySummary
+                            });
+
+                            for (int i = 0; i < _session.NwsData.DailyForecasts.Length; i++)
+                            {
+                                if (date.Date == DateOnly.FromDateTime(_session.NwsData.DailyForecasts[i].StartTime) && _session.NwsData.DailyForecasts[i].IsDaytime == true)
+                                {
+                                    _session.NwsData.DailyForecasts[i].DailyScoring = date;
+                                }
+                            }
+
+                            SelectedScore = Scores.FirstOrDefault();
+                        }
+
+                        ProgressMessage = "Finished organizing Forecasts and Events.";
+                    }
                 }
             }
             catch (Exception ex)
@@ -427,11 +546,50 @@ namespace ThePhotographersForecast.ViewModels
                     ShowForecast = true;
                 });
             }
-
             //await Shell.Current.GoToAsync("ForecastDetails");
         }
+        [RelayCommand]
+        private async Task CardTap(NwsTimeOfDayForecast SelectedDay)
+        {
+            if (SelectedDay == null) return;
+            var dailyForecasts = _session.NwsData?.DailyForecasts;
+            if (dailyForecasts == null || dailyForecasts.Length == 0)
+                return;
+            var daily = _session.NwsData.DailyForecasts.
+                    Where(t => SelectedDay.StartTime >= t.StartTime && SelectedDay.EndTime <= t.EndTime).FirstOrDefault();
+            int dailyIndex = -1;
 
+            // 1. Match the exact SelectedDailyForecast on the tapped DayViewModel if present
+            //if (SelectedDay.SelectedDailyForecast != null)
+            //{
+            //    dailyIndex = Array.FindIndex(dailyForecasts,
+            //        d => d.StartTime == SelectedDay.SelectedDailyForecast.StartTime &&
+            //             d.EndTime == SelectedDay.SelectedDailyForecast.EndTime);
+            //}
+            if (SelectedDay != null)
+            {
+                dailyIndex = _session.NwsData.DailyForecasts.IndexOf(daily);
+            }
 
+            // 2. Otherwise match the daytime (6am-6pm) forecast for the tapped DayViewModel's date
+            if (dailyIndex < 0)
+            {
+                dailyIndex = Array.FindIndex(dailyForecasts,
+                    d => d.StartTime.Date == SelectedDay.StartTime.Date && d.IsDaytime);
+            }
+
+            // 3. Fallback to any forecast matching the tapped date
+            if (dailyIndex < 0)
+            {
+                dailyIndex = dailyForecasts.IndexOf(daily);
+                //                    d => d.StartTime.Date == SelectedDay.StartTime.Date);
+            }
+
+            if (dailyIndex < 0)
+                dailyIndex = 0;
+
+            await Shell.Current.GoToAsync($"//ForecastDetails?dailyIndex={dailyIndex}");
+        }
 
 
         // Time of Day forecast - Initial grouping of Hourlies into Time of Day groups for procesing 
@@ -499,7 +657,7 @@ namespace ThePhotographersForecast.ViewModels
         //        TimeOfDayGust = dh.WindGust != null ? $"{(int)Math.Round(dh.WindGust.Value, 0)}{dh.WindGust.UnitCode}" : "",
         //        TimeOfDayWind = dh.WindStatement,
         //        TimeOfDayTemperature = dh.TempAndUnit,
-        //        TimeOfDayEvents = new ObservableCollection<EventTime>(EventTimes.Where(a => a.AstroTime.Date == dh.StartTime.Date && a.TimeOfDay == "Morning"))
+        //        Events = new ObservableCollection<EventTime>(EventTimes.Where(a => a.AstroTime.Date == dh.StartTime.Date && a.TimeOfDay == "Morning"))
         //    },
         //    >= 12 and < 18 =>
         //    new DayPeriod
@@ -518,7 +676,7 @@ namespace ThePhotographersForecast.ViewModels
         //        TimeOfDayGust = dh.WindGust != null ? $"{(int)Math.Round(dh.WindGust.Value, 0)}{dh.WindGust.UnitCode}" : "",
         //        TimeOfDayWind = dh.WindStatement,
         //        TimeOfDayTemperature = dh.TempAndUnit,
-        //        TimeOfDayEvents = new ObservableCollection<EventTime>(EventTimes.Where(a => a.AstroTime.Date == dh.StartTime.Date && a.TimeOfDay == "Afternoon"))
+        //        Events = new ObservableCollection<EventTime>(EventTimes.Where(a => a.AstroTime.Date == dh.StartTime.Date && a.TimeOfDay == "Afternoon"))
         //    },
         //    >= 18 and < 22 =>
         //    new DayPeriod
@@ -537,7 +695,7 @@ namespace ThePhotographersForecast.ViewModels
         //        TimeOfDayGust = dh.WindGust != null ? $"{(int)Math.Round(dh.WindGust.Value, 0)}{dh.WindGust.UnitCode}" : "",
         //        TimeOfDayWind = dh.WindStatement,
         //        TimeOfDayTemperature = dh.TempAndUnit,
-        //        TimeOfDayEvents = new ObservableCollection<EventTime>(EventTimes.Where(a => a.AstroTime.Date == dh.StartTime.Date && a.TimeOfDay == "Evening"))
+        //        Events = new ObservableCollection<EventTime>(EventTimes.Where(a => a.AstroTime.Date == dh.StartTime.Date && a.TimeOfDay == "Evening"))
         //    },
         //    >= 22 and < 24 =>
         //    new DayPeriod
@@ -556,7 +714,7 @@ namespace ThePhotographersForecast.ViewModels
         //        TimeOfDayGust = dh.WindGust != null ? $"{(int)Math.Round(dh.WindGust.Value, 0)}{dh.WindGust.UnitCode}" : "",
         //        TimeOfDayWind = dh.WindStatement,
         //        TimeOfDayTemperature = dh.TempAndUnit,
-        //        TimeOfDayEvents = new ObservableCollection<EventTime>(EventTimes.Where(a => a.AstroTime.Date == dh.StartTime.Date && a.TimeOfDay == "Night"))
+        //        Events = new ObservableCollection<EventTime>(EventTimes.Where(a => a.AstroTime.Date == dh.StartTime.Date && a.TimeOfDay == "Night"))
         //    },
         //    _ => new DayPeriod()
 
@@ -606,6 +764,7 @@ namespace ThePhotographersForecast.ViewModels
                     Latitude = selectedLocation.Latitude;
                     Longitude = selectedLocation.Longitude;
                     DisplayName = selectedLocation.DisplayName;
+                    SearchText = selectedLocation.DisplayName;
                     ShowSuggestions = false;
                 }
                 else
@@ -616,151 +775,11 @@ namespace ThePhotographersForecast.ViewModels
                 Debug.WriteLine($"Longitude: {Longitude}");
                 OnCompletedChanged();//1. Get Location.
                 ProgressMessage = "Setting Dates...";
-                //await ValidateDates();
-                int nbrOfDays = EndDate.Date.Subtract(StartDate.Date).Days + 1;
-                var currentDate = StartDate.Date;
-                Dates = new CalendarDayModel[nbrOfDays];
-                for (int i = 0; i < nbrOfDays; i++)
-                {
-                    currentDate = currentDate.Date;
-                    Dates[i] = new CalendarDayModel
-                    {
-                        Date = currentDate
-                    };
-                    currentDate = currentDate.Date.AddDays(1);
-                }
-                _session.Dates = Dates.ToArray();
-
-                OnCompletedChanged();//2. Setting Dates
-
-
-                ProgressMessage = $"Fetching forecasts...";
-
-                var nwsResults = await _nwsService.GetWeatherAsync(Latitude, Longitude);
-                if (nwsResults == null)
-                {
-                    Debug.WriteLine("NWS Service returned null.");
-                    return;
-                }
-                NwsData = new NwsWeatherModel(nwsResults);
-                _session.NwsData = new NwsWeatherModel(nwsResults);
-                Debug.WriteLine($"nwsResults.DailyForecasts count {_session.NwsData.DailyForecasts?.Length ?? 0}");
-                Debug.WriteLine($"nwsResults.HourlySupplementals count {_session.NwsData.HourlySupplementals?.Length ?? 0}");
-
-                OnCompletedChanged();//3. Nws Forecasts
-
-                ProgressMessage = "Lining up the Sun, the Moon, and stars...";
-
-                _session.EventsData = await _ephemerisService.GetDailyAstronomicalEventsAsync(Latitude, Longitude, _session.NwsData);
-                if (_session.EventsData == null)
-                {
-                    Debug.WriteLine("Event service returned null.");
-                    return;
-                }
-                EventsData = _session.EventsData.ToArray();
-                EventTimes = _session.EventTimes.ToArray();
-
-                OnCompletedChanged();//4. Solar and Lunar events
-
-                ProgressMessage = $"Calling the station in {_session.NwsData.SelectedLocation.City} for the weather...";
-
-                WeatherForecasts = await _weatherService.BuildWeatherForecastsAsync();
-
-                if (_session.WeatherForecasts.DailyForecasts.Length > 0)
-                {
-                    Debug.WriteLine($"The weather service completed successfully.");
-
-                }
-                else
-                {
-                    Debug.WriteLine("The weather service failed to build forecasts.");
-                }
-                OnCompletedChanged();//5. Open Meteo Forecasts
-
-                // MoonPhases = await _moonService.GetFutureMoonPhasesAsync(StartDate, _session.NwsData.TimezoneOffsetSeconds);
-                //if (MoonPhases != null && MoonPhases.Length > 0)
-                //{
-
-                //    SelectedMoonPhase = MoonPhases.FirstOrDefault();
-                //    _session.MoonPhases = MoonPhases.ToArray();
-                //}
-
-
-                ProgressMessage = "Building the most sophisticated forecast...";
-                if (_session.NwsData.DailyForecasts.Length > 0 && _session.NwsData.HourlyForecasts.Length > 0 && _session.NwsData.HourlySupplementals.Length > 0 && _session.EventsData.Length > 0)
-                {
-                    TimeOfDayForecasts = await _forecastService.BuildTimeOfDayForecastsAsync(_session.NwsData.DailyForecasts);
-                    if (TimeOfDayForecasts != null && TimeOfDayForecasts.Length > 0)
-                    {
-                        _session.NwsData.TimeOfDayForecasts = TimeOfDayForecasts.ToArray();
-                        Debug.WriteLine($"{TimeOfDayForecasts.Length} Time of Day Forecasts have been built.");
-                    }
-                    OnCompletedChanged();//6. Nws Time Of Day Forecasts
-
-                    Dictionary<DateOnly, LinearGradientBrush> skyResults = await _skyEngine.GetDailySkyColorGradientsAsync(Latitude, Longitude);
-                    if (skyResults != null && skyResults.Count > 0)
-                    {
-                        for (int c = 0; c < _session.NwsData.DailyForecasts.Length; c++)
-                        {
-                            var gradient = skyResults.TryGetValue(DateOnly.FromDateTime(_session.NwsData.DailyForecasts[c].StartTime), out var sky) ? sky : null;
-                            _session.NwsData.DailyForecasts[c].SkyColor = gradient;
-                        }
-                    }
-                    OnCompletedChanged();//7. SkyColor
-                    // Time of Day Forecast are finished processing here:
-                }
-
-
-                if (_session.NwsData.TimeOfDayForecasts != null && _session.NwsData.TimeOfDayForecasts.Where(x => x.TimeOfDayForecast != null).Any())
-                {
-                    ProgressMessage = "Populating intriguing event and forecast models...";
-                    Days = new ObservableCollection<DayViewModel>();
-                    var daysResult = await _daysService.GetDaysAsync();
-                    if (daysResult != null)
-                    {
-                        Days = daysResult.ToObservableCollection();
-                        _session.Days = daysResult.ToObservableCollection();
-                    }
-                    OnCompletedChanged();//8. DayViewModels
-
-                    ProgressMessage = "All data and calculations have been processed.";
-                    //   _session.WeatherForecasts = new WeatherForecast(WeatherForecasts);
-                    Debug.WriteLine($"_session.WeatherForecasts Count: {_session.WeatherForecasts.DailyForecasts.Length}");
-                    Debug.WriteLine($"_session.WeatherForecasts Hours Count: {_session.WeatherForecasts.DailyForecasts.SelectMany(x => x.HourlyForecasts).Count()}");
-                    //_session.Days = new ObservableCollection<DayViewModel>(Days);
-                    Debug.WriteLine($"_session.Days Count: {_session.Days.Count}");
-                    Debug.WriteLine($"_session.EventModels Count: {_session.EventsData.Length}");
-                    // _session.NwsData = new NwsWeatherModel(NwsData);
-                    Debug.WriteLine($"_session.NwsData.DailyForecasts Count: {_session.NwsData.DailyForecasts?.Length ?? 0}");
-                    Debug.WriteLine($"_session.NwsData.SelectedDailyHourlyForecasts Count: {_session.NwsData.HourlyForecasts?.Length ?? 0}");
-                    Debug.WriteLine($"_session.NwsData.HourlySupplementals Count: {_session.NwsData.HourlySupplementals?.Length ?? 0}");
-                    //  _session.Dates = Dates.ToArray();
-                    Debug.WriteLine($"_session.Dates Count: {_session.Dates.Length}");
-
-
-                    OnCompletedChanged();//9. Finished Counting everything
-                    ProgressMessage = "Finished organizing Forecasts and Events.";
-
-                }
+                await CollectAndProcessData();
             }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Error in GetGps: {ex}");
-                await Shell.Current.DisplayAlertAsync("Weather Service Error", "An error occurred while retrieving forecast data. Please try again.", "OK");
-            }
-            finally
-            {
-                MainThread.BeginInvokeOnMainThread(() =>
-                {
-                    IsWorking = false;
-                    ShowForecast = true;
-                });
-            }
-
-            //await Shell.Current.GoToAsync("ForecastDetails");
+            catch (Exception ex) { Debug.WriteLine("$ERROR Processing GPS location"); }
+            return;
         }
-
-
 
         //private async Task<List<string>> EnrichForecastAsync(NwsDailyForecast[] dailys)
         //{
@@ -866,6 +885,114 @@ namespace ThePhotographersForecast.ViewModels
             _cts?.Dispose();
             _cts = new CancellationTokenSource();
         }
+        partial void OnStopQueryingChanged(bool value)
+        {
+            if (value)
+            {
+                IsSearchReadOnly = true;
+            }
+        }
+
+        partial void OnSearchTextChanged(string value)
+        {
+            if (IsWorking)
+            {
+                if (!string.IsNullOrEmpty(DisplayName) && value != DisplayName)
+                {
+                    SearchText = DisplayName;
+                }
+                return;
+            }
+
+            if (StopQuerying)
+            {
+                IsSearchReadOnly = true;
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(value) || value.Length < 3)
+            {
+                _searchCts?.Cancel();
+                ShowSuggestions = false;
+                return;
+            }
+
+            _searchCts?.Cancel();
+            _searchCts?.Dispose();
+            _searchCts = new CancellationTokenSource();
+            var token = _searchCts.Token;
+
+            string query = value;
+            Debounce(async () =>
+            {
+                await SearchLocationsAsync(query, token);
+            }, TimeSpan.FromMilliseconds(900));
+        }
+
+        [RelayCommand]
+        private void EnableLocationSearch()
+        {
+            StopQuerying = false;
+            IsSearchReadOnly = false;
+        }
+
+        private async Task SearchLocationsAsync(string input, CancellationToken token)
+        {
+            try
+            {
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    Suggestions = new List<PhotoLocation>();
+                    ShowSuggestions = false;
+                });
+
+                string escaped = Uri.EscapeDataString(input);
+                string apiString = $@"https://nominatim.openstreetmap.org/search?q={escaped}&format=geocodejson&addressdetails=1&countrycodes=us";
+                GeocodeResult.Rootobject? results = null;
+                try
+                {
+                    results = await _client.GetFromJsonAsync<GeocodeResult.Rootobject>(apiString, cancellationToken: token);
+                }
+                catch (IOException ex) when (ex.InnerException is SocketException se && se.SocketErrorCode == SocketError.OperationAborted) { }
+
+                if (results == null || token.IsCancellationRequested)
+                    return;
+
+                var newSuggestions = new List<PhotoLocation>();
+                if (results.features != null)
+                {
+                    for (int i = 0; i < results.features.Length; i++)
+                    {
+                        var result = results.features[i];
+                        newSuggestions.Add(new PhotoLocation
+                        {
+                            Longitude = double.Parse(result.geometry.coordinates[0].ToString()),
+                            Latitude = double.Parse(result.geometry.coordinates[1].ToString()),
+                            City = result.properties.geocoding.name ?? result.properties.geocoding.city,
+                            County = result.properties.geocoding.county,
+                            State = result.properties.geocoding.state,
+                            Country = result.properties.geocoding.country,
+                            GeocodeDisplayName = result.properties.geocoding.label
+                        });
+                    }
+                }
+
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    Suggestions = newSuggestions;
+                    ShowSuggestions = Suggestions.Count > 0;
+                });
+            }
+            catch (OperationCanceledException)
+            {
+                // cancelled - ignore
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error searching locations: {ex.Message}");
+            }
+        }
+
         public void Debounce(Func<Task> action, TimeSpan delay)
         {
             // Cancel any pending execution

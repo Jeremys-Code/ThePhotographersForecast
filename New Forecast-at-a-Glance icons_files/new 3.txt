@@ -1,0 +1,6 @@
+Sunset colors
+#3B83BD - Blue
+#ffe699 - yellow
+#ffb9bc - orange
+#ffc2ff - pink
+#b0a7ff - purple

@@ -15,6 +15,8 @@ public partial class ForecastDetails : ContentPage
         InitializeComponent();
         _vm = vm;
         BindingContext = _vm;
+        _vm.ScrollToIndexRequested += OnScrollToIndexRequested;
+        DailyCollection.Loaded += DailyCollection_Loaded;
         //_backgroundMapService = backgroundMapService;
 
         //// Create the map from the service and assign it to the MapView declared in XAML
@@ -65,19 +67,39 @@ public partial class ForecastDetails : ContentPage
     protected override void OnAppearing()
     {
         base.OnAppearing();
+        _vm.RefreshFromSession();
 
-        //if (BackgroundMapView == null)
-        //    return;
+        if (_vm.DailyForecasts != null && _vm.DailyForecasts.Length > 0)
+        {
+            ScrollDailyCollectionToIndex(_vm.SelectedDailyIndex);
+        }
+    }
 
-        //// If the MapView already has a size, navigate immediately. Otherwise wait for SizeChanged.
-        //if (BackgroundMapView.Width > 0 && BackgroundMapView.Height > 0)
-        //{
-        //    TryNavigateToInitialEnvelope();
-        //}
-        //else
-        //{
-        //    BackgroundMapView.SizeChanged += BackgroundMapView_SizeChanged;
-        //}
+    private void DailyCollection_Loaded(object? sender, EventArgs e)
+    {
+        if (_vm.DailyForecasts != null && _vm.DailyForecasts.Length > 0)
+        {
+            ScrollDailyCollectionToIndex(_vm.SelectedDailyIndex);
+        }
+    }
+
+    private void OnScrollToIndexRequested(int index)
+    {
+        ScrollDailyCollectionToIndex(index);
+    }
+
+    private void ScrollDailyCollectionToIndex(int index)
+    {
+        if (DailyCollection == null || _vm.DailyForecasts == null || index < 0 || index >= _vm.DailyForecasts.Length)
+            return;
+
+        var targetItem = _vm.DailyForecasts[index];
+        MainThread.BeginInvokeOnMainThread(async () =>
+        {
+            // Give WinUI CollectionView a brief moment to finish measuring items after ItemsSource/Appearing
+            await Task.Delay(50);
+            DailyCollection.ScrollTo(targetItem, position: ScrollToPosition.Center, animate: false);
+        });
     }
 
     //private void BackgroundMapView_SizeChanged(object? sender, EventArgs e)

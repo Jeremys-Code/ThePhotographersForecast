@@ -2,11 +2,22 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using SkiaSharp.Extended.UI.Controls;
 using System.Collections.ObjectModel;
 using System.Text;
+using System.Text.Json.Serialization;
 using ThePhotographersForecast.Services;
+using ThePhotographersForecast.Services.ML;
 
 namespace ThePhotographersForecast.Models;
 
 // Translates the weather api model into what is stored in the database
+// In order to make a day one object instead of several parts from various files ( <6 am, 6am - 6 pm, >6pm)
+// The National Weather Service Day Model will be based off off the hourly and supplemental.
+// Step 1 - Process all the hourly and supplemental information
+// Step 2 - Add the supplemental information to the hourly so all the weather info is in one object for each hour.
+// Step 3 - Group the hours into dates
+// Step 4 - Group the hours into TimeOfDay or some interval because one and done isn't right.
+/// </summary>
+// Step 4 - Weather briefings are ShortForecast, (Instead of temperature use Temperature Category), wind speed, and gusts.
+// 
 public partial class NwsWeatherModel : ObservableObject
 {
     [ObservableProperty]
@@ -108,10 +119,11 @@ public class NwsDailyForecast
     public NwsHourlyForecast[] HourlyWeathers { get; set; }
     public NwsTimeOfDayForecast[] TimeOfDayForecasts { get; set; }
     public NwsHourlySupplemental[] SupplementalData { get; set; }
-    public LinearGradientBrush? SkyColor { get; set; }
-
+    public LinearGradientBrush SkyColor { get; set; }
+    public DailyForecastSummary DailyScoring { get; set; }
+    public ObservableCollection<EventTime> Events { get; set; } = new ObservableCollection<EventTime>();
     public string EnrichedForecast { get; set; }
-
+    public Color TimeOfDayTextColor => TimeOfDayService.GetTimeOfDayTextColor(this.StartTime.Hour);
     public LinearGradientBrush DailyBackgroundBrush => GetGradient();
     private LinearGradientBrush GetGradient()
     {
@@ -146,7 +158,7 @@ public class NwsDailyForecast
 
 
 }
-public class NwsHourlyForecast
+public partial class NwsHourlyForecast : ObservableObject
 {
     public int Number { get; set; }
     public string Name => String.Concat(this.StartTime.ToString("dddd"), " ", Services.TimeOfDayService.CalcTimeOfDay(this.StartTime.Hour).ToString(), " @ ", this.StartTime.ToString("h tt"));
@@ -169,11 +181,39 @@ public class NwsHourlyForecast
     public string TempAndUnit => GetTempString();
     public bool IsHigh { get; set; } = false;
     public bool IsLow { get; set; } = false;
-    public ProbabilityOfThunderValue ProbabilityOfThunder { get; set; }
-    public QuantitativePrecipitationValue QuantitativePrecipitation { get; set; }
-    public WeatherStatementsValue WeatherStatement { get; set; }
-    public SkyCoverValue SkyCover { get; set; }
-    public NwsHourlySupplemental? Supplemental { get; set; }
+    private bool _isBestPhotoOrDroneHour;
+    public bool IsBestPhotoOrDroneHour
+    {
+        get => _isBestPhotoOrDroneHour;
+        set
+        {
+            if (SetProperty(ref _isBestPhotoOrDroneHour, value))
+            {
+                OnPropertyChanged(nameof(HourlyBorderBrush));
+                OnPropertyChanged(nameof(HourlyBorderThickness));
+            }
+        }
+    }
+
+    private string _bestHourBadgeText = string.Empty;
+    public string BestHourBadgeText
+    {
+        get => _bestHourBadgeText;
+        set => SetProperty(ref _bestHourBadgeText, value);
+    }
+
+    private string _bestHourReason = string.Empty;
+    public string BestHourReason
+    {
+        get => _bestHourReason;
+        set => SetProperty(ref _bestHourReason, value);
+    }
+
+    public Brush HourlyBorderBrush => IsBestPhotoOrDroneHour
+        ? Brush.LimeGreen
+        : (Application.Current?.Resources["Noon"] as Brush ?? Brush.DeepSkyBlue);
+    public double HourlyBorderThickness => IsBestPhotoOrDroneHour ? 5 : 4;
+    public NwsHourlySupplemental Supplemental { get; set; }
     public SKFileLottieImageSource SkHourlyAnimation { get; set; }
     public string WindStatement => BuildWindStatement();
     public string IntroTimeOfDay => TimeOfDayService.TimesOfDayGreeting(this.StartTime.Hour);
@@ -216,7 +256,7 @@ public class NwsHourlyForecast
 
     public class RelativeHumidityHourly
     {
-        public string UnitCode { get; set; }
+        public string UnitCode => "%";
         public double Value { get; set; }
     }
 
@@ -228,7 +268,7 @@ public class NwsHourlyForecast
             get => field;
             set
             {
-                field = Math.Round((value / 1.609344), 1);
+                field = Math.Round((value / 1.609344), 2);
             }
         }
     }
@@ -242,7 +282,7 @@ public class NwsHourlyForecast
             get => field;
             set
             {
-                field = Math.Round((value / 1.609344), 1);
+                field = Math.Round((value / 1.609344), 2);
             }
         }
     }
@@ -278,45 +318,98 @@ public class NwsHourlyForecast
         return wb.ToString();
     }
 }
+
+public class NwsFullDayForecast
+{
+    public DateOnly Date { get; set; }
+    public HoursGroups Hours { get; set; }
+    public TimeOfDayGroup TimesOfDay { get; set; }
+    public string DayHigh { get; set; }
+    public string DayLow { get; set; }
+    public string Forecasts { get; set; }
+    public string Name { get; set; }
+}
+
 public class NwsTimeOfDayForecast
 {
     public NwsHourlyForecast[] Forecasts { get; set; }
-    public string TimeOfDayName => $"Forecast for {this.StartTime.ToString("dddd, MMMM dd")} {this.TimeOfDay}";
+    public ForecastInputs[] ForecastInputs { get; set; }
+    public string DescForecasts { get; set; }
+    public string LongForecast { get; set; }
+    public bool IsDay { get; set; }
+
     public DateTime StartTime { get; set; }
     public DateTime EndTime { get; set; }
-    public string TimeOfDayForecast { get; set; }
+    public string High { get; set; }
+    public string Low { get; set; }
+    public double MaxTemp { get; set; }
+    public double MinTemp { get; set; }
+    public string TempStatement => MinTemp != MaxTemp ? $"{this.MinTemp}°F to {this.MaxTemp}°F" : $"{this.MaxTemp}°F";
+    public double DewPointAvg { get; set; }
+    public double RelativeHumidityAvg { get; set; }
+    public double MaxProbabilityOfPrecipitation { get; set; }
+    public double QuantitativePrecipitation { get; set; }
+    public double MinWindSpeed { get; set; }
+    public string MinWindDirection { get; set; }
+    public double MaxWindSpeed { get; set; }
+    public string MaxWindDirection { get; set; }
+    public double MinWindGusts { get; set; }
+    public double MaxWindGusts { get; set; }
+    // Time of day name
     public string TimeOfDay { get; set; }
     public LinearGradientBrush TimeOfDayGradientBrush { get; set; }
     public SKFileLottieImageSource SKTimeOfDayAnimation { get; set; }
     public ObservableCollection<LottieAnimation> SkLottieCollection { get; set; }
-    public ObservableCollection<EventTime> TimeOfDayEvents { get; set; }
-    public string TimeOfDayTemperature { get; set; }
-    public ObservableCollection<WeatherStatementsValue> Weathers { get; set; }
+    public ObservableCollection<EventTime> Events { get; set; }
     public Color TimeOfDayTextColor => TimeOfDayService.GetTimeOfDayTextColor(StartTime.Hour);
+    public string TimeOfDayName => $@"{this.StartTime.ToString("dddd")} {this.TimeOfDay}, {this.StartTime.ToString("MMMM dd")} ({this.StartTime.ToString("h tt")} - {this.EndTime.ToString("h tt")}:";
 }
-
-// Layers: Storm (Thunder & Precipitation) Weather; Sky Cover; Wind; Outdoors (Temperature, Dew Point, Relative Humidity); HeatIndex, WindChill 
-public partial class ForecastLayers : ObservableObject
+// 1 Create a day from time of day group
+public class TimeOfDayGroup : ObservableCollection<NwsTimeOfDayForecast>
 {
-    [ObservableProperty]
-    public partial string LayerName { get; set; }
-    [ObservableProperty]
-    public partial string Statement { get; set; }
-    [ObservableProperty]
-    public partial TimeAndQuantity Mean { get; set; }
-    [ObservableProperty]
-    public partial TimeAndQuantity Min { get; set; }
-    [ObservableProperty]
-    public partial TimeAndQuantity Max { get; set; }
-    [ObservableProperty]
-    public partial double Total { get; set; }
-    [ObservableProperty]
-    public partial TimeAndQuantity BeginStorm { get; set; }
-    [ObservableProperty]
-    public partial TimeAndQuantity EndStorm { get; set; }
-    [ObservableProperty]
-    public partial int Duration { get; set; }
+    public DateOnly Date { get; set; }
+    public string TimeOfDay { get; set; }
+
+    public TimeOfDayGroup(DateOnly date, string timeOfDay, ObservableCollection<NwsTimeOfDayForecast> timeOfDayForecasts) : base(timeOfDayForecasts)
+    {
+        Date = date;
+        timeOfDay = timeOfDay;
+    }
+    public ObservableCollection<TimeOfDayGroup> TimeOfDayForecasts { get; set; } = new ObservableCollection<TimeOfDayGroup>();
 }
+// 2.Create a day from hourly group
+public class HoursGroups : ObservableCollection<NwsHourlyForecast>
+{
+    public DateOnly Date { get; set; }
+    public string TimeOfDay { get; set; }
+    public HoursGroups(DateOnly date, string timeOfDay, ObservableCollection<NwsHourlyForecast> hourlyForecasts) : base(hourlyForecasts)
+    {
+        Date = date;
+        TimeOfDay = timeOfDay;
+
+    }
+}
+//public partial class ForecastLayers : ObservableObject
+//{
+//    [ObservableProperty]
+//    public partial string LayerName { get; set; }
+//    [ObservableProperty]
+//    public partial string Statement { get; set; }
+//    [ObservableProperty]
+//    public partial TimeAndQuantity Mean { get; set; }
+//    [ObservableProperty]
+//    public partial TimeAndQuantity Min { get; set; }
+//    [ObservableProperty]
+//    public partial TimeAndQuantity Max { get; set; }
+//    [ObservableProperty]
+//    public partial double Total { get; set; }
+//    [ObservableProperty]
+//    public partial TimeAndQuantity BeginStorm { get; set; }
+//    [ObservableProperty]
+//    public partial TimeAndQuantity EndStorm { get; set; }
+//    [ObservableProperty]
+//    public partial int Duration { get; set; }
+//}
 
 public class TimeAndQuantity
 {
@@ -325,22 +418,15 @@ public class TimeAndQuantity
     public DateTime Time { get; set; }
 }
 
-public partial class ForecastItem : ObservableObject
+public class ForecastItem
 {
-    [ObservableProperty]
-    public partial int Order { get; set; }
-    [ObservableProperty]
-    public partial string Statement { get; set; }
-    [ObservableProperty]
-    public partial string Condition { get; set; }
-    [ObservableProperty]
-    public partial double Thunder { get; set; }
-    [ObservableProperty]
-    public partial double Precipitation { get; set; }
-    [ObservableProperty]
-    public partial DateTime StartTime { get; set; }
-    [ObservableProperty]
-    public partial DateTime EndTime { get; set; }
+    public int Order { get; set; }
+    public string Statement { get; set; }
+    public string Condition { get; set; }
+    public double Thunder { get; set; }
+    public double Precipitation { get; set; }
+    public DateTime StartTime { get; set; }
+    public DateTime EndTime { get; set; }
 }
 
 public class NwsHourlySupplemental
@@ -373,6 +459,11 @@ public class NwsHourlySupplemental
     public SnowFallAmountValue? SnowfallAmount { get; set; }
     public ProbabilityOfPrecipitationValue? ProbabilityOfPrecipitation { get; set; }
     public MixingHeightValue? MixingHeight { get; set; }
+    public CeilingHeightValue? CeilingHeight { get; set; }
+    public TransportWindSpeedValue? TransportWindSpeed { get; set; }
+    public TransportWindDirectionValue? TransportWindDirection { get; set; }
+    public VisibilitiesValue? Visibility { get; set; }
+    public Color TimeOfDayTextColor => TimeOfDayService.GetTimeOfDayTextColor(this.Time.Hour);
 
 }
 
@@ -440,7 +531,7 @@ public class MinTemperatureValue
 public class RelativeHumidityValue
 {
     public int Duration { get; set; }
-    public string UnitCode { get; set; }
+    public string UnitCode => "%";
     public double Value { get; set; }
 }
 
@@ -461,7 +552,7 @@ public class ApparentTemperatureValue
 public class WetBulbGlobeTemperatureValue
 {
     public int Duration { get; set; }
-    public string UnitCode { get; set; }
+    public string UnitCode => "°F";
     public double Value
     {
         get => field;
@@ -476,13 +567,14 @@ public class WetBulbGlobeTemperatureValue
 public class HeatIndexValue
 {
     public int Duration { get; set; }
-    public string UnitCode { get; set; }
+    public string UnitCode => "°F";
     public double Value
     {
         get => field;
         set
         {
-            field = Math.Round(value * 1.8 + 32);
+
+            field = Math.Round(value != null ? value : 0 * 1.8 + 32);
         }
     }
 }
@@ -504,7 +596,7 @@ public class WindchillValue
 public class SkyCoverValue
 {
     public int Duration { get; set; }
-    public string UnitCode { get; set; }
+    public string UnitCode => "%";
     public double Value { get; set; }
     public DateTime Time { get; set; }
     public string Description => GetSkyCoverDescription();
@@ -515,10 +607,11 @@ public class SkyCoverValue
         if (this.Value is double s)
         {
             if (s < 10) desc = $"Look up to the sky and see a clear{(this.Time.Hour >= 6 || this.Time.Hour < 18 ? " sunny day" : " stary night")}.";
-            if (10 <= s && s < 30) desc = $"A mostly {(this.Time.Hour >= 6 || this.Time.Hour < 18 ? "sunny day" : "stary night")}.";
-            if (30 <= s && s < 70) desc = $"A partly cloudy {(this.Time.Hour >= 6 || this.Time.Hour < 18 ? "day" : " night")}.";
-            if (70 <= s && s < 90) desc = $"A mostly cloudy {(this.Time.Hour >= 6 || this.Time.Hour < 18 ? "day" : " night")}.";
-            if (s >= 90) desc = $"An overcast {(this.Time.Hour >= 6 || this.Time.Hour < 18 ? "day" : " night")}.";
+            if (10 <= s && s < 30) desc = $"Look up to the sky and see a mostly {(this.Time.Hour >= 6 || this.Time.Hour < 18 ? "sunny day" : "stary night")}.";
+            if (30 <= s && s < 60) desc = $"Look up to the sky and see a partly {(this.Time.Hour >= 6 || this.Time.Hour < 18 ? "sunny day" : "stary night")}.";
+            if (60 <= s && s < 70) desc = $"Look up to the sky and see a partly cloudy {(this.Time.Hour >= 6 || this.Time.Hour < 18 ? "day" : "night")}.";
+            if (70 <= s && s < 90) desc = $"Look up to the sky and see a mostly cloudy {(this.Time.Hour >= 6 || this.Time.Hour < 18 ? "day" : " night")}.";
+            if (s >= 90) desc = $"Look up to the sky and see an overcast {(this.Time.Hour >= 6 || this.Time.Hour < 18 ? "day" : " night")}.";
         }
         return desc;
     }
@@ -597,7 +690,7 @@ public class WindSpeedValue
         get => field;
         set
         {
-            field = Math.Round((value / 1.609344), 1);
+            field = Math.Round((value / 1.609344), 2);
         }
     }
 }
@@ -610,7 +703,7 @@ public class DailyWindSpeedValue
         get => field;
         set
         {
-            field = Math.Round((value / 1.609344), 1);
+            field = Math.Round((value / 1.609344), 2);
         }
     }
     public double Max
@@ -618,7 +711,7 @@ public class DailyWindSpeedValue
         get => field;
         set
         {
-            field = Math.Round((value / 1.609344), 1);
+            field = Math.Round((value / 1.609344), 2);
         }
     }
     public double Min
@@ -626,7 +719,7 @@ public class DailyWindSpeedValue
         get => field;
         set
         {
-            field = Math.Round((value / 1.609344), 1);
+            field = Math.Round((value / 1.609344), 2);
         }
     }
 }
@@ -641,7 +734,7 @@ public class WindGustValue
         get => field;
         set
         {
-            field = Math.Round((value / 1.609344), 1);
+            field = Math.Round((value / 1.609344), 2);
         }
     }
 }
@@ -694,8 +787,16 @@ public partial class WeatherStatementsValue : ObservableObject
 
 public class VisibilityValue
 {
-    public string UnitCode { get; set; }
-    public double Value { get; set; }
+    public int Duration { get; set; }
+    public string UnitCode => "ft";
+    public double Value
+    {
+        get => field;
+        set
+        {
+            field = Math.Round(value * 3.2808, 2);
+        }
+    }
 }
 
 
@@ -711,9 +812,10 @@ public class HazardValue
 
 public class HazardAttributeValue
 {
-    public string phenomenon { get; set; }
-    public string significance { get; set; }
-    public double event_number { get; set; }
+    public int Duration { get; set; }
+    public string Phenomenon { get; set; }
+    public string Significance { get; set; }
+    public double EventNumber { get; set; }
 }
 
 public class Heatrisk
@@ -771,20 +873,20 @@ public class HeatRiskValue
 public class ProbabilityOfPrecipitationValue
 {
     public int Duration { get; set; }
-    public string UnitCode { get; set; }
+    public string UnitCode => "%";
     public double Value { get; set; }
 }
 
 public class QuantitativePrecipitationValue
 {
     public int Duration { get; set; }
-    public string UnitCode => Value > 1 ? "inches" : Value <= .1 ? @"less than 1/10th of an inch" : "inch";
+    public string UnitCode => Value <= 1 ? "inch" : "inches";
     public double Value
     {
         get => field;
         set
         {
-            field = Math.Round((value / 25.4), 1);
+            field = Math.Round((value / 25.4), 2);
         }
     }
     public DateTime Time { get; set; }
@@ -794,13 +896,13 @@ public class QuantitativePrecipitationValue
 public class IceAccumulationValue
 {
     public int Duration { get; set; }
-    public string UnitCode { get; set; }
+    public string UnitCode => Value <= 1 ? "inch" : "inches";
     public double Value
     {
         get => field;
         set
         {
-            field = Math.Round((value / 25.4), 1);
+            field = Math.Round((value / 25.4), 2);
         }
     }
 }
@@ -808,19 +910,20 @@ public class IceAccumulationValue
 public class SnowFallAmountValue
 {
     public int Duration { get; set; }
-    public string UnitCode { get; set; }
+    public string UnitCode => Value <= 1 ? "inch" : "inches";
     public double Value
     {
         get => field;
         set
         {
-            field = Math.Round((value / 25.4), 1);
+            field = Math.Round((value / 25.4), 2);
         }
     }
 }
 
 public class SnowlevelValue
 {
+    public int Duration { get; set; }
     public string UnitCode { get; set; }
     public double Value { get; set; }
 }
@@ -834,25 +937,50 @@ public class SnowlevelValue
 /// </summary>
 public class CeilingHeightValue
 {
-    public string UnitCode { get; set; }
-    public double Value { get; set; }
+    public int Duration { get; set; }
+    public string UnitCode => "ft";
+    public double Value
+    {
+        get => field;
+        set
+        {
+            field = Math.Round(value * 3.2808, 2);
+        }
+    }
 }
 
 public class VisibilitiesValue
 {
-    public string UnitCode { get; set; }
-    public double Value { get; set; }
+    public int Duration { get; set; }
+    public string UnitCode => "ft";
+    public double Value
+    {
+        get => field;
+        set
+        {
+            field = Math.Round(value * 3.2808, 2);
+        }
+    }
 }
 
 public class TransportWindSpeedValue
 {
-    public string UnitCode { get; set; }
-    public double Value { get; set; }
+    public int Duration { get; set; }
+    public string UnitCode => "mph";
+    public double Value
+    {
+        get => field;
+        set
+        {
+            field = Math.Round((value / 1.609344), 2);
+        }
+    }
 }
 
 public class TransportWindDirectionValue
 {
-    public string UnitCode { get; set; }
+    public int Duration { get; set; }
+    public string Direction => GetWeatherService.WindDirection((int)this.Value);
     public double Value { get; set; }
 }
 
@@ -865,9 +993,14 @@ public class MixingHeightValue
         get => field;
         set
         {
-            var mixing = Math.Round(Value * 3.2808399, 1);
-            if (mixing <= 0) field = 0.0;
-            field = mixing;
+            if (value > 0)
+            {
+                field = Math.Round(value * 3.2808399, 2);
+            }
+            else
+            {
+                field = 0;
+            }
         }
     }
 }
@@ -944,7 +1077,7 @@ public class WindWaveHeightValue
         get => field;
         set
         {
-            field = Math.Round((value / 3.2808399), 1);
+            field = Math.Round((value * 3.2808399), 2);
         }
     }
 }
@@ -1055,17 +1188,43 @@ public class LowVisibilityOccurrenceRiskIndexValue
         get => field;
         set
         {
-            field = Math.Round((value * 3.2808399), 1);
+            field = Math.Round((value * 3.2808399), 2);
         }
     }
     public string Description => Value switch
     {
         1 or 2 or 3 => "Low risk of very low Visibility.",
         4 or 5 or 6 => "Moderate risk of low Visibility.",
-        7 or 8 or 9 => "High risk of low Visibility.",
-        10 => "Exreme risk - very low Visibility expected.",
+        7 or 8 or 9 => "High risk of low Visibility, possibility of super fog. Super fog occurs when smoke from a fire mixes with fog.",
+        10 => "Exreme risk  of low to no visibility expected. possibility of super fog. Super fog occurs when smoke from a fire mixes with fog.",
         _ => "No low Visibility risk issued."
     };
+}
+
+// T is constrained to struct so that "T?" below means Nullable<T> (e.g. double?),
+// allowing NWS null values to deserialize and be checked with HasValue.
+public class NwsGridpointProperty<T> where T : struct
+{
+    [JsonPropertyName("uom")]
+    public string? Uom { get; set; }
+
+    [JsonPropertyName("values")]
+    public NwsGridpointValue<T>[]? Values { get; set; }
+}
+public class NwsGridpointValue<T> where T : struct
+{
+    [JsonPropertyName("validTime")]
+    public string ValidTime { get; set; } = string.Empty;
+
+    [JsonPropertyName("value")]
+    public T? Value { get; set; }
+}
+
+public class NwsWeatherCondition
+{
+    public string? coverage { get; set; }
+    public string? weather { get; set; }
+    public string? intensity { get; set; }
 }
 
 public class Stability

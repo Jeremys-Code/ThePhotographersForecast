@@ -1,6 +1,4 @@
-﻿using static ThePhotographersForecast.Data.NwsSupplementalData;
-
-namespace ThePhotographersForecast.Services
+﻿namespace ThePhotographersForecast.Services
 {
     public static class TempConverter
     {
@@ -29,7 +27,7 @@ namespace ThePhotographersForecast.Services
 
         public static double MphToKmh(double speed)
         {
-            return Math.Round(speed*1.609344, 1);
+            return Math.Round(speed * 1.609344, 1);
         }
         public static double StoredToMs(double speed)
         {
@@ -37,3 +35,5 @@ namespace ThePhotographersForecast.Services
         }
     }
 }
+// value / 25.4 mm to inches
+// value *3.2808 M to Ft

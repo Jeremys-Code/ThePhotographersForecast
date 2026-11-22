@@ -11,16 +11,21 @@ namespace ThePhotographersForecast.Models
         public partial HourlyForecast[] HourlyForecasts { get; set; }
         public WeatherForecast()
         {
-            this.DailyForecasts = Array.Empty<DailyForecast>();
-            this.HourlyForecasts = Array.Empty<HourlyForecast>();
         }
         public WeatherForecast(WeatherForecast weather)
         {
             if (weather == null)
                 throw new ArgumentNullException(nameof(weather), "Source object cannot be null.");
-
-            this.DailyForecasts = weather.DailyForecasts.ToArray();
-            this.HourlyForecasts = weather.HourlyForecasts.ToArray();
+            if (weather.DailyForecasts != null && weather.DailyForecasts.Length > 0)
+            {
+                DailyForecasts = new DailyForecast[weather.DailyForecasts.Length];
+                for (int d = 0; d < weather.DailyForecasts.Length; d++) { DailyForecasts[d] = weather.DailyForecasts[d]; }
+            }
+            if (weather.HourlyForecasts != null && weather.HourlyForecasts.Length > 0)
+            {
+                HourlyForecasts = new HourlyForecast[weather.HourlyForecasts.Length];
+                for (int h = 0; h < weather.HourlyForecasts.Length; h++) { HourlyForecasts[h] = weather.HourlyForecasts[h]; }
+            }
         }
     }
     public class HourlyForecast
@@ -85,6 +90,7 @@ namespace ThePhotographersForecast.Models
         public string WeatherCodeDescription { get; set; }
         public ImageSource DailyIcon { get; set; }
         public DoubleUnitValue Temperature2mMax { get; set; }
+        public DoubleUnitValue RelativeHumidity2mMean { get; set; }
         public string TimeTempMax { get; set; }
         public DoubleUnitValue Temperature2mMin { get; set; }
         public string TimeTempMin { get; set; }

@@ -77,6 +77,7 @@
             public string weather_code { get; set; } = string.Empty;
             public string temperature_2m_max { get; set; } = string.Empty;
             public string temperature_2m_min { get; set; } = string.Empty;
+            public string relative_humidity_2m_mean { get; set; } = string.Empty;
             public string wind_speed_10m_max { get; set; } = string.Empty;
             public string wind_gusts_10m_max { get; set; } = string.Empty;
             public string wind_direction_10m_dominant { get; set; } = string.Empty;
@@ -104,6 +105,7 @@
             public int[] weather_code { get; set; }
             public double[] temperature_2m_max { get; set; }
             public double[] temperature_2m_min { get; set; }
+            public double[] relative_humidity_2m_mean { get; set; }
             public double[] wind_speed_10m_max { get; set; }
             public double[] wind_gusts_10m_max { get; set; }
             public int[] wind_direction_10m_dominant { get; set; }

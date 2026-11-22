@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Text.Json;
 using ThePhotographersForecast.Data;
 using ThePhotographersForecast.Models;
+using ThePhotographersForecast.Models.ObserverCalc;
 using ThePhotographersForecast.Services.JsonConverters;
 using ThePhotographersForecast.Shared;
 
@@ -13,7 +14,8 @@ namespace ThePhotographersForecast.Services.Modules
         private readonly HttpClient _client;
         private ISession _session;
 
-
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
 
         public SkyColorEngine(HttpClient client, ISession session)
         {
@@ -65,6 +67,8 @@ namespace ThePhotographersForecast.Services.Modules
         // ------------------------------------------------------------
         public async Task<Dictionary<DateOnly, LinearGradientBrush>> GetDailySkyColorGradientsAsync(double latitude, double longitude)
         {
+            Latitude = latitude;
+            Longitude = longitude;
             var sky = await GetSkyCompositionAsync(latitude, longitude);
             if (sky == null)
                 return new Dictionary<DateOnly, LinearGradientBrush>();
@@ -123,14 +127,14 @@ namespace ThePhotographersForecast.Services.Modules
             {
                 // AIR QUALITY API
                 string aqUrl =
-                    $"https://air-quality-api.open-meteo.com/v1/air-quality?latitude={latitude}&longitude={longitude}&hourly=pm10,pm2_5,nitrogen_dioxide,sulphur_dioxide,ozone,dust,uv_index,uv_index_clear_sky,aerosol_optical_depth,carbon_monoxide&timezone=auto&start_date={DateTime.Now.Date.ToString("yyyy-MM-dd")}&end_date={DateTime.Now.AddDays(3).Date.ToString("yyyy-MM-dd")}";
+                    $"https://air-quality-api.open-meteo.com/v1/air-quality?latitude={latitude}&longitude={longitude}&hourly=pm10,pm2_5,nitrogen_dioxide,sulphur_dioxide,ozone,dust,uv_index,uv_index_clear_sky,aerosol_optical_depth,carbon_monoxide&timezone=auto&start_date={_session.StartDate.Date.ToString("yyyy-MM-dd")}&end_date={_session.EndDate.Date.ToString("yyyy-MM-dd")}";
                 var aqRequest = new HttpRequestMessage(HttpMethod.Get, aqUrl);
                 var aqResult = await GetDataAsync<SkyCompositionData.Rootobject>(aqRequest, "airquality");
                 if (aqResult == null) return null;
 
                 // WEATHER API
                 string weatherUrl =
-                    $"https://api.open-meteo.com/v1/forecast?latitude={latitude}&longitude={longitude}&hourly=surface_pressure,cloud_cover,direct_normal_irradiance,diffuse_radiation,shortwave_radiation&models=gfs_seamless&timezone=auto&start_date={DateTime.Now.Date.ToString("yyyy-MM-dd")}&end_date={DateTime.Now.AddDays(3).ToString("yyyy-MM-dd")}";
+                    $"https://api.open-meteo.com/v1/forecast?latitude={latitude}&longitude={longitude}&hourly=surface_pressure,cloud_cover,direct_normal_irradiance,diffuse_radiation,shortwave_radiation&models=gfs_seamless&timezone=auto&start_date={_session.StartDate.Date.ToString("yyyy-MM-dd")}&end_date={_session.EndDate.Date.ToString("yyyy-MM-dd")}";
                 var weatherRequest = new HttpRequestMessage(HttpMethod.Get, weatherUrl);
                 var airQ = await GetDataAsync<SkyColorAttributesData.Rootobject>(weatherRequest, "airattributes");
                 if (airQ == null) return null;
@@ -147,7 +151,7 @@ namespace ThePhotographersForecast.Services.Modules
                     var eventDay = _session.EventsData.Where(e => e.Date.Date == t.Date).FirstOrDefault() ?? new EventModel();
                     if (eventDay == null)
                         return null;
-
+                    var sun = SunCalc.GetPosition(t.Date, latitude, longitude);
                     sky[i] = new SkyColor
                     {
                         Time = t,
@@ -171,8 +175,8 @@ namespace ThePhotographersForecast.Services.Modules
                         ShortwaveRadiation = airQ.hourly.shortwave_radiation[i],
 
                         // Solar geometry
-                        SunAltitudeDeg = eventDay.AstronomicalData.SunAltitude,
-                        SunAzimuthDeg = eventDay.AstronomicalData.SunAzimuth,
+                        SunAltitudeDeg = sun.Altitude,
+                        SunAzimuthDeg = sun.Azimuth,
                         Sunrise = eventDay.EventTimes.Where(s => s.EventName == "Sunrise").First().AstroTime,
                         Sunset = eventDay.EventTimes.Where(s => s.EventName == "Sunset").First().AstroTime,
                         SolarNoon = eventDay.EventTimes.Where(s => s.EventName == "Solar Noon").First().AstroTime
@@ -199,12 +203,13 @@ namespace ThePhotographersForecast.Services.Modules
 
             foreach (var h in hourly)
             {
+                var sun = SunCalc.GetPosition(h.Time, Latitude, Longitude);
                 var c = EstimateSkyColor(
                     h.DirectNormalIrradiance,
                     h.Time,
                     h.CloudCoverPercent,
-                    h.SunAltitudeDeg,
-                    h.SunAzimuthDeg,
+                    sun.Altitude,
+                    sun.Azimuth,
                     h.Sunrise,
                     h.Sunset,
                     h.SolarNoon);
@@ -275,11 +280,11 @@ namespace ThePhotographersForecast.Services.Modules
                     255);
             }
 
-            if (intensity > 0.8) return Color.FromRgb(135, 206, 235);
-            if (intensity > 0.5) return Color.FromRgb(135, 206, 250);
-            if (intensity > 0.2) return Color.FromRgb(176, 196, 222);
+            if (intensity > 0.8) return Color.FromRgb(135, 206, 235); //sky blue
+            if (intensity > 0.5) return Color.FromRgb(135, 206, 250); // light sky blue
+            if (intensity > 0.2) return Color.FromRgb(11, 168, 230); // dark sky blue
 
-            return Color.FromRgb(0, 44, 91);
+            return Color.FromRgb(0, 44, 91); //sail on blue
         }
     }
 }

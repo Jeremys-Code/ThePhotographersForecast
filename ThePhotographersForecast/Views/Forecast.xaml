@@ -1,328 +1,535 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:vm="clr-namespace:ThePhotographersForecast.ViewModels"
-             xmlns:model="clr-namespace:ThePhotographersForecast.Models" 
-             xmlns:jt="clr-namespace:ThePhotographersForecast.Components"
+             xmlns:model="clr-namespace:ThePhotographersForecast.Models"
+             xmlns:ml="clr-namespace:ThePhotographersForecast.Services.ML"
+             xmlns:component="clr-namespace:ThePhotographersForecast.Components"
+             xmlns:skia="clr-namespace:SkiaSharp.Extended.UI.Controls;assembly=SkiaSharp.Extended.UI"
              x:Class="ThePhotographersForecast.Views.Forecast"
              x:DataType="vm:ForecastViewModel"
-             xmlns:svc="clr-namespace:ThePhotographersForecast.Services"
-             xmlns:shared="clr-namespace:ThePhotographersForecast.Shared"
-             xmlns:skia="clr-namespace:SkiaSharp.Extended.UI.Controls;assembly=SkiaSharp.Extended.UI"
-             Title="Photographers Forecast">
-    <ScrollView>
-    <VerticalStackLayout Padding="20">
-        <Border Stroke="{StaticResource GpsCircleBorder}" StrokeThickness="10" Background="{StaticResource GpsBackground}">
-            <Border.StrokeShape>
-                <RoundRectangle CornerRadius="30"/>
-            </Border.StrokeShape>
-                <VerticalStackLayout HorizontalOptions="Fill">
-                    <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Start">
-                        <Label Text="The Photographer's forecast for:" HorizontalTextAlignment="Center" LineBreakMode="NoWrap" HorizontalOptions="Fill" FontFamily="NotoThick" FontSize="32" />
-                        <Label Text="{Binding LocationName}"  HorizontalOptions="Center" HorizontalTextAlignment="Center" LineBreakMode="WordWrap" FontFamily="NotoThick" FontSize="30" />
-                        <Label Text="{Binding LocationTime}" HorizontalOptions="Center" HorizontalTextAlignment="Center" Margin="0,0,0,8"  FontFamily="NotoSans" FontSize="18"/>
+             Title="The Photographer's Forecast"
+             BackgroundColor="#121824">
+
+    <ScrollView Orientation="Vertical">
+        <VerticalStackLayout Padding="15,20,15,30">
+
+            <!-- 1.) RoundRectangle border 8 thick, with EarlyMorning background gradient and depth shadow -->
+            <Border Stroke="White"
+                    StrokeThickness="8"
+                    Background="{StaticResource EarlyMorning}"
+                    HeightRequest="350"
+                    VerticalOptions="Start"
+                    Padding="28,24,28,24">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="50"/>
+                </Border.StrokeShape>
+                <Border.Shadow>
+                    <Shadow Brush="Black" Offset="0,18" Radius="30" Opacity="0.85"/>
+                </Border.Shadow>
+
+                <VerticalStackLayout Spacing="22">
+
+                    <!-- Header Section -->
+                    <VerticalStackLayout HorizontalOptions="Center" Spacing="4">
+                        <!-- 2.) Static text with font family of NotoThick Bold -->
+                        <Label Text="The Photographer's Forecast"
+                               FontFamily="HennyPenny"
+                               FontSize="30"
+                               TextColor="White"
+                               HorizontalOptions="Center"
+                               HorizontalTextAlignment="Center"/>
+
+                        <!-- 3.) _session.SelectedLocation.DisplayName -->
+                        <Label Text="{Binding LocationName}"
+                               FontFamily="NotoSans"
+                               FontSize="16"
+                               TextColor="White"
+                               HorizontalOptions="Center"
+                               HorizontalTextAlignment="Center"/>
+
+                        <!-- 4.) Location Current Time on a 1-second timer -->
+                        <Label Text="{Binding LocationTime}"
+                               FontFamily="NotoSans"
+                               FontSize="14"
+                               TextColor="White"
+                               HorizontalOptions="Center"
+                               HorizontalTextAlignment="Center"
+                               Margin="0,2,0,6"/>
                     </VerticalStackLayout>
 
+                    <!-- Middle Section: Date Selector (Left) + Two-column, Three-row Summary Grid (Right) -->
+                    <Grid ColumnDefinitions="Auto, *" ColumnSpacing="28">
 
+                        <!-- 5.) Select your date section -->
+                        <VerticalStackLayout Grid.Column="0" Spacing="10" VerticalOptions="Start">
+                            <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                                <Border Stroke="#D0D7DE"
+                                        StrokeThickness="1"
+                                        BackgroundColor="White"
+                                        WidthRequest="16"
+                                        HeightRequest="16"
+                                        VerticalOptions="Center">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="2"/>
+                                    </Border.StrokeShape>
+                                    <BoxView HeightRequest="2" WidthRequest="8" Color="Black" HorizontalOptions="Center" VerticalOptions="Center"/>
+                                </Border>
+                                <Label Text="Select your date:"
+                                       FontFamily="NotoThick"
+                                       FontAttributes="Bold"
+                                       FontSize="15"
+                                       TextColor="White"
+                                       VerticalOptions="Center"/>
+                            </HorizontalStackLayout>
 
-
-                    <!--Header Ends-->
-                    <BoxView HeightRequest="10" HorizontalOptions="Fill" Color="Transparent"/>
-                    <!--Calendar Dates Menu-->
-                    <!--<VerticalStackLayout HorizontalOptions="Center">
-                            <HorizontalStackLayout VerticalOptions="Start">-->
-
-
-                    <VerticalStackLayout>
-
-                        <Grid ColumnDefinitions="Auto,Auto,Auto" HorizontalOptions="Fill">
-                            <CollectionView x:Name="CalendarDatePicker" Grid.Column="0"  ItemsSource="{Binding Dates}"
-                           SelectedItem="{Binding SelectedDate}"
-                SelectionChangedCommand="{Binding OnSelectedDateCommand}"
-                SelectionChangedCommandParameter="{Binding .}"
-                        WidthRequest="250"
-                        HorizontalOptions="Start"
-                        SelectionMode="Single">
+                            <!-- 3-Column Grid of Date Cards -->
+                            <CollectionView ItemsSource="{Binding Dates}"
+                                            SelectedItem="{Binding SelectedCalendarDay}"
+                                            SelectionMode="Single"
+                                            SelectionChangedCommand="{Binding SelectDateCommand}"
+                                            SelectionChangedCommandParameter="{Binding SelectedItem, Source={RelativeSource Self}}"
+                                            WidthRequest="235">
                                 <CollectionView.ItemsLayout>
-                                    <GridItemsLayout Orientation="Vertical"
-                             Span="4" />
+                                    <GridItemsLayout Orientation="Vertical" Span="3" HorizontalItemSpacing="8" VerticalItemSpacing="8"/>
                                 </CollectionView.ItemsLayout>
                                 <CollectionView.ItemTemplate>
-                                    <DataTemplate x:DataType="svc:DateItem">
-                                        <Border Margin="8"
-                            Stroke="Green" 
-                            StrokeThickness="2" 
-                            HeightRequest="50" 
-                            WidthRequest="50" 
-                                 Style="{StaticResource ActiveLink}">
-                                            <Label Text="{Binding DateDisplay}"
-                                   FontFamily="NotoSans"
-                                   FontSize="12" 
-                                   Margin="2" 
-                                   TextColor="Black"
-                                   LineBreakMode="WordWrap" 
-                                   VerticalTextAlignment="Center" 
-                                   HorizontalOptions="Center" 
-                                   HorizontalTextAlignment="Center"/>
+                                    <DataTemplate x:DataType="component:CalendarDayModel">
+                                        <Border Stroke="#D0D7DE"
+                                                StrokeThickness="1"
+                                                BackgroundColor="White"
+                                                HeightRequest="56"
+                                                WidthRequest="68"
+                                                Padding="2">
+                                            <Border.StrokeShape>
+                                                <RoundRectangle CornerRadius="12"/>
+                                            </Border.StrokeShape>
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ForecastViewModel}}, Path=SelectDateCommand}"
+                                                                      CommandParameter="{Binding .}"/>
+                                            </Border.GestureRecognizers>
+                                            <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="1">
+                                                <Label Text="{Binding Date, StringFormat='{0:ddd,}'}"
+                                                       FontFamily="NotoSans"
+                                                       FontAttributes="Bold"
+                                                       FontSize="12"
+                                                       TextColor="Black"
+                                                       HorizontalTextAlignment="Center"/>
+                                                <Label Text="{Binding Date, StringFormat='{0:MMM d}'}"
+                                                       FontFamily="NotoSans"
+                                                       FontSize="12"
+                                                       TextColor="Black"
+                                                       HorizontalTextAlignment="Center"/>
+                                            </VerticalStackLayout>
                                         </Border>
                                     </DataTemplate>
                                 </CollectionView.ItemTemplate>
                             </CollectionView>
+                        </VerticalStackLayout>
 
+                        <!-- 6.) Two column grid with three rows -->
+                        <Grid Grid.Column="1"
+                              ColumnDefinitions="*, *"
+                              RowDefinitions="Auto, Auto, Auto"
+                              RowSpacing="14"
+                              ColumnSpacing="22"
+                              VerticalOptions="Start">
 
-                            <Border Grid.Column="1" Stroke="{StaticResource PeriodEarlyMorning}" StrokeThickness="4">
-                                <Border.StrokeShape>
-                                    <RoundRectangle CornerRadius="20"/>
-                                </Border.StrokeShape>
-                                <VerticalStackLayout>
-                                    <Label VerticalOptions="Start" VerticalTextAlignment="Start" x:Name="SunMoonSummaryLabel" Text="Sun and Moon Summary:" FontFamily="NotoThick" FontSize="18" HorizontalOptions="Center" HorizontalTextAlignment="Center" Margin="4,4,5,4"/>
-                                    <HorizontalStackLayout Margin="4" VerticalOptions="Start" HorizontalOptions="Start">
-                                        <Label Text="Day Length:" FontFamily="NotoSans" VerticalOptions="Start" VerticalTextAlignment="Start" HorizontalOptions="Start" HorizontalTextAlignment="Start" FontSize="14"/>
-                                        <Label Text="{Binding SelectedDayLength}" FontSize="14" VerticalOptions="Start" VerticalTextAlignment="Start" HorizontalOptions="Start" HorizontalTextAlignment="Start" FontFamily="NotoSans"/>
-                                    </HorizontalStackLayout>
-                                    <HorizontalStackLayout Margin="4" HorizontalOptions="Start" VerticalOptions="Start">
-                                        <Label Text="Sunshine Length:" FontSize="14" FontFamily="NotoSans" VerticalOptions="Start" VerticalTextAlignment="Start" HorizontalOptions="Start" HorizontalTextAlignment="Start"/>
-                                        <Label  Text="{Binding SelectedSunshine}" FontSize="14" FontFamily="NotoSans" VerticalOptions="Start" VerticalTextAlignment="Start" HorizontalOptions="Start" HorizontalTextAlignment="Start" />
-                                    </HorizontalStackLayout>
-                                    <HorizontalStackLayout Margin="4" HorizontalOptions="Start">
-                                        <Label Text="Current Moon Phase:" FontFamily="NotoSans" FontSize="14" VerticalOptions="Center" VerticalTextAlignment="Center" HorizontalOptions="Start" LineBreakMode="WordWrap" HorizontalTextAlignment="Start"/>
-                                        <Label Text="{Binding SelectedMoonPhase}" FontSize="14" FontFamily="NotoSans" FontAttributes="Bold" VerticalOptions="Center" VerticalTextAlignment="Center" HorizontalOptions="Start" HorizontalTextAlignment="Start"/>
-                                    </HorizontalStackLayout>
-                                    <skia:SKLottieView Source="{Binding SelectedMoonPhase}" Grid.Row="2" Grid.Column="1" HorizontalOptions="Center" x:Name="SkMoonPhase" RepeatCount="-1" RepeatMode="Restart"  HeightRequest="100" WidthRequest="100" Margin="5,10"/>
-                                </VerticalStackLayout>
-                            </Border>
+                            <!-- Row 0: Spans both columns: Daily Summary for {SelectedDate} -->
+                            <HorizontalStackLayout Grid.Row="0" Grid.ColumnSpan="2" Spacing="8" Margin="0,0,0,4">
+                                <Border Stroke="#D0D7DE"
+                                        StrokeThickness="1"
+                                        BackgroundColor="White"
+                                        WidthRequest="16"
+                                        HeightRequest="16"
+                                        VerticalOptions="Center">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="2"/>
+                                    </Border.StrokeShape>
+                                    <BoxView HeightRequest="2" WidthRequest="8" Color="Black" HorizontalOptions="Center" VerticalOptions="Center"/>
+                                </Border>
+                                <Label Text="{Binding DailySummaryTitle}"
+                                       FontFamily="NotoThick"
+                                       FontSize="23"
+                                       TextColor="White"
+                                       VerticalOptions="Center"/>
+                            </HorizontalStackLayout>
 
-                            <!-- Moon Phases Carousel -->
-
-                            <!--<jt:MoonPhasesCarouselView Grid.Column="2"/>-->
-                        </Grid>
-                    </VerticalStackLayout>
-
-
-
-
-
-
-                    <CollectionView ItemsSource="{Binding SelectedDay.Periods}"
-                                                     SelectionMode="None">
-                        <CollectionView.ItemsLayout>
-                            <GridItemsLayout Orientation="Vertical" Span="6"/>
-                        </CollectionView.ItemsLayout>
-                        <CollectionView.ItemTemplate>
-                            <DataTemplate x:DataType="model:DayPeriod">
-                                <Grid ColumnSpacing="2" HorizontalOptions="Center" >
-                                    <Border Margin="6" Background="{Binding TimeOfDayBackgroundBrush}">
+                            <!-- 7.) Row 1, Column 0: 2-column grid. Column 0 has 2 rows (High, Low), Column 1 has Daily Lottie -->
+                            <Grid Grid.Row="1" Grid.Column="0" ColumnDefinitions="Auto, Auto" ColumnSpacing="14" VerticalOptions="Start">
+                                <!-- High and Low -->
+                                <Grid Grid.Column="0" RowDefinitions="Auto, Auto" RowSpacing="10" VerticalOptions="Center">
+                                    <!-- High Box -->
+                                    <Border Grid.Row="0"
+                                            Stroke="Red"
+                                            StrokeThickness="2"
+                                            BackgroundColor="#70FF0000"
+                                            MinimumHeightRequest="56"
+                                            WidthRequest="140"
+                                            Padding="6,4">
                                         <Border.StrokeShape>
-                                            <RoundRectangle  CornerRadius="12"/>
+                                            <RoundRectangle CornerRadius="4"/>
                                         </Border.StrokeShape>
                                         <Grid>
-                                            <VerticalStackLayout>
-                                                <Label Text="{Binding TimeOfDayName}" TextColor="#FFFF00" FontAttributes="Bold"  FontFamily="NotoThick" FontAutoScalingEnabled="True"  TextDecorations="Underline" HorizontalTextAlignment="Center" HorizontalOptions="Center" Margin="5" />
-                                                <skia:SKLottieView x:Name="TimeOfDayAnimation" Source="{Binding TimeOfDayImage}" RepeatCount="-1" RepeatMode="Restart" WidthRequest="80" HeightRequest="80" HorizontalOptions="Center"/>
-                                                <Label Text="The forecast for" TextColor="#FFFF00" FontFamily="NotoThick" FontAutoScalingEnabled="True" TextDecorations="Underline" FontAttributes="Bold" HorizontalTextAlignment="Center" HorizontalOptions="Center" Margin="5" />
-                                                <Label Text="{Binding HourlyName}" TextColor="#FFFF00" FontFamily="NotoThick" FontAutoScalingEnabled="True"  FontAttributes="Bold" TextDecorations="Underline" HorizontalTextAlignment="Center" HorizontalOptions="Center" Margin="5" />
-                                                <skia:SKLottieView x:Name="TimeOfDaySkWeatherMeteocon" HeightRequest="80" WidthRequest="80" RepeatCount="-1" RepeatMode="Restart" Source="{Binding TimeOfDayWeatherImage}" HorizontalOptions="Center" Margin="5"/>
-                                                <Label Text="{Binding TimeOfDayStormSummary}" TextColor="#FF004D" Shadow="1,1,2,White,0.9" FontAutoScalingEnabled="True"  FontFamily="NotoSans" FontAttributes="Bold" LineBreakMode="WordWrap" />
-                                                <Label Text="{Binding TimeOfDaySummary}" LineBreakMode="WordWrap" MaxLines="5" FontAutoScalingEnabled="True" FontFamily="NotoSans" TextColor="#FE0194" HorizontalOptions="Center" Margin="5" />
-                                                <CollectionView ItemsSource="{Binding TimeOfDayEvents}" SelectionMode="None" ItemSizingStrategy="MeasureAllItems">
-                                                    <CollectionView.ItemTemplate>
-                                                        <DataTemplate x:DataType="model:EventTime">
-                                                            <VerticalStackLayout Margin="5">
-                                                                <Label Text="{Binding EventName}" LineBreakMode="WordWrap" FontFamily="NotoThick" FontAttributes="Bold" TextColor="#26f629" HorizontalOptions="Center" HorizontalTextAlignment="Center" />
-                                                                <HorizontalStackLayout HorizontalOptions="Center">
-                                                                    <Label Text="{Binding TimeLabel}"  HorizontalOptions="Fill" HorizontalTextAlignment="Justify" FontAttributes="Bold" FontAutoScalingEnabled="True" TextColor="#FF01FB" FontFamily="NotoThick" />
-                                                                    <Label Text="{Binding AstroTime, StringFormat='{}{0:h:mm tt}'}" TextColor="#FAFF00" HorizontalOptions="Fill" HorizontalTextAlignment="Justify" FontAutoScalingEnabled="True" FontAttributes="Bold" FontFamily="NotoThick" />
-                                                                </HorizontalStackLayout>
-                                                                <HorizontalStackLayout HorizontalOptions="Center">
-                                                                    <Label Text="{Binding OtherTimeLabel}" TextColor="#00F556" FontFamily="NotoThick" HorizontalOptions="Fill" HorizontalTextAlignment="Justify" FontAttributes="Bold" FontAutoScalingEnabled="True"/>
-                                                                    <Label Text="{Binding OtherTime, StringFormat='{}{0:h:mm tt}'}" TextColor="#EE1717" FontFamily="NotoThick" HorizontalOptions="Fill" FontAttributes="Bold" HorizontalTextAlignment="Justify" FontAutoScalingEnabled="True"/>
-                                                                </HorizontalStackLayout>
-                                                            </VerticalStackLayout>
-                                                        </DataTemplate>
-                                                    </CollectionView.ItemTemplate>
-                                                </CollectionView>
+                                            <Label Text="High"
+                                                   FontFamily="NotoThick"
+                                                   FontSize="24"
+                                                   TextColor="#CCFF7777"
+                                                   HorizontalOptions="Start"
+                                                   VerticalOptions="Center"/>
+                                            <VerticalStackLayout HorizontalOptions="End" VerticalOptions="Center" Spacing="0">
+                                                <Label Text="{Binding SelectedHighTime}"
+                                                       FontFamily="NotoSans"
+                                                       FontSize="11"
+                                                       TextColor="Black"
+                                                       HorizontalTextAlignment="End"/>
+                                                <Label Text="{Binding SelectedHighTemp}"
+                                                       FontFamily="NotoThick"
+                                                       FontAttributes="Bold"
+                                                       FontSize="13"
+                                                       LineBreakMode="WordWrap"
+                                                       TextColor="Black"
+                                                       HorizontalTextAlignment="End"/>
+                                            </VerticalStackLayout>
+                                        </Grid>
+                                    </Border>
+
+                                    <!-- Low Box -->
+                                    <Border Grid.Row="1"
+                                            Stroke="Blue"
+                                            StrokeThickness="2"
+                                            BackgroundColor="#700000FF"
+                                            MinimumHeightRequest="56"
+                                            WidthRequest="140"
+                                            Padding="6,4">
+                                        <Border.StrokeShape>
+                                            <RoundRectangle CornerRadius="4"/>
+                                        </Border.StrokeShape>
+                                        <Grid>
+                                            <Label Text="LOW"
+                                                   FontFamily="NotoThick"
+                                                   FontSize="24"
+                                                   TextColor="#CC99C0FF"
+                                                   HorizontalOptions="End"
+                                                   VerticalOptions="Center"/>
+                                            <VerticalStackLayout HorizontalOptions="Start" VerticalOptions="Center" Spacing="0">
+                                                <Label Text="{Binding SelectedLowTemp}"
+                                                       FontFamily="NotoThick"
+                                                       FontAttributes="Bold"
+                                                       FontSize="13"
+                                                       LineBreakMode="WordWrap"
+                                                       TextColor="Black"
+                                                       HorizontalTextAlignment="Start"/>
+                                                <Label Text="{Binding SelectedLowTime}"
+                                                       FontFamily="NotoSans"
+                                                       FontSize="11"
+                                                       TextColor="Black"
+                                                       HorizontalTextAlignment="Start"/>
                                             </VerticalStackLayout>
                                         </Grid>
                                     </Border>
                                 </Grid>
+
+                                <!-- Daily Lottie File -->
+                                <Border Grid.Column="1"
+                                        BackgroundColor="#26C6DA"
+                                        HeightRequest="122"
+                                        WidthRequest="122"
+                                        VerticalOptions="Center">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="16"/>
+                                    </Border.StrokeShape>
+                                    <skia:SKLottieView Source="{Binding SelectedDailyMeteocon}"
+                                                       RepeatCount="-1"
+                                                       RepeatMode="Restart"
+                                                       HeightRequest="92"
+                                                       WidthRequest="92"
+                                                       HorizontalOptions="Center"
+                                                       VerticalOptions="Center"/>
+                                </Border>
+                            </Grid>
+
+                            <!-- 8.) Row 1, Column 1: Health & Safety Summary -->
+                            <VerticalStackLayout Grid.Row="1" Grid.Column="1" Spacing="6" VerticalOptions="Start">
+                                <Label Text="Health &amp; Safety Summary:"
+                                       FontFamily="NotoThick"
+                                       FontSize="20"
+                                       TextColor="White"/>
+                                <Label Text="{Binding SelectedHealthSafetySummary}"
+                                       FontFamily="NotoSans"
+                                       FontSize="13"
+                                       TextColor="White"
+                                       LineBreakMode="WordWrap"/>
+                            </VerticalStackLayout>
+
+                            <!-- 9.) Row 2, Column 0: Weather Summary -->
+                            <VerticalStackLayout Grid.Row="2" Grid.Column="0" Spacing="6" VerticalOptions="Start">
+                                <Label Text="Weather Summary:"
+                                       FontFamily="NotoThick"
+                                       FontSize="20"
+                                       TextColor="White"/>
+                                <Label Text="{Binding SelectedWeatherSummary}"
+                                       FontFamily="NotoSans"
+                                       FontSize="13"
+                                       TextColor="White"
+                                       LineBreakMode="WordWrap"/>
+                            </VerticalStackLayout>
+
+                            <!-- 10.) Row 2, Column 1: Sun & Moon Summary -->
+                            <VerticalStackLayout Grid.Row="2" Grid.Column="1" Spacing="6" VerticalOptions="Start">
+                                <Label Text="Sun &amp; Moon Summary:"
+                                       FontFamily="NotoThick"
+                                       FontSize="20"
+                                       TextColor="White"/>
+                                <Label Text="{Binding SelectedDayLength, StringFormat='Day Length: {0}'}"
+                                       FontFamily="NotoSans"
+                                       FontSize="14"
+                                       TextColor="White"/>
+                                <Label Text="{Binding SelectedNightLength, StringFormat='Night Length: {0}'}"
+                                       FontFamily="NotoSans"
+                                       FontSize="14"
+                                       TextColor="White"/>
+                                <Label Text="{Binding SelectedMoonPhase, StringFormat='Moon Phase: {0}'}"
+                                       FontFamily="NotoSans"
+                                       FontSize="14"
+                                       TextColor="White"/>
+                            </VerticalStackLayout>
+                        </Grid>
+                    </Grid>
+
+                    <!-- 11.) 5 boxes with colorful background gradient -->
+                    <CollectionView ItemsSource="{Binding SelectedDayEventsByPeriod}"
+                                    SelectionMode="None"
+                                    Margin="0,8,0,0">
+                        <CollectionView.ItemsLayout>
+                            <GridItemsLayout Orientation="Horizontal" Span="5" HorizontalItemSpacing="5" VerticalItemSpacing="0"/>
+                        </CollectionView.ItemsLayout>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="model:DayPeriod">
+                                <Border Background="{Binding TimeOfDayBackgroundBrush}"
+                                        Padding="10,8"
+                                        Stroke="Transparent"
+                                        StrokeThickness="0">
+                                    <ScrollView VerticalScrollBarVisibility="Never" HeightRequest="400">
+                                        <VerticalStackLayout Spacing="6">
+                                            <!-- Time of Day Label -->
+                                            <Label Text="{Binding TimeOfDayName}"
+                                                   FontFamily="NotoThick"
+                                                   FontAttributes="Bold"
+                                                   FontSize="14"
+                                                   TextColor="White"
+                                                   HorizontalTextAlignment="Center"/>
+
+                                            <!-- Weather during period -->
+                                            <Border BackgroundColor="#45000000" HeightRequest="400" Padding="5,4" StrokeThickness="0">
+                                                <Border.StrokeShape>
+                                                    <RoundRectangle CornerRadius="6"/>
+                                                </Border.StrokeShape>
+                                                <VerticalStackLayout Spacing="2" HeightRequest="400">
+                                                    <Label Text="{Binding TimeOfDayTemperature}"
+                                                           FontFamily="NotoThick"
+                                                           FontAttributes="Bold"
+                                                           FontSize="12"
+                                                           TextColor="White"
+                                                           HorizontalTextAlignment="Center"/>
+                                                    <Label Text="{Binding TimeOfDayForecast}"
+                                                           FontFamily="NotoSans"
+                                                           FontSize="10"
+                                                           TextColor="White"
+                                                           LineBreakMode="WordWrap"
+                                                           HorizontalTextAlignment="Center"/>
+                                                </VerticalStackLayout>
+                                            </Border>
+
+                                            <!-- Events during this time of day -->
+                                            <Border BackgroundColor="#45000000" Padding="5,4" StrokeThickness="0">
+                                                <Border.StrokeShape>
+                                                    <RoundRectangle CornerRadius="6"/>
+                                                </Border.StrokeShape>
+                                                <VerticalStackLayout Spacing="2">
+                                                    <Label Text="Events:"
+                                                           FontFamily="NotoThick"
+                                                           FontSize="11"
+                                                           FontAttributes="Bold"
+                                                           TextColor="#FFEB3B"/>
+                                                    <StackLayout BindableLayout.ItemsSource="{Binding TimeOfDayEvents}" Spacing="2">
+                                                        <BindableLayout.ItemTemplate>
+                                                            <DataTemplate x:DataType="model:EventTime">
+                                                                <VerticalStackLayout Spacing="0">
+                                                                    <Label Text="{Binding EventName}"
+                                                                           FontFamily="NotoSans"
+                                                                           FontAttributes="Bold"
+                                                                           FontSize="10"
+                                                                           TextColor="White"/>
+                                                                    <Label Text="{Binding TimeLabel}"
+                                                                           FontFamily="NotoSans"
+                                                                           FontSize="9"
+                                                                           TextColor="#E0E0E0"/>
+                                                                </VerticalStackLayout>
+                                                            </DataTemplate>
+                                                        </BindableLayout.ItemTemplate>
+                                                    </StackLayout>
+                                                </VerticalStackLayout>
+                                            </Border>
+
+                                            <!-- Photo and Drone Scores and Summary -->
+                                            <Border BackgroundColor="#45000000" Padding="5,4" StrokeThickness="0">
+                                                <Border.StrokeShape>
+                                                    <RoundRectangle CornerRadius="6"/>
+                                                </Border.StrokeShape>
+                                                <VerticalStackLayout Spacing="2">
+                                                    <Label Text="{Binding PhotoScore}"
+                                                           FontFamily="NotoThick"
+                                                           FontSize="10"
+                                                           TextColor="#BEFCA6"/>
+                                                    <Label Text="{Binding DroneScore}"
+                                                           FontFamily="NotoThick"
+                                                           FontSize="10"
+                                                           TextColor="#BEFCA6"/>
+                                                    <Label Text="{Binding ScoreSummary}"
+                                                           FontFamily="NotoSans"
+                                                           FontSize="9"
+                                                           TextColor="White"
+                                                           LineBreakMode="WordWrap"/>
+                                                </VerticalStackLayout>
+                                            </Border>
+                                        </VerticalStackLayout>
+                                    </ScrollView>
+                                </Border>
                             </DataTemplate>
                         </CollectionView.ItemTemplate>
                     </CollectionView>
+
+                    <!-- 12.) Daily AI Photography & Drone Predictions for Selected Date -->
+                    <Border Stroke="#45FFFFFF"
+                            StrokeThickness="1.5"
+                            BackgroundColor="#24000000"
+                            Padding="16"
+                            Margin="0,12,0,0">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="16"/>
+                        </Border.StrokeShape>
+                        <VerticalStackLayout Spacing="12">
+                            <Label Text="AI Photography &amp; Drone Predictions"
+                                   FontFamily="NotoThick"
+                                   FontAttributes="Bold"
+                                   FontSize="20"
+                                   TextColor="White"/>
+
+                            <!-- Daily Summary Header -->
+                            <FlexLayout Wrap="Wrap" JustifyContent="Start" AlignItems="Center">
+                                <Border BackgroundColor="#353B82F6" Stroke="#60A5FA" StrokeThickness="1" Padding="10,4" Margin="0,0,10,6">
+                                    <Border.StrokeShape><RoundRectangle CornerRadius="8"/></Border.StrokeShape>
+                                    <Label Text="{Binding SelectedDailyPhotoScoreText}" FontFamily="NotoThick" FontSize="12" TextColor="#BFDBFE"/>
+                                </Border>
+                                <Border BackgroundColor="#3510B981" Stroke="#34D399" StrokeThickness="1" Padding="10,4" Margin="0,0,10,6">
+                                    <Border.StrokeShape><RoundRectangle CornerRadius="8"/></Border.StrokeShape>
+                                    <Label Text="{Binding SelectedDailyDroneScoreText}" FontFamily="NotoThick" FontSize="12" TextColor="#A7F3D0"/>
+                                </Border>
+                                <Border BackgroundColor="#35F59E0B" Stroke="#FBBF24" StrokeThickness="1" Padding="10,4" Margin="0,0,10,6"
+                                        IsVisible="{Binding HasSelectedDayPredictions}">
+                                    <Border.StrokeShape><RoundRectangle CornerRadius="8"/></Border.StrokeShape>
+                                    <Label Text="{Binding SelectedDailyDominantCondition}" FontFamily="NotoThick" FontSize="12" TextColor="#FDE68A"/>
+                                </Border>
+                                <Border BackgroundColor="#356366F1" Stroke="#818CF8" StrokeThickness="1" Padding="10,4" Margin="0,0,10,6"
+                                        IsVisible="{Binding HasSelectedDayPredictions}">
+                                    <Border.StrokeShape><RoundRectangle CornerRadius="8"/></Border.StrokeShape>
+                                    <Label Text="{Binding SelectedDailyBlueHourScoreText}" FontFamily="NotoThick" FontSize="12" TextColor="#C7D2FE"/>
+                                </Border>
+                                <Border BackgroundColor="#35FB923C" Stroke="#FDBA74" StrokeThickness="1" Padding="10,4" Margin="0,0,10,6"
+                                        IsVisible="{Binding HasSelectedDayPredictions}">
+                                    <Border.StrokeShape><RoundRectangle CornerRadius="8"/></Border.StrokeShape>
+                                    <Label Text="{Binding SelectedDailySunriseScoreText}" FontFamily="NotoThick" FontSize="12" TextColor="#FED7AA"/>
+                                </Border>
+                                <Border BackgroundColor="#35F43F5E" Stroke="#FB7185" StrokeThickness="1" Padding="10,4" Margin="0,0,10,6"
+                                        IsVisible="{Binding HasSelectedDayPredictions}">
+                                    <Border.StrokeShape><RoundRectangle CornerRadius="8"/></Border.StrokeShape>
+                                    <Label Text="{Binding SelectedDailySunsetScoreText}" FontFamily="NotoThick" FontSize="12" TextColor="#FECDD3"/>
+                                </Border>
+                                <Border BackgroundColor="#3594A3B8" Stroke="#CBD5E1" StrokeThickness="1" Padding="10,4" Margin="0,0,10,6"
+                                        IsVisible="{Binding HasSelectedDayPredictions}">
+                                    <Border.StrokeShape><RoundRectangle CornerRadius="8"/></Border.StrokeShape>
+                                    <Label Text="{Binding SelectedDailyLunarScoreText}" FontFamily="NotoThick" FontSize="12" TextColor="#E2E8F0"/>
+                                </Border>
+                                <Border BackgroundColor="#35A855F7" Stroke="#C084FC" StrokeThickness="1" Padding="10,4" Margin="0,0,10,6"
+                                        IsVisible="{Binding HasSelectedDayPredictions}">
+                                    <Border.StrokeShape><RoundRectangle CornerRadius="8"/></Border.StrokeShape>
+                                    <Label Text="{Binding SelectedDailyGalaxyScoreText}" FontFamily="NotoThick" FontSize="12" TextColor="#E9D5FF"/>
+                                </Border>
+                                <Border BackgroundColor="#3522C55E" Stroke="LimeGreen" StrokeThickness="1" Padding="10,4" Margin="0,0,10,6"
+                                        IsVisible="{Binding HasSelectedDayPredictions}">
+                                    <Border.StrokeShape><RoundRectangle CornerRadius="8"/></Border.StrokeShape>
+                                    <Label Text="{Binding SelectedDailyBestHoursText}" FontFamily="NotoThick" FontSize="12" TextColor="#BBF7D0"/>
+                                </Border>
+                            </FlexLayout>
+
+                            <Label Text="{Binding SelectedDailyScoreSummaryText}"
+                                   FontFamily="NotoSans"
+                                   FontSize="13"
+                                   TextColor="#E2E8F0"
+                                   LineBreakMode="WordWrap"/>
+
+                            <!-- Hourly Predictions Horizontal Cards -->
+                            <CollectionView ItemsSource="{Binding SelectedDayHourlyPredictions}"
+                                            SelectionMode="None"
+                                            HeightRequest="215"
+                                            IsVisible="{Binding HasSelectedDayPredictions}">
+                                <CollectionView.ItemsLayout>
+                                    <LinearItemsLayout Orientation="Horizontal" ItemSpacing="10"/>
+                                </CollectionView.ItemsLayout>
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate x:DataType="ml:HourlyForecastPrediction">
+                                        <Border BackgroundColor="#33081F43"
+                                                Stroke="#5093C5FD"
+                                                StrokeThickness="1.5"
+                                                WidthRequest="235"
+                                                Padding="10">
+                                            <Border.StrokeShape>
+                                                <RoundRectangle CornerRadius="12"/>
+                                            </Border.StrokeShape>
+                                            <VerticalStackLayout Spacing="4">
+                                                <Grid ColumnDefinitions="*,Auto">
+                                                    <Label Grid.Column="0"
+                                                           Text="{Binding Timestamp, StringFormat='{0:h:mm tt}'}"
+                                                           FontFamily="NotoThick"
+                                                           FontAttributes="Bold"
+                                                           FontSize="14"
+                                                           TextColor="#FDE047"/>
+                                                    <Label Grid.Column="1"
+                                                           Text="{Binding Condition}"
+                                                           FontFamily="NotoSans"
+                                                           FontSize="11"
+                                                           TextColor="#93C5FD"
+                                                           VerticalOptions="Center"/>
+                                                </Grid>
+
+                                                <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="8" RowSpacing="2">
+                                                    <Label Grid.Row="0" Grid.Column="0" Text="{Binding OverallScore, StringFormat='Overall: {0:F0}'}" FontFamily="NotoThick" FontSize="11" TextColor="#BEFCA6"/>
+                                                    <Label Grid.Row="0" Grid.Column="1" Text="{Binding DroneFlightScore, StringFormat='Drone: {0:F0}'}" FontFamily="NotoThick" FontSize="11" TextColor="#A7F3D0"/>
+                                                    <Label Grid.Row="1" Grid.Column="0" Text="{Binding BlueHourScore, StringFormat='Blue Hr: {0:F0}'}" FontFamily="NotoSans" FontSize="11" TextColor="#93C5FD"/>
+                                                    <Label Grid.Row="1" Grid.Column="1" Text="{Binding SunriseScore, StringFormat='Sunrise: {0:F0}'}" FontFamily="NotoSans" FontSize="11" TextColor="#FDBA74"/>
+                                                    <Label Grid.Row="2" Grid.Column="0" Text="{Binding SunsetScore, StringFormat='Sunset: {0:F0}'}" FontFamily="NotoSans" FontSize="11" TextColor="#F9A8D4"/>
+                                                    <Label Grid.Row="2" Grid.Column="1" Text="{Binding LunarEventScore, StringFormat='Lunar: {0:F0}'}" FontFamily="NotoSans" FontSize="11" TextColor="#E2E8F0"/>
+                                                    <Label Grid.Row="3" Grid.Column="0" Text="{Binding GalaxyScore, StringFormat='Galaxy: {0:F0}'}" FontFamily="NotoSans" FontSize="11" TextColor="#C4B5FD"/>
+                                                    <Label Grid.Row="3" Grid.Column="1" Text="{Binding ConditionConfidence, StringFormat='Conf: {0:P0}'}" FontFamily="NotoSans" FontSize="11" TextColor="#CBD5E1"/>
+                                                </Grid>
+
+                                                <Label Text="{Binding HumanReadableForecast}"
+                                                       FontFamily="NotoSans"
+                                                       FontSize="10"
+                                                       TextColor="#E2E8F0"
+                                                       LineBreakMode="WordWrap"
+                                                       MaxLines="4"/>
+                                            </VerticalStackLayout>
+                                        </Border>
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+                            </CollectionView>
+                        </VerticalStackLayout>
+                    </Border>
+
                 </VerticalStackLayout>
             </Border>
-    </VerticalStackLayout>
+
+        </VerticalStackLayout>
     </ScrollView>
 </ContentPage>
-
-
-
-<!--<ScrollView Orientation="Vertical">
-                        
-                        <VerticalStackLayout HorizontalOptions="Center">
-                            Astronomical Stats for the Day
-                            <Border Margin="5,5,10,5" Background="{StaticResource SunMoon}">
-                                <Border.StrokeShape>
-                                    <RoundRectangle CornerRadius="12"/>
-                                </Border.StrokeShape>
-                                <Grid>
-                                    <VerticalStackLayout HorizontalOptions="Fill" VerticalOptions="Start">
-                                        <Label x:Name="SunMoonSummaryLabel" Text="Sun and Moon Summary:" FontFamily="NotoThick" FontSize="18" HorizontalOptions="Center" HorizontalTextAlignment="Center" Margin="4,4,5,4"/>
-                                        <HorizontalStackLayout HorizontalOptions="Center">
-                                            <Label Text="Day Length:" FontFamily="NotoThick" HorizontalOptions="Start" FontSize="16"/>
-                                            <Label Text="{Binding SelectedDayLength}" FontSize="14" FontFamily="NotoSans"/>
-                                        </HorizontalStackLayout>
-                                        <HorizontalStackLayout HorizontalOptions="Center">
-                                            <Label Text="Sunshine Length:" FontFamily="NotoThick" HorizontalOptions="Start" FontSize="16"/>
-                                            <Label  Text="{Binding SelectedSunshine}" FontSize="14" FontFamily="NotoSans"/>
-                                        </HorizontalStackLayout>
-
-                                        <Label Text="Current Moon Phase" FontFamily="NotoThick" FontSize="16" HorizontalOptions="Center" HorizontalTextAlignment="Center"/>
-                                        <Label Text="{Binding SelectedMoonPhase}" FontSize="14" FontFamily="NotoThick" HorizontalOptions="Center" HorizontalTextAlignment="Center"/>
-                                        <skia:SKLottieView x:Name="SkMoonPhase" RepeatCount="-1" RepeatMode="Restart"  HeightRequest="100" WidthRequest="100" Source="{Binding SelectedMoonImage}" Margin="5,10"/>
-                                        <Image Source="{Binding SelectedMoonImage}" HeightRequest="100" WidthRequest="100" HorizontalOptions="Center" Margin="5,10,5,10"/>
-                                    </VerticalStackLayout>
-                                </Grid>
-                            </Border>
-                        </VerticalStackLayout>
-                         Daily Weather Lottie 
-                        <VerticalStackLayout HorizontalOptions="Center">
-                            <Border Stroke="{StaticResource Noon}" StrokeThickness="4" VerticalOptions="Start" Margin="0,0,5,5">
-                                <Border.StrokeShape>
-                                    <RoundRectangle CornerRadius="30"/>
-                                </Border.StrokeShape>
-                                <skia:SKLottieView x:Name="DailyWeatherMeteocon" Source="{Binding SelectedDailyWeatherImage}" RepeatCount="-1" HeightRequest="150" WidthRequest="150" RepeatMode="Restart"  HorizontalOptions="Fill" VerticalOptions="Fill"/>
-                            </Border>
-                        </VerticalStackLayout>
-                        Daily High and Low
-                        <VerticalStackLayout HorizontalOptions="Center">
-                            <Grid  Margin="5">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="100"/>
-                                    <RowDefinition Height="100"/>
-                                </Grid.RowDefinitions>
-                                <Grid Grid.Row="0">
-                                    <Border Stroke="Red" StrokeThickness="2" HorizontalOptions="Fill" VerticalOptions="Fill" Background="#70FF0000">
-                                        <Border.StrokeShape>
-                                            <RoundRectangle CornerRadius="30,30,0,0" />
-                                        </Border.StrokeShape>
-                                        <Grid HorizontalOptions="Fill" VerticalOptions="Fill">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <Grid Grid.Column="0">
-                                                <VerticalStackLayout Margin="8">
-                                                    <Label Text="The High" FontAttributes="Bold" VerticalOptions="Center" FontFamily="NotoThick" HorizontalOptions="Start" FontSize="24" HorizontalTextAlignment="Start" Margin="2" TextColor="#701705"/>
-                                                    <Label Text="{Binding SelectedTimeHighTemp}" HorizontalOptions="Start" HorizontalTextAlignment="Start" LineBreakMode="WordWrap" VerticalOptions="Center" TextColor="#701705" Margin="2" FontSize="24" FontFamily="NotoThick"/>
-                                                </VerticalStackLayout>
-                                            </Grid>
-                                            <Grid Grid.Column="1" Margin="8">
-                                                <skia:SKLottieView Source="{Binding DailyHighAnimation}" RepeatCount="-1" RepeatMode="Restart"  HeightRequest="80" WidthRequest="80" HorizontalOptions="Center" VerticalOptions="Center"/>
-                                            </Grid>
-                                        </Grid>
-                                    </Border>
-                                </Grid>
-                                <Grid Grid.Row="1">
-                                    <Border Stroke="Blue" HorizontalOptions="Fill" VerticalOptions="Fill" StrokeThickness="2" Background="#700000FF">
-                                        <Border.StrokeShape>
-                                            <RoundRectangle CornerRadius="0,0,30,30" />
-                                        </Border.StrokeShape>
-                                        <Grid HorizontalOptions="Fill" VerticalOptions="Fill">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <Grid Grid.Column="0">
-                                                <VerticalStackLayout Margin="8">
-                                                    <Label Text="The Low" FontAttributes="Bold" VerticalOptions="Center" FontFamily="NotoThick" HorizontalOptions="Start" FontSize="24" HorizontalTextAlignment="Start" Margin="2" TextColor="#FFF6F3C0"/>
-                                                    <Label Text="{Binding SelectedTimeLowTemp}" HorizontalOptions="Start" HorizontalTextAlignment="Start" LineBreakMode="WordWrap" VerticalOptions="Center" TextColor="#F6F3C0" Margin="2" FontSize="24" FontFamily="NotoThick"/>
-                                                </VerticalStackLayout>
-                                            </Grid>
-                                            <Grid Grid.Column="1" Margin="8">
-                                                <skia:SKLottieView Source="{Binding DailyLowAnimation}" HeightRequest="80" RepeatCount="-1" RepeatMode="Restart"  WidthRequest="80" HorizontalOptions="Center" VerticalOptions="Center"/>
-                                            </Grid>
-                                        </Grid>
-                                    </Border>
-                                </Grid>
-                            </Grid>
-                        </VerticalStackLayout>
-
-
-                        Daily Weather Summary and Storm Summary
-                        <VerticalStackLayout HorizontalOptions="Center">
-                            <Border x:Name="DailyWeatherSummary" Margin="5,5,10, 5" Stroke="{StaticResource Noon}" StrokeThickness="8">
-                                <Border.StrokeShape>
-                                    <RoundRectangle CornerRadius="12"/>
-                                </Border.StrokeShape>
-                                <VerticalStackLayout HorizontalOptions="Center" Margin="15">
-                                    <Label Text="Summary:" FontSize="18" VerticalOptions="Center" HorizontalOptions="Start" HorizontalTextAlignment="Start" FontFamily="NotoThick" Margin="5,0,0,0"/>
-                                    <Label Text="{Binding SelectedSummary}" VerticalOptions="Center" LineBreakMode="WordWrap" FontFamily="NotoSans" FontSize="12" HorizontalOptions="Start" HorizontalTextAlignment="Start" Margin="5"/>
-                                    <Label x:Name="StormLabel" Text="Storm Summary:" FontFamily="NotoThick" FontSize="18" HorizontalOptions="Start" HorizontalTextAlignment="Start" Margin="5,10,5,4" />
-                                    <Label x:Name="StormInfo" Text="{Binding SelectedDailyStormSummary}" LineBreakMode="WordWrap" FontFamily="NotoSans" FontSize="12" HorizontalOptions="Start" HorizontalTextAlignment="Start" Margin="5"/>
-                                </VerticalStackLayout>
-                            </Border>
-                        </VerticalStackLayout>
-                         Health and Safety Summary 
-
-                        <VerticalStackLayout HorizontalOptions="Center">
-                            <Border x:Name="HeatriskBorder" Margin="5,5,10, 5" Stroke="{Binding SelectedUvRiskColor}" StrokeThickness="8">
-                                <Border.StrokeShape>
-                                    <RoundRectangle CornerRadius="12"/>
-                                </Border.StrokeShape>
-                                <VerticalStackLayout>
-                                    <Label x:Name="HeatRiskLabel" Text="Heat Risk:" FontFamily="NotoThick" FontAttributes="Bold" FontSize="20" HorizontalOptions="Start" HorizontalTextAlignment="Start" Margin="5,10,5,4" />
-                                    <Label x:Name="HeatRiskInfo" Text="{Binding SelectedDayHeatriskSummary}" LineBreakMode="WordWrap" FontFamily="NotoSans" FontSize="12" HorizontalOptions="Start" HorizontalTextAlignment="Start" Margin="5"/>
-                                    <Label x:Name="HyperlinkToHeatRisk"  LineBreakMode="WordWrap" FontFamily="NotoSans" FontSize="12" HorizontalOptions="Start" HorizontalTextAlignment="Start" Margin="5">
-                                        <Label.FormattedText>
-                                            <FormattedString>
-                                                <Span Text="For more information about HeatRisk please refer to this explanation by the National Weather Service." TextColor="Blue" TextDecorations="Underline">
-                                                    <Span.GestureRecognizers>
-                                                        <TapGestureRecognizer Command="{Binding GoToNwsCommand}" />
-                                                    </Span.GestureRecognizers>
-                                                </Span>
-                                            </FormattedString>
-                                        </Label.FormattedText>
-                                    </Label>
-                                    <Label x:Name="HealthLabel" Text="Health and Safety Summary:" TextColor="{Binding SelectedUvRiskColor}" FontAttributes="Bold" FontFamily="NotoThick" FontSize="20" HorizontalOptions="Start" HorizontalTextAlignment="Start" Margin="5,10,5,4"/>
-                                    <Label x:Name="Health" Text="{Binding SelectedSafetySummary}" LineBreakMode="WordWrap"  FontFamily="NotoSans" FontSize="12" HorizontalOptions="Start" HorizontalTextAlignment="Start" Margin="5"/>
-                                </VerticalStackLayout>
-                            </Border>
-                        </VerticalStackLayout>
-                        </ScrollView>
-                </Border>
-            </Grid>
-        </HorizontalStackLayout>
-    </VerticalStackLayout>
-</ContentPage>-->
-<!--<VerticalStackLayout Margin="5,10,5,10">
-                                                        <Border Stroke="{StaticResource Noon}" StrokeThickness="4" WidthRequest="96" HeightRequest="96">
-                                                            <Border.StrokeShape>
-                                                                <RoundRectangle CornerRadius="12"/>
-                                                            </Border.StrokeShape>-->
-<!--<HorizontalStackLayout>
-                                                    <Label Text="Temp: " FontFamily="NotoThick" FontSize="12" TextColor="#befca6" HorizontalOptions="Start" Margin="4" />
-                                                    <Label Text="{Binding TimeOfDayTemperature}" FontSize="12" TextColor="#befca6" FontFamily="NotoThick" HorizontalOptions="Start" Margin="4" />
-                                                </HorizontalStackLayout>
-                                                <HorizontalStackLayout>
-                                                    <Label Text="Dewpoint: " FontFamily="NotoThick" FontSize="12" TextColor="#befca6" HorizontalOptions="Start" Margin="4" />
-                                                    <Label Text="{Binding TimeOfDayDewpoint}" FontSize="12" TextColor="#befca6" FontFamily="NotoThick" HorizontalOptions="Start" Margin="4" />
-                                                </HorizontalStackLayout>
-                                                <HorizontalStackLayout>
-                                                    <Label Text="Feels Like: " FontFamily="NotoThick" TextColor="#befca6" FontSize="12" HorizontalOptions="Start" Margin="4" />
-                                                    <Label Text="{Binding TimeOfDayApparentTemperature}" TextColor="#befca6" FontSize="12" FontFamily="NotoThick" HorizontalOptions="Start" Margin="4" />
-                                                </HorizontalStackLayout>
-                                                <HorizontalStackLayout>
-                                                    <Label Text="Cloud Cover: " FontFamily="NotoThick" TextColor="#befca6" FontSize="12" HorizontalOptions="Start" Margin="4" />
-                                                    <Label Text="{Binding TimeOfDayCloudCover}" TextColor="#befca6" FontSize="12" FontFamily="NotoThick" HorizontalOptions="Start" Margin="4" />
-                                                </HorizontalStackLayout>
-                                                <HorizontalStackLayout>
-                                                    <Label Text="Winds: " FontFamily="NotoThick" TextColor="#befca6" FontSize="12" HorizontalOptions="Start" Margin="4" />
-                                                    <Label Text="{Binding TimeOfDayWind}" TextColor="#befca6" FontSize="12" FontFamily="NotoThick" HorizontalOptions="Start" Margin="4" />
-                                                </HorizontalStackLayout>
-                                                <HorizontalStackLayout>
-                                                    <Label Text="Gusts: " FontFamily="NotoThick" TextColor="#befca6" FontSize="12" HorizontalOptions="Start" Margin="4" />
-                                                    <Label Text="{Binding TimeOfDayGust}" TextColor="#befca6" FontSize="12" FontFamily="NotoThick" HorizontalOptions="Start" Margin="4" />
-                                                </HorizontalStackLayout>
-                                                    </VerticalStackLayout>-->
-
-<!--</control:ParallaxSkyContainer>-->

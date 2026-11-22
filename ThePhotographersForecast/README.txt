@@ -1,4 +1,11 @@
-﻿Order methods should be called:
+﻿The Photographer's Forecast rates specific hours of the 7 day forecast for best time to take outdoor photos.
+
+Use Case 1: User wants to know when twilight is and if it will have vivid colors.
+
+Use Case 2: I'm planning a trip to Kansas City and want to make sure there are some great days for outdoor photography.
+
+
+Order methods should be called:
 	- Dates
 	- Location
 	- Events

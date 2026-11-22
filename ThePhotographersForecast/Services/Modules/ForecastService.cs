@@ -21,7 +21,8 @@ namespace ThePhotographersForecast.Services.Modules;
 /// </summary>
 public partial class ForecastService : ObservableObject, IForecastService
 {
-
+    [ObservableProperty]
+    public partial int TCount { get; set; }
     private ISession _session;
 
     [ObservableProperty]
@@ -34,6 +35,12 @@ public partial class ForecastService : ObservableObject, IForecastService
     public partial CalendarDayModel[] Dates { get; set; }
     [ObservableProperty]
     public partial DateTime SelectedDate { get; set; }
+    [ObservableProperty]
+    public partial ObservableCollection<ForecastInputs> Inputs { get; set; } = new ObservableCollection<ForecastInputs>();
+    [ObservableProperty]
+    public partial ObservableCollection<TimeOfDayGroup> TimeOfDayDailies { get; set; } = new ObservableCollection<TimeOfDayGroup>();
+    [ObservableProperty]
+    public partial ObservableCollection<NwsTimeOfDayForecast> TimeOfDayForecasts { get; set; } = new ObservableCollection<NwsTimeOfDayForecast>();
     //public static string Temperature { get; set; }
     //public static string HealthSafetyStatement { get; set; }
     //public static string Ptsi { get; set; }
@@ -55,7 +62,7 @@ public partial class ForecastService : ObservableObject, IForecastService
     // The morning of November 2nd (6am - 12pm):
     // Temperature {temp} and {trend}.
     // Temperature in the mid 50's and climbing.
-    //{If WeatherStatement Exists}
+    //{If ShortForecast Exists}
     // LOOKOUT! There is weather afoot...
     //{precipitationCategory} is moving into {city} by {StormStartTime}.
     // rain is moving into Boston by 8am.
@@ -79,152 +86,651 @@ public partial class ForecastService : ObservableObject, IForecastService
     // , and gusts up to 35 mph.
     // --- Time Of Day Creating 
     // The hourlies being processed are being processed through a for loop in SelectLocationViewModel Line: 
-    public async Task<NwsTimeOfDayForecast[]> BuildTimeOfDayForecastsAsync(NwsDailyForecast[] dailies)
-    {
-        var timeOfDayCollection = new ObservableCollection<NwsTimeOfDayForecast>();
-
-        for (int i = 0; i < dailies.Length; i++)
-        {
-
-
-            var hourlies = dailies[i].HourlyWeathers.ToArray();
-            var timesOfDayHours = hourlies.OrderBy(x => x.StartTime).GroupBy(x => x.TimeOfDay);
-            Debug.WriteLine($"There are {timesOfDayHours.Count()} time of day hours.");
-            foreach (var t in timesOfDayHours)
-            {
-                var timeOfDayForecast = new NwsTimeOfDayForecast();
-
-                timeOfDayForecast.StartTime = t.FirstOrDefault().StartTime;
-                timeOfDayForecast.EndTime = t.LastOrDefault().EndTime;
-
-                var times = timeOfDayForecast.StartTime.Hour switch
-                {
-                    >= 0 and < 6 => ("Early Morning", "PeriodEarlyMorning", "time_morning.json"),
-                    >= 6 and < 12 => ("Morning", "PeriodMorning", "time_late_morning.json"),
-                    >= 12 and < 18 => ("Afternoon", "PeriodAfternoon", "time_afternoon.json"),
-                    >= 18 and < 22 => ("Evening", "PeriodEvening", "time_evening.json"),
-                    _ => ("Night", "PeriodNight", "time_night.json")
-                };
-                // var todEvents = new ObservableCollection<EventTime>();
-                //todEvents = _session.EventTimes.Where(x => x.WeatherHour.Date == date && x.TimeOfDay == times.Item1).ToObservableCollection();
-                timeOfDayForecast.TimeOfDay = times.Item1;
-
-                timeOfDayForecast.TimeOfDayGradientBrush = (LinearGradientBrush)Application.Current.Resources[times.Item2];
-                var animation = new SKFileLottieImageSource { File = times.Item3 };
-                var weatherAnimations = t.Select(x => new LottieAnimation
-                {
-                    Temperature = x.TempAndUnit,
-                    Time = x.StartTime,
-                    Forecast = x.ShortForecast,
-                    LottieWeather = x.SkHourlyAnimation
-                });
-                timeOfDayForecast.SkLottieCollection = new ObservableCollection<LottieAnimation>(weatherAnimations);
-                timeOfDayForecast.SKTimeOfDayAnimation = animation;
-                timeOfDayForecast.Forecasts = hourlies.ToArray();
-                timeOfDayForecast.TimeOfDayEvents = new ObservableCollection<EventTime>();
-
-
-                timeOfDayForecast.TimeOfDayForecast = await BuildForecastAsync(hourlies);
-                timeOfDayCollection.Add(timeOfDayForecast);
-
-            }
-
-            var timeOfDay = timeOfDayCollection.Where(y => y.StartTime >= _session.NwsData.DailyForecasts[i].StartTime && _session.NwsData.DailyForecasts[i].EndTime <= y.EndTime).OrderBy(x => x.StartTime).ToArray();
-            _session.NwsData.DailyForecasts[i].TimeOfDayForecasts = timeOfDay.ToArray();
-        }
-        var masterTimeOfDayArray = timeOfDayCollection.OrderBy(o => o.StartTime).ToArray();
-        _session.NwsData.TimeOfDayForecasts = masterTimeOfDayArray.ToArray();
-        return masterTimeOfDayArray;
-    }
-
-    public async Task<string> BuildForecastAsync(NwsHourlyForecast[] forecasts)
-    {
-
-        ObservableCollection<(DateTime starttime, DateTime endtime, string line)> starterCollection = new ObservableCollection<(DateTime starttime, DateTime endtime, string line)>();
-        ObservableCollection<(DateTime starttime, DateTime endtime, string trend, double temp)> tempCollection = new ObservableCollection<(DateTime starttime, DateTime endtime, string trend, double temp)>();
-        ObservableCollection<(DateTime starttime, DateTime endtime, string trend, double windspeed, string direction)> windCollection = new ObservableCollection<(DateTime starttime, DateTime endtime, string trend, double windspeed, string direction)>();
-        ObservableCollection<(DateTime starttime, DateTime endtime, string trend, double gust)> gustsCollection = new ObservableCollection<(DateTime starttime, DateTime endtime, string trend, double gust)>();
-        ObservableCollection<(DateTime starttime, DateTime endtime, string trend, double skycover)> skyCoverCollection = new ObservableCollection<(DateTime starttime, DateTime endtime, string trend, double skycover)>();
-        ObservableCollection<(DateTime starttime, DateTime endtime, string trend, double tstorm)> tStormCollection = new ObservableCollection<(DateTime starttime, DateTime endtime, string trend, double tstorm)>();
-        //ShortForecast
-        for (int f = 0; f < forecasts.Length - 1; f++)
-        {
-            DateTime starttime = forecasts[f].StartTime;
-            DateTime endtime = forecasts[f].EndTime;
-            string line = forecasts[f].ShortForecast;
-            double temp = Math.Round(forecasts[f].Temperature.Value / 5) * 5;
-            double windSpeed = Math.Round(forecasts[f].WindSpeed.Value / 5) * 5;
-            double futureTemp = Math.Round(forecasts[f + 1].Temperature.Value / 5) * 5;
-            double futureWindSpeed = Math.Round(forecasts[f + 1].WindSpeed.Value / 5) * 5;
-            string direction = forecasts[f].WindDirection;
-            double gust = forecasts[f].WindGust != null ? Math.Round(forecasts[f].WindGust.Value / 5) * 5 : 0;
-            double skyCover = forecasts[f].Supplemental.Skycover != null ? forecasts[f].Supplemental.Skycover.Value : -1;
-            double tStorm = forecasts[f].Supplemental.ProbabilityOfThunder != null && forecasts[f].Supplemental.ProbabilityOfThunder.Value >= 10 ? forecasts[f].Supplemental.ProbabilityOfThunder.Value : -1;
-            double futureGust = forecasts[f + 1].WindGust != null ? Math.Round(forecasts[f + 1].WindGust.Value / 5) * 5 : 0;
-            double futureSkyCover = forecasts[f + 1].Supplemental.Skycover != null ? forecasts[f + 1].Supplemental.Skycover.Value : -1;
-            double futureTStorm = forecasts[f + 1].Supplemental.ProbabilityOfThunder != null && forecasts[f + 1].Supplemental.ProbabilityOfThunder.Value >= 10 ? forecasts[f + 1].Supplemental.ProbabilityOfThunder.Value : -1;
-            starterCollection.Add((starttime, endtime, line));
-            tempCollection.Add((starttime, endtime, ProcessTrend(temp, futureTemp, starttime, endtime), temp));
-            windCollection.Add((starttime, endtime, ProcessTrend(windSpeed, futureWindSpeed, starttime, endtime), windSpeed, direction));
-            gustsCollection.Add((starttime, endtime, ProcessTrend(gust, futureGust, starttime, endtime), gust));
-            skyCoverCollection.Add((starttime, endtime, ProcessTrend(skyCover, futureSkyCover, starttime, endtime), skyCover));
-            tStormCollection.Add((starttime, endtime, ProcessTrend(tStorm, futureTStorm, starttime, endtime), tStorm));
-        }
-        //Starter
-        var orderStarters = starterCollection.OrderBy(x => x.starttime).GroupBy(y => y.line);
-        var phrases = orderStarters.Select(x => $"from {x.Min(z => z.starttime).ToString("h tt")} to {x.Max(y => y.endtime).ToString("h tt")} {x.Key}").ToObservableCollection();
-        var firstLine = String.Join(", ", phrases) + ". ";
-        //Temperature
-        var orderTemps = tempCollection.OrderBy(x => x.starttime).GroupBy(y => y.temp);
-        var tempPhrases = orderTemps.Select(x => $"from {x.Min(z => z.starttime).ToString("h tt")} to {x.Max(y => y.endtime).ToString("h tt")} at a temperature of {x.Key} and {x.Max(y => y.trend)}").ToObservableCollection();
-        var tempLine = String.Join(", ", tempPhrases) + ". ";
-        //WindSpeed and Direction
-        var orderWinds = windCollection.OrderBy(x => x.starttime).GroupBy(y => y.windspeed);
-        var windsPhrases = orderWinds.Select(x => $"from {x.Min(z => z.starttime).ToString("h tt")} to {x.Max(y => y.endtime).ToString("h tt")} {x.Max().direction} winds at speeds of {Math.Round(x.Key / 5) * 5} mph and {x.Max(y => y.trend)}").ToObservableCollection();
-        var windLine = String.Join(", ", windsPhrases) + ". ";
-        //Gusts
-        var orderGusts = gustsCollection.OrderBy(x => x.starttime).GroupBy(y => y.gust);
-        var gustPhrases = orderGusts.Select(x => $"from {x.Min(z => z.starttime).ToString("h tt")} to {x.Max(y => y.endtime).ToString("h tt")} gusts up to {x.Key} mph and {x.Max(y => y.trend)}").ToObservableCollection();
-        var gustLine = String.Join(", ", gustPhrases) + ". ";
-        //Skycover
-        var orderClouds = skyCoverCollection.OrderBy(x => x.starttime).GroupBy(y => y.skycover);
-        var cloudPhrases = orderClouds.Select(x => $"from {x.Min(z => z.starttime).ToString("h tt")} to {x.Max(y => y.endtime).ToString("h tt")} cloud coverage is {x.Key}% and {x.Max(y => y.trend)}").ToObservableCollection();
-        var cloudLine = String.Join(", ", cloudPhrases) + ". ";
-        //TStorms
-        var orderTstorms = tStormCollection.Where(r => r.tstorm != -1).OrderBy(x => x.starttime).GroupBy(y => y.tstorm);
-        var tstormPhrases = orderTstorms.Select(x => $"from {x.Min(z => z.starttime).ToString("h tt")} to {x.Max(y => y.endtime).ToString("h tt")} there is a {x.Key}% chance of thunderstorms and damaging winds and {x.Max(y => y.trend)}").ToObservableCollection();
-        var tstormLine = String.Join(", ", tstormPhrases) + ". ";
-        string complete = firstLine + tstormLine + tempLine + cloudLine + windLine + gustLine;
-        return complete;
-    }
-
-
-
-
-    public string ProcessTrend(double oldValue, double newValue, DateTime oldTime, DateTime newTime)
+    public async Task<NwsTimeOfDayForecast[]> BuildTimeOfDayForecastsAsync(NwsHourlyForecast[] nws)
     {
         try
         {
-            var rate = Math.Abs(newValue - oldValue) / Math.Abs(newTime.Hour - oldTime.Hour);
-            if (rate < _session.NwsData.HourlyTemperatureChangeRate && oldValue < newValue)
+            HoursGroups hg;
+            var dayGroup = nws.OrderBy(h => h.StartTime).GroupBy(g => g.StartTime.Date);
+            foreach (var day in dayGroup)
             {
-                return "slow increase";
+                var date = day.Key;
+                var hours = day.ToArray();
+                var tod = hours.GroupBy(x => x.TimeOfDay);
+                foreach (var time in tod)
+                {
+                    string timeOfDay = time.Key;
+                    var todHours = time.ToArray();
+                    var timeOfDayForecast = new NwsTimeOfDayForecast();
+                    timeOfDayForecast.StartTime = todHours.Min(x => x.StartTime);
+                    timeOfDayForecast.EndTime = todHours.Max(x => x.EndTime);
+
+                    Debug.WriteLine($"There are {todHours.Length}");
+
+                    var times = timeOfDayForecast.StartTime.Hour switch
+                    {
+                        >= 0 and < 6 => ("Early Morning", "PeriodEarlyMorning", "time_morning.json", false),
+                        >= 6 and < 12 => ("Morning", "PeriodMorning", "time_late_morning.json", true),
+                        >= 12 and < 18 => ("Afternoon", "PeriodAfternoon", "time_afternoon.json", true),
+                        >= 18 and < 22 => ("Evening", "PeriodEvening", "time_evening.json", false),
+                        _ => ("Night", "PeriodNight", "time_night.json", false)
+                    };
+
+                    timeOfDayForecast.TimeOfDay = times.Item1;
+                    timeOfDayForecast.IsDay = times.Item4;
+
+                    timeOfDayForecast.TimeOfDayGradientBrush = (LinearGradientBrush)Application.Current.Resources[times.Item2];
+                    var animation = new SKFileLottieImageSource { File = times.Item3 };
+                    var weatherAnimations = hours.Select(x => new LottieAnimation
+                    {
+                        Temperature = x.TempAndUnit,
+                        Time = x.StartTime,
+                        Forecast = x.ShortForecast,
+                        LottieWeather = x.SkHourlyAnimation
+                    }).ToObservableCollection<LottieAnimation>();
+                    timeOfDayForecast.SkLottieCollection = weatherAnimations;
+                    timeOfDayForecast.SKTimeOfDayAnimation = animation;
+                    timeOfDayForecast.Forecasts = todHours.ToArray();
+                    timeOfDayForecast.Events = _session.EventTimes.Where(x => x.WeatherHour >= timeOfDayForecast.StartTime && timeOfDayForecast.EndTime >= x.WeatherHour).ToObservableCollection();
+                    var results = GetDailyHighLow(timeOfDayForecast.StartTime.Date);
+                    timeOfDayForecast.High = results.high;
+                    timeOfDayForecast.Low = results.low;
+                    await BuildForecastAsync(timeOfDayForecast);
+                    ++TCount;
+                    if (TimeOfDayForecasts.Count == TCount)
+                    {
+                        Debug.WriteLine($"{timeOfDayForecast.TimeOfDay} has been added for {timeOfDayForecast.StartTime.Date:MM/dd}.");
+                    }
+                    else
+                    {
+                        Debug.WriteLine($"{timeOfDayForecast.TimeOfDay} was not successfully added for {timeOfDayForecast.StartTime.Date:MM/dd}.");
+                    }
+                }
+                Debug.WriteLine($"{TimeOfDayForecasts.Last().TimeOfDay} was added.");
             }
-            else if (rate > _session.NwsData.HourlyTemperatureChangeRate && oldValue < newValue && Math.Abs(Math.Abs(oldValue) - Math.Abs(newValue)) >= 10)
+            Debug.WriteLine($"{TimeOfDayForecasts.Last().EndTime.ToString("F")} was added.");
+
+            var timeOfDayArray = TimeOfDayForecasts.OrderBy(s => s.StartTime).ToArray();
+            return timeOfDayArray;
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"ERROR in Forecast Service. Unable to create the Times of Days for each day. {ex}");
+            return default;
+        }
+    }
+
+    private (string high, string low) GetDailyHighLow(DateTime date)
+    {
+        var highRecord = _session.NwsData.HourlyForecasts.Where(x => x.StartTime.Date == date.Date && x.Temperature.Value != null).MaxBy(y => y.Temperature.Value);
+        var lowRecord = _session.NwsData.HourlyForecasts.Where(x => x.StartTime.Date == date.Date && x.Temperature.Value != null).MinBy(z => z.Temperature.Value);
+        string high = string.Empty;
+        string low = string.Empty;
+        if (highRecord == null)
+        {
+            high = $"The high temperature{Environment.NewLine}is not available.";
+        }
+        else
+        {
+            high = $"High of {highRecord.TempAndUnit}{Environment.NewLine}@ {highRecord.StartTime:h tt}.";
+        }
+
+        if (lowRecord == null)
+        {
+            low = $"The Low temperature{Environment.NewLine}is not available.";
+        }
+        else
+        {
+            low = $"Low of {lowRecord.TempAndUnit}{Environment.NewLine}@ {lowRecord.StartTime:h tt}.";
+        }
+
+        return (high, low);
+    }
+
+
+    public async Task BuildForecastAsync(NwsTimeOfDayForecast timeOfDayForecast)
+    {
+        //Tabular Forecast
+
+        var openSb = new StringBuilder();
+        var forecastSb = new StringBuilder();
+        var weatherSb = new StringBuilder();
+        var precipitationSb = new StringBuilder();
+        var tempSb = new StringBuilder();
+        var skySb = new StringBuilder();
+        var windSb = new StringBuilder();
+        var inputs = new ObservableCollection<ForecastInputs>();
+        try
+        {
+            var nws = timeOfDayForecast.Forecasts.ToArray();
+            inputs = BuildForecastInputs(nws);
+            timeOfDayForecast.DewPointAvg = inputs.Average(x => x.Dewpoint.Value);
+            timeOfDayForecast.MaxProbabilityOfPrecipitation = inputs.Max(x => x.Precipitation.Value);
+            timeOfDayForecast.MaxTemp = inputs.Max(x => x.Temp.Value);
+            timeOfDayForecast.MaxWindGusts = inputs.Where(s => s.WindGusts != null).Max(x => x.WindGusts.Value);
+            timeOfDayForecast.MaxWindSpeed = inputs.Max(x => x.Wind.Value);
+            timeOfDayForecast.MaxWindDirection = inputs.MaxBy(x => x.Wind.Value).Wind.Direction;
+            timeOfDayForecast.MinTemp = inputs.Min(x => x.Temp.Value);
+            timeOfDayForecast.MinWindGusts = inputs.Where(s => s.WindGusts != null).Min(x => x.WindGusts.Value);
+            timeOfDayForecast.MinWindSpeed = inputs.Min(x => x.Wind.Value);
+            timeOfDayForecast.MinWindDirection = inputs.MinBy(x => x.Wind.Value).Wind.Direction;
+            timeOfDayForecast.QuantitativePrecipitation = inputs.Sum(x => x.Precipitation.Amount);
+            timeOfDayForecast.RelativeHumidityAvg = inputs.Average(x => x.RelativeHumidity.Value);
+            var forecasts = inputs.Select(x => x.WmoForecast.ToLowerInvariant()).Distinct();
+            openSb.AppendLine($@"{nws.First().StartTime.ToString("MMMM d")} ({nws.First().StartTime.ToString("h tt")} - {nws.Last().EndTime.ToString("h tt")}):");
+            timeOfDayForecast.DescForecasts = forecasts.Count() == 1 ? $"{forecasts.First()}" : $"{String.Join(", then ", forecasts.SkipLast(1))} and then {forecasts.LastOrDefault()}.";
+
+            Debug.WriteLine($"{timeOfDayForecast.TimeOfDayName} have been processed.");
+
+            var forecastGroup = inputs.GroupBy(x => x.WmoForecast);
+            forecastSb.AppendLine("Forecast:");
+            foreach (var item in forecastGroup)
             {
-                return "rapid increase";
+                if (item.Key == null) continue;
+                var sTime = item.Min(x => x.StartTime);
+                var eTime = item.Max(x => x.EndTime);
+                forecastSb.AppendLine($"From {sTime.ToString("h tt")} to {eTime.ToString("h tt")} {item.Key}.");
             }
-            else if (rate < _session.NwsData.HourlyTemperatureChangeRate && oldValue > newValue && Math.Abs(Math.Abs(oldValue) - Math.Abs(newValue)) >= 10)
+            var temps = inputs.GroupBy(x => x.TempStatement);
+            tempSb.AppendLine("Temperature:");
+            foreach (var tempChange in temps)
             {
-                return "slow decrease";
+                tempSb.AppendLine($"From {tempChange.Min(x => x.Temp.StartTime).ToString("h tt")} to {tempChange.Max(x => x.Temp.EndTime).ToString("h tt")} {tempChange.Key}.");
             }
-            else if (rate > _session.NwsData.HourlyTemperatureChangeRate && oldValue > newValue && Math.Abs(Math.Abs(oldValue) - Math.Abs(newValue)) >= 10)
+            var weatherGrouped = inputs.GroupBy(x => x.StormWeatherStatement);
+
+            foreach (var storm in weatherGrouped)
             {
-                return "rapid decrease";
+                if (storm.Key == null) continue;
+                weatherSb.AppendLine("Storm Weather:");
+                weatherSb.AppendLine($"From {storm.Min(x => x.StartTime.ToString("h tt"))} to {storm.Max(x => x.EndTime.ToString("h tt"))} {storm.Key}");
             }
-            else
+            var windGrouped = inputs.GroupBy(x => x.WindGustStatement);
+            windSb.AppendLine("Winds and Gusts:");
+            foreach (var wind in windGrouped)
             {
-                return "remains steady";
+                windSb.AppendLine($"From {wind.Min(x => x.StartTime.ToString("h tt"))} to {wind.Max(x => x.EndTime.ToString("h tt"))} {wind.Key}");
+            }
+            var precipitationGrouped = inputs.GroupBy(x => x.Precipitation.Type);
+            foreach (var type in precipitationGrouped)
+            {
+                if (type.Key == null) continue;
+                precipitationSb.AppendLine($"Precipitation({type.Key}):");
+                precipitationSb.AppendLine($"Total: {type.Sum(x => x.Precipitation.Amount)} for {type.Max(x => x.StartTime.ToString("dddd, MMM dd"))}");
+            }
+            var skyGrouped = inputs.GroupBy(x => x.SkyCoverStatement);
+            skySb.AppendLine("Sky Cover:");
+            foreach (var sky in skyGrouped)
+            {
+                skySb.AppendLine($"From {sky.Min(x => x.StartTime.ToString("h tt"))} to {sky.Max(x => x.EndTime.ToString("h tt"))} {sky.Key}");
+            }
+            string finalSb = openSb.ToString() + forecastSb.ToString() + weatherSb.ToString() + precipitationSb.ToString() + tempSb.ToString() + skySb.ToString() + windSb.ToString();
+            timeOfDayForecast.LongForecast = finalSb;
+            TimeOfDayForecasts.Add(timeOfDayForecast);
+            return;
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"ERROR running BuildForecastAsync method in Forecast Service {ex}");
+            return;
+        }
+
+    }
+
+
+    private string CoverageStmt(string coverage, string weather, string intensity = "")
+    {
+        string weatherDescription = string.Empty;
+        weatherDescription += coverage switch
+        {
+            "areas" => "areas of ",
+            "brief" => "brief ",
+            "chance" => "chance of ",
+            "definite" => "definite ",
+            "few" => "few ",
+            "frequent" => "frequent ",
+            "intermittent" => "intermittent ",
+            "isolated" => "isolated ",
+            "likely" => "likely chance of ",
+            "numerous" => "numerous ",
+            "occasional" => "occasional ",
+            "patchy" => "patchy ",
+            "periods" => "periods of ",
+            "scattered" => "scattered ",
+            "slight_chance" => "slight chance of ",
+            "widespread" => "widespread ",
+            null => "",
+            "" => "",
+            _ => "",
+        };
+        weatherDescription += " " + intensity.Replace("_", " ").ToLowerInvariant() ?? ""; weatherDescription += " " + weather.Replace("_", " ").ToLowerInvariant();
+        return weatherDescription;
+    }
+
+    public ObservableCollection<ForecastInputs> BuildForecastInputs(NwsHourlyForecast[] hours)
+    {
+        var inputCollection = new ObservableCollection<ForecastInputs>();
+        if (hours == null || hours.Length == 0)
+            return inputCollection;
+
+        var weather = new ObservableCollection<WeatherStatementsValue>();
+        var stormBuilder = new StringBuilder();
+
+
+        for (int h = 0; h < hours.Length; h++)
+        {
+            weather.Clear();
+            stormBuilder.Clear();
+
+            var supp = hours[h].Supplemental ?? new NwsHourlySupplemental();
+
+            if (supp.Weather != null && supp.Weather.Length > 0)
+            {
+                for (int w = 0; w < supp.Weather.Length; w++)
+                {
+                    if (supp.Weather[w] != null)
+                        weather.Add(supp.Weather[w]!);
+                }
+
+                for (int w = 0; w < weather.Count; w++)
+                {
+
+                    if (w == 0)
+                    {
+                        stormBuilder.Append($"Expect {CoverageStmt(weather[w].Coverage, weather[w].Weather, weather[w].Intensity ?? "")}");
+                        if (weather.Count == 1 && !weather.Any(x => x.Weather.ToLowerInvariant().Contains("thunder")) && (supp.ProbabilityOfThunder?.Value ?? 0) > 0)
+                        {
+                            stormBuilder.Append($"and {supp.ProbabilityOfThunder?.Description}");
+                        }
+                    }
+                    if (w == 1)
+                    {
+                        stormBuilder.Append($"along with {CoverageStmt(weather[w].Coverage, weather[w].Weather, weather[w].Intensity ?? "")}");
+                        if (weather.Count > 1 && !weather.Any(x => x.Weather.ToLowerInvariant().Contains("thunder")) && (supp.ProbabilityOfThunder?.Value ?? 0) > 0)
+                        {
+                            stormBuilder.Append($"and {supp.ProbabilityOfThunder?.Description}");
+                        }
+                    }
+                    if (w > 1)
+                    {
+                        stormBuilder.Append($",{CoverageStmt(weather[w].Coverage, weather[w].Weather, weather[w].Intensity ?? "")}");
+                    }
+                    if (weather.Count - 1 == w)
+                    {
+                        stormBuilder.Append($" lasting about {weather[w].Duration} hours.");
+                    }
+                }
+            }
+
+            var forecast = new ForecastInputs
+            {
+                StartTime = hours[h].StartTime,
+                EndTime = hours[h].EndTime,
+                WmoForecast = hours[h].ShortForecast,
+                //Temperature
+                Temp = supp.Temperature != null ? new ForecastTemperature
+                {
+                    StartTime = hours[h].StartTime,
+                    EndTime = hours[h].EndTime,
+                    Value = supp.Temperature.Value,
+                    UnitCode = supp.Temperature.UnitCode
+                } : new ForecastTemperature(),
+                Dewpoint = supp.DewPoint != null ? new ForecastDewPoint
+                {
+                    StartTime = hours[h].StartTime,
+                    EndTime = hours[h].EndTime,
+                    UnitCode = supp.DewPoint.UnitCode,
+                    Value = supp.DewPoint.Value
+                } : new ForecastDewPoint(),
+                RelativeHumidity = supp.RelativeHumidity != null ? new ForecastRelativeHumidity
+                {
+                    StartTime = hours[h].StartTime,
+                    EndTime = hours[h].EndTime,
+                    UnitCode = supp.RelativeHumidity.UnitCode,
+                    Value = supp.RelativeHumidity.Value
+                } : new ForecastRelativeHumidity(),
+                ApparentTemperature = supp.ApparentTemperature != null ? new ForecastApparentTemperature
+                {
+                    StartTime = hours[h].StartTime,
+                    EndTime = hours[h].EndTime,
+                    Value = supp.ApparentTemperature.Value,
+                    UnitCode = supp.ApparentTemperature.UnitCode
+                } : new ForecastApparentTemperature(),
+                WindChill = supp.WindChill != null ? new ForecastWindChill
+                {
+                    StartTime = hours[h].StartTime,
+                    EndTime = hours[h].EndTime,
+                    Value = supp.WindChill.Value,
+                    UnitCode = supp.WindChill.UnitCode
+                } : new ForecastWindChill(),
+                HeatIndex = supp.HeatIndex != null ? new ForecastHeatIndex
+                {
+                    StartTime = hours[h].StartTime,
+                    EndTime = hours[h].EndTime,
+                    Value = supp.HeatIndex.Value,
+                    UnitCode = supp.HeatIndex.UnitCode
+                } : new ForecastHeatIndex(),
+                HeatRisk = supp.HeatRisk != null ? new ForecastHeatRisk
+                {
+                    StartTime = hours[h].StartTime,
+                    EndTime = hours[h].EndTime,
+                    Value = supp.HeatRisk.Value,
+                    UnitCode = supp.HeatRisk.UnitCode
+                } : new ForecastHeatRisk(),
+                WetBulbGlobeTemp = supp.WetBulbGlobeTemperature != null ? new ForecastWbgt
+                {
+                    StartTime = hours[h].StartTime,
+                    EndTime = hours[h].EndTime,
+                    Value = supp.WetBulbGlobeTemperature.Value,
+                    UnitCode = supp.WetBulbGlobeTemperature.UnitCode
+                } : new ForecastWbgt(),
+                //Wind
+                Wind = supp.WindSpeed != null ? new ForecastWind
+                {
+                    StartTime = hours[h].StartTime,
+                    EndTime = hours[h].EndTime,
+                    Value = supp.WindSpeed.Value,
+                    Direction = supp.WindDirection?.Description ?? hours[h].WindDirection ?? string.Empty,
+                    UnitCode = hours[h].WindSpeed?.UnitCode ?? supp.WindSpeed.UnitCode
+                } : new ForecastWind(),
+                WindGusts = supp.WindGust != null ? new ForecastGusts
+                {
+                    StartTime = hours[h].StartTime,
+                    EndTime = hours[h].EndTime,
+                    Value = supp.WindGust.Value,
+                    UnitCode = supp.WindGust.UnitCode
+                } : new ForecastGusts(),
+                TransportWind = supp.TransportWindSpeed != null ? new ForecastTransportWind
+                {
+                    StartTime = hours[h].StartTime,
+                    EndTime = hours[h].EndTime,
+                    Value = supp.TransportWindSpeed.Value,
+                    Direction = supp.TransportWindDirection != null ? $@"({supp.TransportWindDirection.Value}) {supp.TransportWindDirection.Direction}" : string.Empty,
+                    UnitCode = supp.TransportWindSpeed.UnitCode
+                } : new ForecastTransportWind(),
+                //Precipitation
+                Weather = new ObservableCollection<WeatherStatementsValue>(weather),
+                StormWeatherStatement = stormBuilder.ToString(),
+                Precipitation = supp.QuantitativePrecipitation != null && hours[h].ProbabilityOfPrecipitation != null ? new ForecastPrecipitation
+                {
+                    StartTime = hours[h].StartTime,
+                    EndTime = hours[h].EndTime,
+                    Value = hours[h].ProbabilityOfPrecipitation.Value,
+                    Amount = supp.QuantitativePrecipitation.Value,
+                    UnitCode = supp.QuantitativePrecipitation.UnitCode
+                } : new ForecastPrecipitation(),
+                IceAccumulation = supp.IceAccumulation != null ? new ForecastIceAccumulation
+                {
+                    StartTime = hours[h].StartTime,
+                    EndTime = hours[h].EndTime,
+                    Value = supp.IceAccumulation.Value,
+                    UnitCode = supp.IceAccumulation.UnitCode
+                } : new ForecastIceAccumulation(),
+                SnowFallAmount = supp.SnowfallAmount != null ? new ForecastSnowfallAmount
+                {
+                    StartTime = hours[h].StartTime,
+                    EndTime = hours[h].EndTime,
+                    Value = supp.SnowfallAmount.Value,
+                    UnitCode = supp.SnowfallAmount.UnitCode
+                } : new ForecastSnowfallAmount(),
+                Thunder = supp.ProbabilityOfThunder != null ? new ForecastThunder
+                {
+                    StartTime = hours[h].StartTime,
+                    EndTime = hours[h].EndTime,
+                    Value = supp.ProbabilityOfThunder.Value,
+                    UnitCode = supp.ProbabilityOfThunder.Description
+                } : new ForecastThunder(),
+                //Clouds
+                SkyCover = supp.Skycover != null ? new ForecastSkyCover
+                {
+                    StartTime = hours[h].StartTime,
+                    EndTime = hours[h].EndTime,
+                    Value = supp.Skycover.Value,
+                    UnitCode = supp.Skycover.UnitCode
+                } : new ForecastSkyCover(),
+                Lovri = supp.LowVisibilityOccurrenceRiskIndex != null ? new ForecastLowOccuranceVisibilityIndex
+                {
+                    StartTime = hours[h].StartTime,
+                    EndTime = hours[h].EndTime,
+                    Value = supp.LowVisibilityOccurrenceRiskIndex.Value,
+                    UnitCode = supp.LowVisibilityOccurrenceRiskIndex.UnitCode
+                } : new ForecastLowOccuranceVisibilityIndex(),
+                Visibility = supp.Visibility != null ? new ForecastVisibility
+                {
+                    StartTime = hours[h].StartTime,
+                    EndTime = hours[h].EndTime,
+                    Value = supp.Visibility.Value,
+                    UnitCode = supp.Visibility.UnitCode
+                } : new ForecastVisibility(),
+                CeilingHeight = supp.CeilingHeight != null ? new ForecastCeilingHeight
+                {
+                    StartTime = hours[h].StartTime,
+                    EndTime = hours[h].EndTime,
+                    Value = supp.CeilingHeight.Value,
+                    UnitCode = supp.CeilingHeight.UnitCode
+                } : new ForecastCeilingHeight(),
+                MixingHeight = supp.MixingHeight != null ? new ForecastMixingHeight
+                {
+                    StartTime = hours[h].StartTime,
+                    EndTime = hours[h].EndTime,
+                    Value = supp.MixingHeight.Value,
+                    UnitCode = supp.MixingHeight.UnitCode
+                } : new ForecastMixingHeight(),
+                TempStatement = TempCategory(
+                    hours[h].Temperature?.Value ?? 0,
+                    hours[h].DewPoint?.Value ?? 0,
+                    hours[h].RelativeHumidity?.Value ?? 0,
+                    supp.WetBulbGlobeTemperature?.Value ?? 0),
+                WindGustStatement = $"Winds from the {hours[h].WindDirection} at {hours[h].WindSpeed?.Value ?? 0}{hours[h].WindSpeed?.UnitCode}{(hours[h].WindGust != null ? $"{hours[h].WindGust.Value} mph." : ".")}",
+                SkyCoverStatement = (supp.Skycover?.Value ?? 0) switch
+                {
+                    < 10 => $"Look up to the sky and see a clear{(hours[h].StartTime.Hour >= 6 || hours[h].StartTime.Hour < 18 ? " sunny day" : " stary night")}.",
+                    >= 10 and < 30 => $"Look up to the sky and see a mostly {(hours[h].StartTime.Hour >= 6 || hours[h].StartTime.Hour < 18 ? "sunny day" : "stary night")}.",
+                    >= 30 and < 60 => $"Look up to the sky and see a partly {(hours[h].StartTime.Hour >= 6 || hours[h].StartTime.Hour < 18 ? "sunny day" : "stary night")}.",
+                    >= 60 and < 70 => $"Look up to the sky and see a partly cloudy {(hours[h].StartTime.Hour >= 6 || hours[h].StartTime.Hour < 18 ? "day" : "night")}.",
+                    >= 70 and < 90 => $"Look up to the sky and see a mostly cloudy {(hours[h].StartTime.Hour >= 6 || hours[h].StartTime.Hour < 18 ? "day" : " night")}.",
+                    >= 90 => $"Look up to the sky and see an overcast {(hours[h].StartTime.Hour >= 6 || hours[h].StartTime.Hour < 18 ? "day" : " night")}."
+                }
+            };
+
+            inputCollection.Add(forecast);
+        }
+        return inputCollection;
+    }
+
+    public string TempCategory(double temp, double dewPoint, double relativeHumidity, double wbgt)
+    {
+        var sb = new StringBuilder();
+        sb.Append($"The temperature will be {NumberGroups.TempsToString(temp)} with a dew point {NumberGroups.DewPointToString(dewPoint)}. Expect ");
+        // --- Extreme heat danger (WBGT-based) ---
+        if (wbgt >= 90)
+        {
+            sb.Append("extreme dangerous heat this hour.");
+            return sb.ToString();
+        }
+        if (wbgt >= 82)
+        {
+            sb.Append("dangerous heat this hour.");
+            return sb.ToString();
+        }
+        if (wbgt >= 78)
+        {
+            sb.Append("very hot and humid this hour.");
+            return sb.ToString();
+        }
+        // --- RelativeHumidity / dew point discomfort ---
+        bool oppressiveHumidity = dewPoint >= 75 || relativeHumidity >= 85;
+        bool veryHumid = dewPoint >= 70 || relativeHumidity >= 75;
+        bool humid = dewPoint >= 65 || relativeHumidity >= 60;
+
+        // --- Cold stress ---
+        if (temp <= 20)
+        {
+            sb.Append("frigid conditions this hour.");
+            return sb.ToString();
+        }
+        if (temp <= 32)
+        {
+            sb.Append("freezing conditions this hour.");
+            return sb.ToString();
+        }
+        if (temp <= 40)
+        {
+            sb.Append(humid ? "raw and cold conditions this hour." : "cold conditions this hour.");
+            return sb.ToString();
+        }
+        // --- Cool to mild ---
+        if (temp <= 50)
+        {
+            sb.Append(humid ? "chilly and damp conditions this hour." : "cool conditions this hour.");
+            return sb.ToString();
+        }
+        if (temp <= 60)
+        {
+            sb.Append(humid ? "cool and humid conditions this hour." : "mildly cool conditions this hour.");
+            return sb.ToString();
+        }
+        // --- Mild to warm ---
+        if (temp <= 70)
+        {
+            sb.Append(humid ? "mild but humid conditions this hour." : "mild conditions this hour.");
+            return sb.ToString();
+        }
+        if (temp <= 80)
+        {
+            if (oppressiveHumidity) sb.Append("warm and oppressive conditions this hour.");
+            if (veryHumid) sb.Append("warm and very humid conditions this hour.");
+            if (humid) sb.Append("warm and humid conditions this hour.");
+            sb.Append("warm conditions this hour.");
+            return sb.ToString();
+        }
+
+        // --- Hot categories ---
+        if (temp <= 90)
+        {
+            if (oppressiveHumidity) sb.Append("hot and oppressive conditions this hour.");
+            if (veryHumid) sb.Append("hot and very humid conditions this hour.");
+            if (humid) sb.Append("hot and humid conditions this hour.");
+            sb.Append("hot conditions this hour.");
+            return sb.ToString();
+        }
+
+        // --- Extreme heat (temp-based) ---
+        if (temp > 90)
+        {
+            if (oppressiveHumidity) sb.Append("extremely hot and oppressive conditions this hour.");
+            if (veryHumid) sb.Append("extremely hot and very humid conditions this hour.");
+            sb.Append("extremely hot conditions this hour.");
+            return sb.ToString();
+        }
+
+        sb.Append("unknown");
+        return sb.ToString();
+    }
+
+    // Produces the enriched string of forecasts (await)
+
+
+    // Start Intensity and start time
+    //Any changes in intensity if every hour is an up down change
+    // on and off or switch between lighter and heavier
+    //Any changes in coverage should also be shown
+    // qprecip shows if it's raining heavier one hour over another hour
+    //skycover increases and then decreases 
+    // total length of storm and total precipitation that falls
+    // use for loops to see if there are any pockets in the weather or times of peace.
+    // those are the on and off again's.
+    // maybe even talk about the wind speeds during the weather including gust statements.
+    // don't forget Thunderstorms are storms too that don't always show up with weather.
+    // HeatRisk index if high enough can also be weather as well as (find out about cold exposure and hypothermia).
+    // Future releases will also have the Nws Alerts, alerting of flash floods, winter storm advisories, winter storm warnings, heat advisories, drought conditions.
+    //During intense storms, check the distance of the sun and moon and see if they are contributing to exceptionally higher tides
+    // For peoples who like to go outside the climate control, new healf and safety with web bulb gt and apparenttemp, dewpoint, relative humidity
+    //    // 
+
+
+    //foreach (var timeOfDay in grouped)
+    //{
+    //    var todForecast = timeOfDay.ToObservableCollection();
+
+    //    var result = TemperatureEngine.StandardDeviation(todForecast);
+    //}
+
+
+
+    //for (int i = 0; i < inputs.Count - 1; i++)
+    //{
+    //    if (Math.Round(inputs[i].Temp / 3) * 3 > Math.Round(inputs[i + 1].Temp / 3) * 3)
+    //        inputs[i].TempTrend = "cooling down";
+    //    if (Math.Round(inputs[i].Temp / 3) * 3 < Math.Round(inputs[i + 1].Temp / 3) * 3)
+    //        inputs[i].TempTrend = "warming up";
+    //    if (Math.Round(inputs[i].Temp / 3) * 3 == Math.Round(inputs[i + 1].Temp / 3) * 3)
+    //        inputs[i].TempTrend = "remaining steady";
+    //}
+    //var startTime = inputs.Min(x => x.StartTime);
+    //var endTime = inputs.Max(x => x.EndTime);
+    // The morning of November 2 (6 AM - 12 PM)
+
+    //Temps and times
+    //var maxTemp = inputs.MaxBy(x => x.Temp);
+    //var minTemp = inputs.MinBy(x => x.Temp);
+
+
+    //starterCollection.Add((starttime, endtime, line));
+    //tempCollection.Add((starttime, endtime, ProcessTrend(temp, futureTemp, starttime, endtime), temp));
+    //windCollection.Add((starttime, endtime, ProcessTrend(windSpeed, futureWindSpeed, starttime, endtime), windSpeed, direction));
+    //gustsCollection.Add((starttime, endtime, ProcessTrend(gust, futureGust, starttime, endtime), gust));
+    //skyCoverCollection.Add((starttime, endtime, ProcessTrend(skyCover, futureSkyCover, starttime, endtime), skyCover));
+    //tStormCollection.Add((starttime, endtime, ProcessTrend(tStorm, futureTStorm, starttime, endtime), tStorm));
+
+
+    //Starter
+    //var orderStarters = starterCollection.OrderBy(x => x.starttime).GroupBy(y => y.line);
+    //var phrases = orderStarters.Select(x => $"From {x.Min(z => z.starttime).ToString("h tt")} to {x.Max(y => y.endtime).ToString("h tt")}, {x.Key.ToLowerInvariant()}").ToObservableCollection();
+    //var firstLine = $"{String.Join(", ", phrases.Take(phrases.Count - 1))} and {phrases.Last()}.";
+    ////Temperature
+    //var orderTemps = tempCollection.OrderBy(x => x.starttime).GroupBy(y => y.temp);
+    //var tempPhrases = orderTemps.Select(x => $"From {x.Min(z => z.starttime).ToString("h tt")} to {x.Max(y => y.endtime).ToString("h tt")}, at a temperature of {x.Key} and {x.Max(y => y.trend)}").ToObservableCollection();
+    //var tempLine = $"{}" String.Join(", ", tempPhrases) + ". ";
+    ////WindSpeed and Direction
+    //var orderWinds = windCollection.OrderBy(x => x.starttime).GroupBy(y => y.windspeed);
+    //var windsPhrases = orderWinds.Select(x => $"from {x.Min(z => z.starttime).ToString("h tt")} to {x.Max(y => y.endtime).ToString("h tt")} {x.Max().direction} winds at speeds of {Math.Round(x.Key / 5) * 5} mph and {x.Max(y => y.trend)}").ToObservableCollection();
+    //var windLine = String.Join(", ", windsPhrases) + ". ";
+    ////Gusts
+    //var orderGusts = gustsCollection.OrderBy(x => x.starttime).GroupBy(y => y.gust);
+    //var gustPhrases = orderGusts.Select(x => $"from {x.Min(z => z.starttime).ToString("h tt")} to {x.Max(y => y.endtime).ToString("h tt")} gusts up to {x.Key} mph and {x.Max(y => y.trend)}").ToObservableCollection();
+    //var gustLine = String.Join(", ", gustPhrases) + ". ";
+    ////Skycover
+    //var orderClouds = skyCoverCollection.OrderBy(x => x.starttime).GroupBy(y => y.skycover);
+    //var cloudPhrases = orderClouds.Select(x => $"from {x.Min(z => z.starttime).ToString("h tt")} to {x.Max(y => y.endtime).ToString("h tt")} cloud coverage is {x.Key}% and {x.Max(y => y.trend)}").ToObservableCollection();
+    //var cloudLine = String.Join(", ", cloudPhrases) + ". ";
+    ////TStorms
+    //var orderTstorms = tStormCollection.Where(r => r.tstorm != -1).OrderBy(x => x.starttime).GroupBy(y => y.tstorm);
+    //var tstormPhrases = orderTstorms.Select(x => $"from {x.Min(z => z.starttime).ToString("h tt")} to {x.Max(y => y.endtime).ToString("h tt")} there is a {x.Key}% chance of thunderstorms and damaging winds and {x.Max(y => y.trend)}").ToObservableCollection();
+    //var tstormLine = String.Join(", ", tstormPhrases) + ". ";
+    //string complete = firstLine + tstormLine + tempLine + cloudLine + windLine + gustLine;
+    //return string.Empty;
+
+
+
+
+
+    public string ProcessTrend(double currentValue, double futureValue)
+    {
+        try
+        {
+
+            if (currentValue < futureValue)
+            {
+                return "increasing";
+            }
+            if (currentValue > futureValue)
+            {
+                return "decreasing";
+            }
+            if (currentValue == futureValue)
+            {
+                return "stable";
             }
         }
         catch (Exception ex)
@@ -232,6 +738,7 @@ public partial class ForecastService : ObservableObject, IForecastService
             Debug.WriteLine($"ERROR PROCESSING TREND{ex}");
             return "remains steady";
         }
+        return "remains steady";
     }
 
     //public async Task<string> BuildStormStatementAsync(NwsHourlyForecast[] hourlies)
@@ -481,113 +988,6 @@ public partial class ForecastService : ObservableObject, IForecastService
     //    return weatherStatement.ToString();
     //}
 
-    private static string TemperatureStatement(double t, double d)
-    {
-        var tempBuilder = new StringBuilder();
-
-        string temp = string.Empty;
-        if (t < 30) temp = "below freezing";
-        if (30 <= t && t < 34) temp = "in the low 30's";
-        if (34 <= t && t <= 36) temp = "in the mid 30's";
-        if (37 <= t && t < 40) temp = "in the high 30's";
-        if (40 <= t && t < 44) temp = "in the low 40's";
-        if (44 <= t && t <= 46) temp = "in the mid 40's";
-        if (47 <= t && t < 50) temp = "in the high 40's";
-        if (50 <= t && t < 54) temp = "in the low 50's";
-        if (54 <= t && t <= 56) temp = "in the mid 50's";
-        if (57 <= t && t < 60) temp = "in the high 50's";
-        if (60 <= t && t < 64) temp = "in the low 60's";
-        if (64 <= t && t <= 66) temp = "in the mid 60's";
-        if (67 <= t && t < 70) temp = "in the high 60's";
-        if (70 <= t && t < 74) temp = "in the low 70's";
-        if (74 <= t && t <= 76) temp = "in the mid 70's";
-        if (77 <= t && t < 80) temp = "in the high 70's";
-        if (80 <= t && t < 84) temp = "in the low 80's";
-        if (84 <= t && t <= 86) temp = "in the mid 80's";
-        if (87 <= t && t < 90) temp = "in the high 80's";
-        if (90 <= t && t < 94) temp = "in the low 90's";
-        if (94 <= t && t <= 96) temp = "in the mid 90's";
-        if (97 <= t && t < 100) temp = "in the high 90's";
-        if (100 <= t && t < 104) temp = "in the low 100's";
-        if (104 <= t && t <= 106) temp = "reaching about 105";
-        if (107 <= t && t < 110) temp = "climbing near 110";
-        if (t >= 110) temp = "reaching over 110";
-        tempBuilder.Append(temp);
-        return tempBuilder.ToString();
-    }
-    private string DewPointStatement(double d, double t)
-    {
-        var humiditySB = new StringBuilder();
-        if (t >= 60)
-        {
-            string dp = string.Empty;
-            if (d < 30) dp = "less than 30";
-            if (30 <= d && d < 34) dp = "in the low 30's,";
-            if (34 <= d && d <= 36) dp = "in the mid 30's,";
-            if (37 <= d && d < 40) dp = "in the high 30's";
-            if (40 <= d && d < 44) dp = "in the low 40's";
-            if (44 <= d && d <= 46) dp = "in the mid 40's,";
-            if (47 <= d && d < 50) dp = "in the high 40's,";
-            if (50 <= d && d < 54) dp = "in the low 50's";
-            if (54 <= d && d <= 56) dp = "in the mid 50's,";
-            if (57 <= d && d < 60) dp = "in the high 50's";
-            if (60 <= d && d < 64) dp = "in the low 60's,";
-            if (64 <= d && d <= 66) dp = "in the mid 60's,";
-            if (67 <= d && d < 70) dp = "in the high 60's";
-            if (70 <= d && d < 75) dp = "in the low 70's";
-            if (d > 75) dp = $" at {d}";
-            humiditySB.Append($" and dew point {dp}.");
-        }
-        return humiditySB.ToString();
-    }
-    private string TypeOfDay(double t, double d)
-    {
-        string feelsLike = string.Empty;
-        var typeOfDaySb = new StringBuilder();
-        var coldness = string.Empty;
-        switch (t)
-        {
-            case > 20 and < 30:
-                coldness = "cold";
-                break;
-            case > 10 and <= 20:
-                coldness = "chilly";
-                break;
-            case <= 10:
-                coldness = "frigid";
-                break;
-        }
-        switch (d)
-        {
-            case (<= 30):
-                feelsLike = "wicked cold";
-                break;
-            case (> 30 and <= 50):
-                feelsLike = "perfect";
-                break;
-            case (> 50 and <= 60) when t >= 60 && t < 65:
-                feelsLike = "decent";
-                break;
-            case (> 50 and <= 60) when t > 65:
-                feelsLike = "kinda comfortable";
-                break;
-            case (> 60 and <= 70) when t >= 70 && t <= 75:
-                feelsLike = "sweaty";
-                break;
-            case (> 60 and <= 70) when t > 75:
-                feelsLike = "kinda  comfortable";
-                break;
-            case > 70 and <= 75:
-                feelsLike = "filthy, hot, and sweaty";
-                break;
-            case > 75:
-                //Dangerous when paired with high temperatures. Heat-illness risk for outdoor activity, athletes, elderly, and infants
-                feelsLike = "wicked hot and dangerous";
-                break;
-        }
-        typeOfDaySb.Append($", a {feelsLike}");
-        return typeOfDaySb.ToString();
-    }
     //        else if (tempAvg > 30 && tempAvg< 60 && hours.Max(h => h.ProbabilityOfPrecipitation.Value) <= 12.0)
     //        {
     //            tempBuilder.Append($"With a {hours.Max(h => h.ProbabilityOfPrecipitation.Value)}% chance of precipitation and cool temperatures.");
@@ -687,32 +1087,32 @@ public partial class ForecastService : ObservableObject, IForecastService
 
     //return statement.ToString().Trim();
 
-    private static ForecastItem[] BuildWeatherItems(IEnumerable<NwsHourlyForecast> forecasts)
-    {
-        return forecasts
-            .SelectMany(forecast => forecast.Supplemental?.Weather ?? [])
-            .Where(weather => weather != null &&
-                              !string.IsNullOrWhiteSpace(weather.Category))
-            .GroupBy(
-                weather => weather.Category,
-                StringComparer.OrdinalIgnoreCase)
-            .Select(group =>
-            {
-                var start = group.Min(weather => weather.Time);
-                var duration = group.FirstOrDefault().Duration;
-                var end = start.AddHours(duration);
+    //private ForecastItem[] BuildWeatherItems(IEnumerable<NwsHourlyForecast> forecasts)
+    //{
+    //    return forecasts
+    //        .SelectMany(forecast => forecast.Supplemental?.Weather ?? [])
+    //        .Where(weather => weather != null &&
+    //                          !string.IsNullOrWhiteSpace(weather.Category))
+    //        .GroupBy(
+    //            weather => weather.Category,
+    //            StringComparer.OrdinalIgnoreCase)
+    //        .Select(group =>
+    //        {
+    //            var start = group.Min(weather => weather.Time);
+    //            var duration = group.FirstOrDefault().Duration;
+    //            var end = start.AddHours(duration);
 
 
-                return new ForecastItem
-                {
-                    Condition = group.Key,
-                    StartTime = start,
-                    EndTime = end == start ? start.AddHours(1) : end
-                };
-            })
-            .OrderBy(item => item.StartTime)
-            .ToArray();
-    }
+    //            return new ForecastItem
+    //            {
+    //                Condition = group.Key,
+    //                StartTime = start,
+    //                EndTime = end == start ? start.AddHours(1) : end
+    //            };
+    //        })
+    //        .OrderBy(item => item.StartTime)
+    //        .ToArray();
+    //}
 
 
 
@@ -752,36 +1152,36 @@ public partial class ForecastService : ObservableObject, IForecastService
 
 
 
-    //private string BuildStormAndWarningStatement(List<ValueEvolution> evolutions)
-    //{
-    //    var weatherStatements = _session.NwsData.DailyForecasts.OrderBy(o => o.StartTime).ToArray();
-    //    if (weatherStatements != null)
-    //    {
-    //        var thunderKeywords = new[] { "thunder", "thunderstorm", "severe", "tstm" };
-    //        var stormHours = weatherStatements.Where(e => e.Weather?.Statement != null)
-    //                                    .OrderBy(e => e.Time)
-    //                                    .ToArray();
+    private string BuildStormAndWarningStatement(List<ValueEvolution> evolutions)
+    {
+        var weatherStatements = _session.NwsData.HourlySupplementals.OrderBy(o => o.Time).ToArray();
+        if (weatherStatements != null)
+        {
+            var thunderKeywords = new[] { "thunder", "thunderstorm", "severe", "tstm" };
+            var stormHours = weatherStatements.Where(e => e.Weather.Select(x => x.Statement) != null)
+                                        .OrderBy(e => e.Time)
+                                        .ToArray();
 
-    //        if (stormHours.Length == 0) return string.Empty;
+            if (stormHours.Length == 0) return string.Empty;
 
-    //        var start = stormHours.First().Time;
-    //        var end = stormHours.Last().Time == default ? stormHours.Last().Time.AddHours(1) : stormHours.Last().Time;
-    //        var msg = new StringBuilder();
-    //        msg.Append($"⚠️ Severe weather possible from {start:h tt} to {end:h tt}. ");
-    //        if (_session.NwsData.HourlySupplementals.Where(x => x.Time.Date == start.Date).Select(t => t.ProbabilityOfThunder?.Description).ToArray() is string[] tstormDescription)
-    //        {
-    //            //From x to x there is a moderate change of thrudersstorms.
-    //            msg.Append("Prepare for a moderate chance of thunderstorms and strong winds.");
-    //        }
-    //        // Use the first matching statement for detail if present
-    //        var detail = stormHours.Select(e => e.Weather.Statement).FirstOrDefault(s => !string.IsNullOrEmpty(s));
-    //        if (!string.IsNullOrEmpty(detail)) msg.Append(detail + ". ");
+            var start = stormHours.First().Time;
+            var end = stormHours.Last().Time == default ? stormHours.Last().Time.AddHours(1) : stormHours.Last().Time;
+            var msg = new StringBuilder();
+            msg.Append($"⚠️ Severe weather possible from {start:h tt} to {end:h tt}. ");
+            if (_session.NwsData.HourlySupplementals.Where(x => x.Time.Date == start.Date).Select(t => t.ProbabilityOfThunder?.Description).ToArray() is string[] tstormDescription)
+            {
+                //From x to x there is a moderate change of thrudersstorms.
+                msg.Append("Prepare for a moderate chance of thunderstorms and strong winds.");
+            }
+            // Use the first matching statement for detail if present
+            var detail = stormHours.Select(e => e.SupplementalWeatherStatement).FirstOrDefault(s => !string.IsNullOrEmpty(s));
+            if (!string.IsNullOrEmpty(detail)) msg.Append(detail + ". ");
 
-    //        return msg.ToString();
+            return msg.ToString();
 
-    //    }
-    //    return "no storms to report.";
-    //}
+        }
+        return "no storms to report.";
+    }
 
     private IEnumerable<string> BuildPrecipitationStatements(List<ValueEvolution> evolutions)
     {
@@ -823,7 +1223,7 @@ public partial class ForecastService : ObservableObject, IForecastService
     private string BuildBriefForecastStatement(List<ValueEvolution> evolutions)
     {
         if (evolutions == null || !evolutions.Any()) return string.Empty;
-        var list = evolutions.OrderBy(e => e.Time).Select(e => (Time: e.Time, desc: e.WeatherDescription?.FirstOrDefault()?.Value ?? e.WeatherStatement?.FirstOrDefault()?.Value ?? string.Empty)).ToList();            // collapse consecutive equal descriptions
+        var list = evolutions.OrderBy(e => e.Time).Select(e => (Time: e.Time, desc: e.WeatherDescription?.FirstOrDefault()?.Value ?? e.ShortForecast?.FirstOrDefault()?.Value ?? string.Empty)).ToList();            // collapse consecutive equal descriptions
         var collapsed = new List<(DateTime Start, DateTime End, string Desc)>();
         DateTime start = list[0].Time;
         DateTime end = list[0].Time.AddHours(1);
@@ -895,101 +1295,134 @@ public partial class ForecastService : ObservableObject, IForecastService
     private double ParseWindSpeed(double Value) => Value; // placeholder for unit conversion if needed
 
 
-    //public async Task<ObservableCollection<string>> BuildDailyForecastAsync(NwsTimeOfDayForecast tod)
-    //{
-    //    try
-    //    {
-    //        Debug.WriteLine("BuildDailyForecastAsync: start");
+    public async Task<ObservableCollection<string>> BuildDailyForecastAsync(NwsTimeOfDayForecast tod)
+    {
+        try
+        {
+            Debug.WriteLine("BuildDailyForecastAsync: start");
 
-    //        var hourlies = tod.Forecasts;
-    //        Debug.WriteLine($"BuildDailyForecastAsync: loaded {hourlies.Length} nws hours. StartTime={tod.StartTime:f} EndTime:{tod.EndTime:f}");
+            var hourlies = tod.Forecasts;
+            Debug.WriteLine($"BuildDailyForecastAsync: loaded {hourlies.Length} nws hours. StartTime={tod.StartTime:f} EndTime:{tod.EndTime:f}");
 
-    //        // Map to ValueEvolution on background thread
-    //        List<ValueEvolution> evolutions = await BuildEvolutionListsAsync(hourlies);
+            // Map to ValueEvolution on background thread
+            List<ValueEvolution> evolutions = await BuildEvolutionListsAsync(hourlies);
 
-    //        Debug.WriteLine($"BuildDailyForecastAsync: mapped {evolutions.Count} evolutions");
+            Debug.WriteLine($"BuildDailyForecastAsync: mapped {evolutions.Count} evolutions");
 
-    //        // Build and smooth segments on background
-    //        var segments = await Task.Run(() => ForecastSegmentation.BuildSegments(evolutions));
-    //        var smoothed = await Task.Run(() => ForecastSegmentation.SmoothSegments(segments, minHours: 2));
+            // Build and smooth segments on background
+            var segments = await Task.Run(() => ForecastSegmentation.BuildSegments(evolutions));
+            var smoothed = await Task.Run(() => ForecastSegmentation.SmoothSegments(segments, minHours: 2));
 
-    //        Debug.WriteLine($"BuildDailyForecastAsync: built {smoothed.Count} segments");
+            Debug.WriteLine($"BuildDailyForecastAsync: built {smoothed.Count} segments");
 
-    //        // Build statements on background, then marshal ObservableCollection creation to UI thread
-    //        var statementList = await Task.Run(async () =>
-    //        {
-    //            var list = new List<string>();
-    //            var stormStmt = await BuildTimeOfDayForecastsAsync(_session.NwsData.DailyForecasts);
-    //            // if (!string.IsNullOrEmpty(stormStmt))
-    //            // {
-    //            //   list.Add(stormStmt);
-    //            list.AddRange(BuildPrecipitationStatements(evolutions));
-    //            //}
-    //            var brief = BuildBriefForecastStatement(evolutions);
-    //            if (!string.IsNullOrEmpty(brief)) list.Add(brief);
-    //            var tempStmt = TemperatureStatement(evolutions.Max(x => x.Temperature).First(), evolutions.Max(x => x.DewPoints).First());
-    //            if (!string.IsNullOrEmpty(tempStmt)) list.Add(tempStmt);
-    //            var skyStmt = BuildSkyCoverStatement(evolutions);
-    //            if (!string.IsNullOrEmpty(skyStmt)) list.Add(skyStmt);
-    //            list.AddRange(BuildWindStatements(evolutions));
-    //            if (!list.Any())
-    //            {
-    //                foreach (var s in smoothed)
-    //                    list.Add($"{s.Start:h tt} to {s.End:h tt}: {Math.Round(s.Representative.Temperature)}°, {s.Representative.PrecipitationType}");
-    //            }
-    //            var forecasts = new ObservableCollection<string>(list);
-    //            return forecasts;
-    //        });
+            // Build statements on background, then marshal ObservableCollection creation to UI thread
+            var statementList = await Task.Run(async () =>
+            {
+                var list = new List<string>();
+                var stormStmt = await BuildTimeOfDayForecastsAsync(_session.NwsData.HourlyForecasts);
+                // if (!string.IsNullOrEmpty(stormStmt))
+                // {
+                //   list.Add(stormStmt);
+                list.AddRange(BuildPrecipitationStatements(evolutions));
+                //}
+                var brief = BuildBriefForecastStatement(evolutions);
+                if (!string.IsNullOrEmpty(brief)) list.Add(brief);
+                var tempStmt = TemperatureStatement(evolutions.FirstOrDefault().Temperature.Select(y => y.Value).Max(), evolutions.FirstOrDefault().DewPoints.Select(y => y.Value).Max(), evolutions.FirstOrDefault().Precipitation.Select(y => y.Amount).Max());
+                if (!string.IsNullOrEmpty(tempStmt)) list.Add(tempStmt);
+                //var skyStmt = BuildSkyCoverStatement(evolutions);
+                //if (!string.IsNullOrEmpty(skyStmt)) list.Add(skyStmt);
+                //list.AddRange(BuildWindStatements(evolutions));
+                if (!list.Any())
+                {
+                    foreach (var s in smoothed)
+                        list.Add($"{s.Start:h tt} to {s.End:h tt}: {Math.Round(s.Representative.Temperature)}°, {s.Representative.PrecipitationType}");
+                }
+                var forecasts = new ObservableCollection<string>(list);
+                return forecasts;
+            });
 
-    //        Debug.WriteLine($"BuildDailyForecastAsync: built {statementList.Count} statements");
+            Debug.WriteLine($"BuildDailyForecastAsync: built {statementList.Count} statements");
 
-    //        // Marshal ObservableCollection creation to UI thread
-    //        var statements = new ObservableCollection<string>(statementList);
-    //        //string paragraph = String.Join(" ", statements);
+            // Marshal ObservableCollection creation to UI thread
+            var statements = new ObservableCollection<string>(statementList);
+            //string paragraph = String.Join(" ", statements);
 
-    //        Debug.WriteLine("BuildDailyForecastAsync: completed successfully");
-    //        return statements;
+            Debug.WriteLine("BuildDailyForecastAsync: completed successfully");
+            return statements;
 
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        Debug.WriteLine($"BuildDailyForecastAsync: exception - {ex}");
-    //        Debug.WriteLine($"Error building forecast: {ex.Message}");
-    //    }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"BuildDailyForecastAsync: exception - {ex}");
+            Debug.WriteLine($"Error building forecast: {ex.Message}");
+        }
 
-    //    return new ObservableCollection<string>();
-    //}
+        return new ObservableCollection<string>();
+    }
 
     private async Task<List<ValueEvolution>> BuildEvolutionListsAsync(NwsHourlyForecast[] localNws)
     {
         var evolutions = await Task.Run(async () =>
         {
             var evolutions = new List<ValueEvolution>();
-
+            var weather = new ObservableCollection<WeatherStatementsValue>();
+            var stormBuilder = new StringBuilder();
             //var dayHourlies = localNws.Where(h => h.StartTime.Time == localSelectedDate).OrderBy(h => h.StartTime).ToArray();
             foreach (var nws in localNws)
             {
-                string precipicationType = GetPrecipitationType(nws);
+                // Transform the array weather statements into a single statement.
+                weather.Clear();
+                stormBuilder.Clear();
+                if (nws.Supplemental != null && nws.Supplemental.Weather != null && nws.Supplemental.Weather.Length > 0)
+                {
+                    for (int w = 0; w < nws.Supplemental?.Weather.Length; w++)
+                    {
+                        weather.Add(nws.Supplemental?.Weather[w]);
+                    }
+                    for (int w = 0; w < weather.Count; w++)
+                    {
+                        if (w == 0)
+                        {
+                            stormBuilder.Append($"Expect {GetNwsData.CoverageStmt(weather[w].Coverage, weather[w].Weather, weather[w].Intensity ?? "")}");
+                        }
+                        if (w == 1)
+                        {
+                            stormBuilder.Append($"along with {GetNwsData.CoverageStmt(weather[w].Coverage, weather[w].Weather, weather[w].Intensity) ?? ""}");
+                        }
+                        if (w > 1)
+                        {
+                            stormBuilder.Append($",{GetNwsData.CoverageStmt(weather[w].Coverage, weather[w].Weather, weather[w].Intensity ?? "")}");
+                        }
+                        if (weather.Count - 1 == w)
+                        {
+                            stormBuilder.Append($" lasting about {weather[w].Duration} hours.");
+                        }
+                    }
+                }
+                //            string precipicationType = GetPrecipitationType(nws);
                 var evo = new ValueEvolution
                 {
                     Time = nws.StartTime,
                     EndTime = nws.EndTime,
                     IsDay = nws.IsDaytime,
                     Temperature = new List<ForecastTemperature> { new ForecastTemperature { StartTime = nws.StartTime, Value = nws.Temperature.Value, UnitCode = nws.Temperature.UnitCode } },
-                    ApparentTemperature = new List<ApparentTemperature> { new ApparentTemperature { StartTime = nws.StartTime, Value = nws.Supplemental?.ApparentTemperature?.Value ?? 0, UnitCode = nws.Supplemental.ApparentTemperature?.UnitCode ?? string.Empty } },
-                    PrecipitationType = precipicationType,
-                    PrecipitationAmt = GetPrecipitationType(nws) != "none" ? nws.Supplemental.QuantitativePrecipitation.Value : 0.00,
-                    WindSpeed = nws.WindSpeed.Value,
-                    Wind = new List<ForecastWind> { new ForecastWind { StartTime = nws.StartTime, Value = nws.WindSpeed.Value } },
+                    ApparentTemperature = new List<ForecastApparentTemperature> { new ForecastApparentTemperature { StartTime = nws.StartTime, Value = nws.Supplemental?.ApparentTemperature?.Value ?? 0, UnitCode = nws.Supplemental.ApparentTemperature?.UnitCode ?? string.Empty } },
+                    Precipitation = new List<ForecastPrecipitation> { new ForecastPrecipitation { StartTime = nws.StartTime, Type = nws.Supplemental?.Weather?[0]?.Category ?? "none", Value = nws.Supplemental?.ProbabilityOfPrecipitation?.Value ?? 0.0D, Amount = nws.Supplemental?.QuantitativePrecipitation?.Value ?? 0.0D } },
+                    Wind = new List<ForecastWind> { new ForecastWind { StartTime = nws.StartTime, Value = nws.WindSpeed.Value, Direction = nws.WindDirection } },
                     Gusts = new List<ForecastGusts> { new ForecastGusts { StartTime = nws.StartTime, Value = nws.WindGust != null ? nws.WindGust.Value : 0.0D } },
                     SkyCover = new List<ForecastSkyCover> { new ForecastSkyCover { StartTime = nws.StartTime, Value = nws.Supplemental?.Skycover?.Value ?? 0.0D } },
                     MixingHeight = new List<ForecastMixingHeight> { new ForecastMixingHeight { StartTime = nws.StartTime, Value = nws.Supplemental?.MixingHeight?.Value ?? 0.0D } },
                     Wbgt = new List<ForecastWbgt> { new ForecastWbgt { StartTime = nws.StartTime, Value = nws.Supplemental?.WetBulbGlobeTemperature?.Value ?? 0.0D } },
-                    HeatRisk = new List<ForecastHeatRisk> { new ForecastHeatRisk { StartTime = nws.StartTime, Value = nws.Supplemental?.HeatRisk?.Value ?? 0.0D } },
+                    HeatRisk = new List<ForecastHeatRisk> { new ForecastHeatRisk { StartTime = nws.StartTime, Value = nws.Supplemental?.HeatRisk?.Value ?? 0 } },
                     WindChill = new List<ForecastWindChill> { new ForecastWindChill { StartTime = nws.StartTime, Value = nws.Supplemental?.WindChill?.Value ?? 0.0D } },
-                    WeatherStatement = new List<ForecastWeatherStatement> { new ForecastWeatherStatement { StartTime = nws.StartTime, Value = nws.ShortForecast } },
-                    WeatherDescription = new List<ForecastWmoDescription> { new ForecastWmoDescription { StartTime = nws.StartTime, Value = nws.DetailedForecast } }
+                    ShortForecast = new List<ForecastShortForecast> { new ForecastShortForecast { StartTime = nws.StartTime, Value = nws.ShortForecast } },
+                    WeatherDescription = new List<ForecastWmoDescription> { new ForecastWmoDescription { StartTime = nws.StartTime, Value = nws.DetailedForecast } },
+                    Thunder = new List<ForecastThunder> { new ForecastThunder { StartTime = nws.StartTime, Value = nws.Supplemental?.ProbabilityOfThunder.Value ?? 0.0D } },
+                    WeatherStatement = new List<ForecastWeatherStatement> { new ForecastWeatherStatement { StartTime = nws.StartTime, Value = stormBuilder.ToString() ?? "" } },
+                    IceAccumulation = new List<ForecastIceAccumulation> { new ForecastIceAccumulation { StartTime = nws.StartTime, Value = nws.Supplemental?.IceAccumulation.Value ?? 0.0D } },
+                    SnowfallAmount = new List<ForecastSnowfallAmount> { new ForecastSnowfallAmount { StartTime = nws.StartTime, Value = nws.Supplemental?.SnowfallAmount.Value ?? 0.0D } }
                 };
+
 
                 evolutions.Add(evo);
             }
@@ -998,113 +1431,126 @@ public partial class ForecastService : ObservableObject, IForecastService
         return evolutions;
     }
 
-    //public static string TemperatureStatement(double t,  double d)
-    //{
-    //    tempBuilder.Append("the temperature ");
-    //    if (t < 30) temp = "below freezing";
-    //    if (30 <= t && t < 34) temp = "in the low 30's";
-    //    if (34 <= t && t <= 36) temp = "in the mid 30's";
-    //    if (37 <= t && t < 40) temp = "in the high 30's";
-    //    if (40 <= t && t < 44) temp = "in the low 40's";
-    //    if (44 <= t && t <= 46) temp = "in the mid 40's";
-    //    if (47 <= t && t < 50) temp = "in the high 40's";
-    //    if (50 <= t && t < 54) temp = "in the low 50's";
-    //    if (54 <= t && t <= 56) temp = "in the mid 50's";
-    //    if (57 <= t && t < 60) temp = "in the high 50's";
-    //    if (60 <= t && t < 64) temp = "in the low 60's";
-    //    if (64 <= t && t <= 66) temp = "in the mid 60's";
-    //    if (67 <= t && t < 70) temp = "in the high 60's";
-    //    if (70 <= t && t < 74) temp = "in the low 70's";
-    //    if (74 <= t && t <= 76) temp = "in the mid 70's";
-    //    if (77 <= t && t < 80) temp = "in the high 70's";
-    //    if (80 <= t && t < 84) temp = "in the low 80's";
-    //    if (84 <= t && t <= 86) temp = "in the mid 80's";
-    //    if (87 <= t && t < 90) temp = "in the high 80's";
-    //    if (90 <= t && t < 94) temp = "in the low 90's";
-    //    if (94 <= t && t <= 96) temp = "in the mid 90's";
-    //    if (97 <= t && t < 100) temp = "in the high 90's";
-    //    if (100 <= t && t < 104) temp = "in the low 100's";
-    //    if (104 <= t && t <= 106) temp = "reaching about 105";
-    //    if (107 <= t && t < 110) temp = "climbing near 110";
-    //    if (t >= 110) temp = "reaching over 110";
-    //    tempBuilder.Append(temp);
+    public string TemperatureStatement(double t, double d, double q)
+    {
+        var tempBuilder = new StringBuilder();
+        var temp = string.Empty;
+        if (t < 30) temp = "below freezing";
+        if (30 <= t && t < 34) temp = "in the low 30's";
+        if (34 <= t && t <= 36) temp = "in the mid 30's";
+        if (37 <= t && t < 40) temp = "in the high 30's";
+        if (40 <= t && t < 44) temp = "in the low 40's";
+        if (44 <= t && t <= 46) temp = "in the mid 40's";
+        if (47 <= t && t < 50) temp = "in the high 40's";
+        if (50 <= t && t < 54) temp = "in the low 50's";
+        if (54 <= t && t <= 56) temp = "in the mid 50's";
+        if (57 <= t && t < 60) temp = "in the high 50's";
+        if (60 <= t && t < 64) temp = "in the low 60's";
+        if (64 <= t && t <= 66) temp = "in the mid 60's";
+        if (67 <= t && t < 70) temp = "in the high 60's";
+        if (70 <= t && t < 74) temp = "in the low 70's";
+        if (74 <= t && t <= 76) temp = "in the mid 70's";
+        if (77 <= t && t < 80) temp = "in the high 70's";
+        if (80 <= t && t < 84) temp = "in the low 80's";
+        if (84 <= t && t <= 86) temp = "in the mid 80's";
+        if (87 <= t && t < 90) temp = "in the high 80's";
+        if (90 <= t && t < 94) temp = "in the low 90's";
+        if (94 <= t && t <= 96) temp = "in the mid 90's";
+        if (97 <= t && t < 100) temp = "in the high 90's";
+        if (100 <= t && t < 104) temp = "in the low 100's";
+        if (104 <= t && t <= 106) temp = "reaching about 105";
+        if (107 <= t && t < 110) temp = "climbing near 110";
+        if (t >= 110) temp = "reaching over 110";
+        tempBuilder.Append($"With temperature {temp}");
 
-    //    var feelsLike = string.Empty;
-    //    if (t >= 60)
-    //    {
-    //        string dp = string.Empty;
-    //        if (d < 30) dp = "less than 30";
-    //        if (30 <= d && d < 34) dp = "in the low 30's,";
-    //        if (34 <= d && d <= 36) dp = "in the mid 30's,";
-    //        if (37 <= d && d < 40) dp = "in the high 30's";
-    //        if (40 <= d && d < 44) dp = "in the low 40's";
-    //        if (44 <= d && d <= 46) dp = "in the mid 40's,";
-    //        if (47 <= d && d < 50) dp = "in the high 40's,";
-    //        if (50 <= d && d < 54) dp = "in the low 50's";
-    //        if (54 <= d && d <= 56) dp = "in the mid 50's,";
-    //        if (57 <= d && d < 60) dp = "in the high 50's";
-    //        if (60 <= d && d < 64) dp = "in the low 60's,";
-    //        if (64 <= d && d <= 66) dp = "in the mid 60's,";
-    //        if (67 <= d && d < 70) dp = "in the high 60's";
-    //        if (70 <= d && d < 75) dp = "in the low 70's";
-    //        if (d > 75) dp = $" at {d}";
-    //        tempBuilder.Append($" and dew point {dp},");
+        var feelsLike = string.Empty;
 
+        string dp = string.Empty;
+        if (d < 30) dp = "less than 30";
+        if (30 <= d && d < 34) dp = "in the low 30's,";
+        if (34 <= d && d <= 36) dp = "in the mid 30's,";
+        if (37 <= d && d < 40) dp = "in the high 30's";
+        if (40 <= d && d < 44) dp = "in the low 40's";
+        if (44 <= d && d <= 46) dp = "in the mid 40's,";
+        if (47 <= d && d < 50) dp = "in the high 40's,";
+        if (50 <= d && d < 54) dp = "in the low 50's";
+        if (54 <= d && d <= 56) dp = "in the mid 50's,";
+        if (57 <= d && d < 60) dp = "in the high 50's";
+        if (60 <= d && d < 64) dp = "in the low 60's,";
+        if (64 <= d && d <= 66) dp = "in the mid 60's,";
+        if (67 <= d && d < 70) dp = "in the high 60's";
+        if (70 <= d && d < 75) dp = "in the low 70's";
+        if (d > 75) dp = $" at {d}";
+        tempBuilder.Append($" and dew point {dp},");
+        string precipitation = string.Empty;
+        if (q > 0)
+        {
+            precipitation = "damp and ";
+        }
+        else
+        {
+            precipitation = "";
+        }
 
-    //        var h = tempAvg;
-    //        switch (hours.Max(h => h.DewPoint.Value))
-    //        {
-    //            case <= 50:
-    //                feelsLike = "pleasant";
-    //                break;
-    //            case (> 50 and <= 60) when h >= 60 && h < 65:
-    //                feelsLike = "mostly comfortable";
-    //                break;
-    //            case (> 50 and <= 60) when h > 65:
-    //                feelsLike = "comfortable";
-    //                break;
-    //            case (> 60 and <= 70) when h >= 70 && h <= 75:
-    //                feelsLike = "humid";
-    //                break;
-    //            case (> 60 and <= 70) when h > 75:
-    //                feelsLike = "mostly comfortable";
-    //                break;
-    //            case > 70 and <= 75:
-    //                feelsLike = "hot and humid";
-    //                break;
-    //            case > 75:
-    //                //Dangerous when paired with high temperatures. Heat-illness risk for outdoor activity, athletes, elderly, and infants
-    //                feelsLike = "tropical";
-    //                break;
-    //        }
-    //        tempBuilder.Append($", the {TemperatureStatement(hours)} will feel {feelsLike} in the great outdoors.");
+        string coldness = "";
 
-    //    }
-    //    else if (tempAvg > 30 && tempAvg < 60 && hours.Max(h => h.ProbabilityOfPrecipitation.Value) <= 12.0)
-    //    {
-    //        tempBuilder.Append($"With a {hours.Max(h => h.ProbabilityOfPrecipitation.Value)}% chance of precipitation and cool temperatures.");
-    //    }
-    //    else
-    //    {
-    //        string coldness = string.Empty;
-    //        var h = tempAvg;
-    //        switch (h)
-    //        {
-    //            case > 20 and < 30:
-    //                coldness = "cold";
-    //                break;
-    //            case > 10 and <= 20:
-    //                coldness = "chilly";
-    //                break;
-    //            case <= 10:
-    //                coldness = "frigid";
-    //                break;
-    //        }
+        switch (t)
+        {
+            case >= 30 and < 40:
+                coldness = "brisk";
+                break;
+            case > 20 and < 30:
+                coldness = "cold";
+                break;
+            case > 10 and <= 20:
+                coldness = "chilly";
+                break;
+            case <= 10:
+                coldness = "frigid";
+                break;
+        }
 
-    //        tempBuilder.Append($" will make for a {coldness} {hours.FirstOrDefault().TimeOfDay}.");
-    //    }
-    //    return tempBuilder.ToString();
-    //}
+        switch (d)
+        {
+            case (<= 30):
+                feelsLike = "";
+                break;
+            case (> 30 and <= 40):
+                feelsLike = "cool and dry";
+                break;
+            case (> 40 and <= 50):
+                feelsLike = "cool and pleasant";
+                break;
+            case (> 50 and <= 60) when t >= 60 && t < 65:
+                feelsLike = "to those that are stationary, cool and mostly comfortable. To those that are mobile, raw and humid";
+                break;
+            case (> 50 and <= 60) when t > 65:
+                feelsLike = "cool and comfortable";
+                break;
+            case (> 60 and <= 70) when t >= 70 && t <= 75:
+                feelsLike = "warm and humid";
+                break;
+            case (> 60 and <= 70) when t > 75:
+                feelsLike = "warm and mostly comfortable";
+                break;
+            case > 70 and <= 75:
+                feelsLike = "hot and humid";
+                break;
+            case > 75:
+                //Dangerous when paired with high temperatures. Heat-illness risk for outdoor activity, athletes, elderly, and infants
+                feelsLike = "tropical";
+                break;
+        }
+        var refined = coldness + precipitation + feelsLike;
+        var splitString = refined.Split(" and ");
+        if (splitString.Count() > 2)
+        {
+            refined = $"{String.Join(", ", splitString.SkipLast(1))} and {splitString.Last()}";
+        }
+        tempBuilder.Append($", will make the great outdoors feel {refined}.");
+
+        return tempBuilder.ToString();
+    }
 
     private static string GetPrecipitationType(NwsHourlyForecast nws)
     {
@@ -1142,7 +1588,7 @@ public partial class ForecastService : ObservableObject, IForecastService
         var precipType = evolution.PrecipitationType ?? "none";
         var precipAmt = evolution.PrecipitationAmt;
         var weatherDesc = string.Join(", ", (evolution.WeatherDescription ?? new List<ForecastWmoDescription>()).Select(w => w?.Value ?? string.Empty).Where(s => !string.IsNullOrEmpty(s)));
-        var weatherStmt = evolution.WeatherStatement?.FirstOrDefault()?.Value ?? string.Empty;
+        var weatherStmt = evolution.ShortForecast?.FirstOrDefault()?.Value ?? string.Empty;
 
         var sb = new StringBuilder();
         if (!string.IsNullOrEmpty(weatherStmt)) sb.Append(weatherStmt + ". ");
@@ -1223,95 +1669,6 @@ public partial class ForecastService : ObservableObject, IForecastService
         return ceiling;
     }
     // 2 //3 
-    public string TempCategory(double temp, double dewPoint, double relativeHumidity, double wbgt)
-    {
-        var sb = new StringBuilder();
-        sb.Append($"The temperature will be {NumberGroups.TempsToString(temp)} with a dew point {NumberGroups.DewPointToString(dewPoint)}. Expect ");
-        // --- Extreme heat danger (WBGT-based) ---
-        if (wbgt >= 90)
-        {
-            sb.Append("extreme dangerous heat this hour.");
-            return sb.ToString();
-        }
-        if (wbgt >= 82)
-        {
-            sb.Append("dangerous heat this hour.");
-            return sb.ToString();
-        }
-        if (wbgt >= 78)
-        {
-            sb.Append("very hot and humid this hour.");
-            return sb.ToString();
-        }
-        // --- RelativeHumidity / dew point discomfort ---
-        bool oppressiveHumidity = dewPoint >= 75 || relativeHumidity >= 85;
-        bool veryHumid = dewPoint >= 70 || relativeHumidity >= 75;
-        bool humid = dewPoint >= 65 || relativeHumidity >= 60;
-
-        // --- Cold stress ---
-        if (temp <= 20)
-        {
-            sb.Append("frigid conditions this hour.");
-            return sb.ToString();
-        }
-        if (temp <= 32)
-        {
-            sb.Append("freezing conditions this hour.");
-            return sb.ToString();
-        }
-        if (temp <= 40)
-        {
-            sb.Append(humid ? "raw and cold conditions this hour." : "cold conditions this hour.");
-            return sb.ToString();
-        }
-        // --- Cool to mild ---
-        if (temp <= 50)
-        {
-            sb.Append(humid ? "chilly and damp conditions this hour." : "cool conditions this hour.");
-            return sb.ToString();
-        }
-        if (temp <= 60)
-        {
-            sb.Append(humid ? "cool and humid conditions this hour." : "mildly cool conditions this hour.");
-            return sb.ToString();
-        }
-        // --- Mild to warm ---
-        if (temp <= 70)
-        {
-            sb.Append(humid ? "mild but humid conditions this hour." : "mild conditions this hour.");
-            return sb.ToString();
-        }
-        if (temp <= 80)
-        {
-            if (oppressiveHumidity) sb.Append("warm and oppressive conditions this hour.");
-            if (veryHumid) sb.Append("warm and very humid conditions this hour.");
-            if (humid) sb.Append("warm and humid conditions this hour.");
-            sb.Append("warm conditions this hour.");
-            return sb.ToString();
-        }
-
-        // --- Hot categories ---
-        if (temp <= 90)
-        {
-            if (oppressiveHumidity) sb.Append("hot and oppressive conditions this hour.");
-            if (veryHumid) sb.Append("hot and very humid conditions this hour.");
-            if (humid) sb.Append("hot and humid conditions this hour.");
-            sb.Append("hot conditions this hour.");
-            return sb.ToString();
-        }
-
-        // --- Extreme heat (temp-based) ---
-        if (temp > 90)
-        {
-            if (oppressiveHumidity) sb.Append("extremely hot and oppressive conditions this hour.");
-            if (veryHumid) sb.Append("extremely hot and very humid conditions this hour.");
-            sb.Append("extremely hot conditions this hour.");
-            return sb.ToString();
-        }
-
-        sb.Append("unknown");
-        return sb.ToString();
-    }
 
 
     private string CalcWind(double wind)

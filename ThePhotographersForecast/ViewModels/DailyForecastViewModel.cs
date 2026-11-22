@@ -19,7 +19,7 @@ namespace ThePhotographersForecast.ViewModels
             get => field;
             set
             {
-                field = [.. _session.NwsData.DailyForecasts];
+                field = _session.NwsData.DailyForecasts.ToArray();
                 OnPropertyChanged();
             }
         }
@@ -45,27 +45,27 @@ namespace ThePhotographersForecast.ViewModels
         [ObservableProperty]
         public partial NwsHourlyForecast SelectedDailyEventTimeForecast { get; set; }
 
-        public DailyForecastViewModel(ISession _session)
+        public DailyForecastViewModel(ISession session)
         {
-            _session = _session;
-            Initialize();
-            if (Dailies != null || Dailies?.Length != _session.NwsData.DailyForecasts.Length) return;
-            SelectedDate = _session.Dates[0].Date;
-            SelectedDaily = Dailies[0];
-            SelectedGfsDaily = _session.WeatherForecasts.DailyForecasts.Where(d => d.Date == DateOnly.FromDateTime(SelectedDate)).SingleOrDefault();
-            SelectedDailyEventModel = _session.EventsData.Where(d => d.Date == SelectedDate.Date).SingleOrDefault();
-            SelectedDailyHourlies = [.. SelectedDaily.HourlyWeathers];
-            SelectedDailyHour = SelectedDailyHourlies[0];
-
+            _session = session;
+            RefreshFromSession();
         }
 
-        private async void Initialize()
+        public void RefreshFromSession()
         {
-            await MainThread.InvokeOnMainThreadAsync(async () =>
-            {
-                Dailies = _session.NwsData.DailyForecasts.ToArray();
-            });
+            if (_session?.NwsData?.DailyForecasts == null || _session.NwsData.DailyForecasts.Length == 0)
+                return;
 
+            Dailies = _session.NwsData.DailyForecasts.ToArray();
+            if (_session.Dates != null && _session.Dates.Length > 0)
+            {
+                SelectedDate = _session.Dates[0].Date;
+            }
+            SelectedDaily = Dailies[0];
+            SelectedGfsDaily = _session.WeatherForecasts?.DailyForecasts?.FirstOrDefault(d => d.Date == DateOnly.FromDateTime(SelectedDate)) ?? new DailyForecast();
+            SelectedDailyEventModel = _session.EventsData?.FirstOrDefault(d => d.Date == SelectedDate.Date) ?? new EventModel();
+            SelectedDailyHourlies = SelectedDaily.HourlyWeathers?.ToArray() ?? Array.Empty<NwsHourlyForecast>();
+            SelectedDailyHour = SelectedDailyHourlies.FirstOrDefault() ?? new NwsHourlyForecast();
         }
 
     }

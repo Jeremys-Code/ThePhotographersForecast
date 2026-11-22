@@ -68,17 +68,6 @@
         <Setter Property="StrokeThickness" Value="8"/>
         <Setter Property="Background" Value="{StaticResource GpsBackground}"/>
         <Setter Property="StrokeShape" Value="RoundRectangle 30"/>
-        <Setter Property="Behaviors">
-            <Setter.Value>
-                <toolkit:TouchBehavior
-DefaultScale="1.0"
-DefaultOpacity="1.0"
-HoveredScale="1.05"
-PressedScale="0.94"
-DefaultAnimationDuration="200"
-DefaultAnimationEasing="{x:Static Easing.SpringOut}"/>
-            </Setter.Value>
-        </Setter>
         <Setter Property="VisualStateManager.VisualStateGroups">
             <VisualStateGroupList>
                 <VisualStateGroup x:Name="CommonStates">

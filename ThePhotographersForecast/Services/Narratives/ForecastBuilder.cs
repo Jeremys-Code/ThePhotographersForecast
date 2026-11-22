@@ -8,7 +8,6 @@ namespace ThePhotographersForecast.Services.Narratives
         {
             var bins = new[]
             {
-            agent.EarlyHours,
             agent.EarlyMorning,
             agent.Morning,
             agent.Afternoon,
