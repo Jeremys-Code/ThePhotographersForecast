@@ -1,4 +1,6 @@
-﻿namespace ThePhotographersForecast
+﻿using ThePhotographersForecast.Views;
+
+namespace ThePhotographersForecast
 {
     public partial class AppShell : Shell
     {

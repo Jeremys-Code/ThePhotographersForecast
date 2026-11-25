@@ -9,12 +9,13 @@
     <TabBar>
         <ShellContent Title="Select Location" Route="SelectLocation" ContentTemplate="{DataTemplate views:SelectLocation}"/>
         <ShellContent Title="Forecast" Route="Forecast" ContentTemplate="{DataTemplate views:Forecast}" />
-        <!--<ShellContent Title="Lottie Parade" Route="LottieParade" ContentTemplate="{DataTemplate views:LottieParade}"/>-->
         <ShellContent Title="Forecast Details" Route="ForecastDetails" ContentTemplate="{DataTemplate views:ForecastDetails}"/>
-        <!--<ShellContent Title="Calendar" Route="Calendar" ContentTemplate="{DataTemplate views:Calendar}" />-->
         <ShellContent Title="Event Planner" Route="EventPlanner" ContentTemplate="{DataTemplate views:EventPlanner}"/>
-        <ShellContent Title="DataCheck" Route="DataCheck" ContentTemplate="{DataTemplate views:DataCheck}"/>
+        <ShellContent Title="Data Check" Route="DataCheck" ContentTemplate="{DataTemplate views:DataCheck}"/>
+        <ShellContent Title="Testing Page" Route="TestingPage" ContentTemplate="{DataTemplate views:TestingPage}"/>
+        
         <!--<ShellContent Title="Preferences" Route="Settings" ContentTemplate="{DataTemplate views:Settings}" />-->
-        <ShellContent Title="Test Page" ContentTemplate="{DataTemplate views:MissMeNot}"/>
+        <!--<ShellContent Title="Calendar" Route="Calendar" ContentTemplate="{DataTemplate views:Calendar}" />-->
+        <!--<ShellContent Title="Lottie Parade" Route="LottieParade" ContentTemplate="{DataTemplate views:LottieParade}"/>-->
     </TabBar>
 </Shell>

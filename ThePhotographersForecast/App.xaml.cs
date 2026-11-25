@@ -1,9 +1,11 @@
-﻿namespace ThePhotographersForecast
+﻿using ThePhotographersForecast.Views;
+
+namespace ThePhotographersForecast
 {
 
     public partial class App : Application
     {
-        //SelectLocation _selectLocation;
+        //private SelectLocation _selectLocation;
         public App(IServiceProvider service)
         {
             InitializeComponent();
@@ -11,7 +13,7 @@
             //{
             //    System.Diagnostics.Debug.WriteLine($"[XAML ERROR] {e.Exception}");
             //};
-            //_selectLocation = service.GetService<SelectLocation>()
+          //  _selectLocation = service.GetService<SelectLocation>();
         }
         protected override Window CreateWindow(IActivationState? activationState)
         {

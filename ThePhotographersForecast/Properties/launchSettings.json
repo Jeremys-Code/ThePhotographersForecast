@@ -3,9 +3,6 @@
     "Windows Machine": {
       "commandName": "Project",
       "remoteDebugEnabled": false
-    },
-    "Profile 1": {
-      "commandName": "Executable"
     }
   }
 }

@@ -3,6 +3,7 @@
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:vm="clr-namespace:ThePhotographersForecast.ViewModels"
              xmlns:model="clr-namespace:ThePhotographersForecast.Models" 
+             xmlns:ml="clr-namespace:ThePhotographersForecast.Services.ML"
              xmlns:svc="clr-namespace:ThePhotographersForecast.Services"
              xmlns:components="clr-namespace:ThePhotographersForecast.Components"
              xmlns:skia="clr-namespace:SkiaSharp.Extended.UI.Controls;assembly=SkiaSharp.Extended.UI"
@@ -218,11 +219,12 @@
                     <Border Background="{StaticResource Night}" Stroke="{StaticResource Moon}" Padding="5" Margin="10" StrokeThickness="4" StrokeShape="RoundRectangle 30">
                     
                              <Grid HorizontalOptions="Center" RowDefinitions="Auto, Auto" Padding="5" Background="{StaticResource Night}">
-                                <Label x:Name="OnnxResults" Grid.Row="0" Grid.ColumnSpan="4" Margin="0,15" TextColor="{StaticResource Moon}" FontSize="24" FontFamily="HennyPenny" Text="Flight and Photo Scoring" HorizontalOptions="Center"/>
+                                <Label x:Name="OnnxResults" Grid.Row="0" Margin="0,15" TextColor="{StaticResource Moon}" FontSize="24" FontFamily="HennyPenny" Text="Flight and Photo Scoring" HorizontalOptions="Center"/>
                                 <CollectionView x:Name="Results" Grid.Row="1"
-                                      ItemsSource="{Binding BestTimes}"
-                                      SelectedItem="{Binding SelectedBestTime}"
-                                     HorizontalOptions="Fill"
+                                      ItemsSource="{Binding Scores}"
+                                      SelectedItem="{Binding SelectedScore}"
+                                    SelectionMode="Single"
+                                                HorizontalOptions="Fill"
                                      HeightRequest="300" >
                                     <CollectionView.ItemsLayout>
                                         <LinearItemsLayout Orientation="Horizontal" SnapPointsAlignment="Center" SnapPointsType="MandatorySingle" ItemSpacing="12"/>
@@ -230,8 +232,8 @@
                                     <CollectionView.ItemTemplate>
                                     <DataTemplate x:DataType="model:Inference">
                                         <Border Stroke="{StaticResource Moon}" StrokeThickness="1.5" BackgroundColor="#30081F43" WidthRequest="320" Padding="14">
-                                            <Border.StrokeShape><RoundRectangle CornerRadius="14"/></Border.StrokeShape>
-                                            <ScrollView VerticalScrollBarVisibility="Never">
+    
+                                            
                                                 <VerticalStackLayout Spacing="8">
                                                     <VerticalStackLayout HorizontalOptions="Center" Margin="0,0,0,4">
                                                         <Label Text="Photo and Flight Predictions" FontFamily="NotoThick" FontAttributes="Bold" FontSize="20" HorizontalOptions="Center"/>
@@ -255,7 +257,7 @@
                                                         <Label TextColor="{StaticResource Moon}" Text="{Binding BestHoursText}" LineBreakMode="WordWrap" FontFamily="NotoSans" FontSize="11"/>
                                                     </VerticalStackLayout>
                                                 </VerticalStackLayout>
-                                            </ScrollView>
+      
                                         </Border>
                                     </DataTemplate>
                                     </CollectionView.ItemTemplate>
@@ -306,7 +308,7 @@
                             <DataTemplate x:DataType="model:NwsTimeOfDayForecast">
                                 <Grid>
                                     <Grid.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SelectLocationViewModel}}, Path=CardTapCommand}"
+                                        <TapGestureRecognizer NumberOfTapsRequired="2"  Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SelectLocationViewModel}}, Path=CardTapCommand}"
             CommandParameter="{Binding .}" /></Grid.GestureRecognizers>
                                     <!--<VisualStateManager.VisualStateGroups>
                                         <VisualStateGroup Name="FlipStates">

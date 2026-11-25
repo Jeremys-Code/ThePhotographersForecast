@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="ThePhotographersForecast.Views.MissMeNot"
+             x:Class="ThePhotographersForecast.Views.TestingPage"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:control="clr-namespace:ThePhotographersForecast.Controls"
-             Title="Test Page">
+             xmlns:vm="clr-namespace:ThePhotographersForecast.ViewModels"
+             Title="Testing Page">
     <control:ParallaxSkyContainer>
-        <ScrollView Background="Transparent">
             <VerticalStackLayout>
             <Label Text="Time Is Ticking... Tick Tok" FontSize="34" FontFamily="HennyPenny" HorizontalOptions="Center"/>
             <Label 
@@ -112,6 +112,5 @@ Sed a vestibulum dui. Donec vestibulum eros ullamcorper, ullamcorper felis ornar
 
 Cras porta velit ac turpis congue congue. Aliquam erat volutpat. In non est in nulla condimentum semper. Suspendisse laoreet mauris eget metus scelerisque condimentum. In faucibus sapien sit amet porttitor consectetur. Vestibulum eu finibus neque. Nulla suscipit, magna id accumsan dictum, odio diam blandit elit, et blandit est elit eu nulla. Donec in purus finibus, vestibulum erat id, lacinia dolor. Nullam dignissim egestas lacus, nec tincidunt nulla tempor et. Donec mollis laoreet ante, et dictum risus." />
         </VerticalStackLayout>
-    </ScrollView>
     </control:ParallaxSkyContainer>
 </ContentPage>

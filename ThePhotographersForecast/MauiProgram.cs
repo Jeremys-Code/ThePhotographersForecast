@@ -139,17 +139,14 @@ namespace ThePhotographersForecast
             builder.Services.AddSingleton<DataCheckViewModel>();
             builder.Services.AddSingleton<DailyForecastViewModel>();
             builder.Services.AddSingleton<EventPlannerViewModel>();
-            builder.Services.AddSingleton<MissMeNotViewModel>();
+            builder.Services.AddSingleton<TestingPageViewModel>();
             // Register the Views and inject the VM's
             builder.Services.AddSingleton<SelectLocation>();
             builder.Services.AddSingleton<Forecast>();
             builder.Services.AddSingleton<ForecastDetails>();
-            builder.Services.AddSingleton<Settings>();
-            builder.Services.AddSingleton<Calendar>();
             builder.Services.AddSingleton<DataCheck>();
             builder.Services.AddSingleton<EventPlanner>();
-            builder.Services.AddSingleton<LottieParade>();
-            builder.Services.AddSingleton<MissMeNot>();
+            builder.Services.AddSingleton<TestingPage>();
             // Register the ContentViews
             builder.Services.AddSingleton<NwsDailyHourlyView>();
 

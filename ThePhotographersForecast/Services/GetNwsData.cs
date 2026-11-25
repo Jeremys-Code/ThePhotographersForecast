@@ -472,6 +472,9 @@ public partial class GetNwsData : ObservableObject, IGetNwsData
         }
 
         var supplementals = await ParseSupplementalDataAsync(suppData);
+
+        _session.DailyPhotoScoringSummary = await CreateHourlyNwsInputAsync(suppData);
+
         return supplementals;
 
     }

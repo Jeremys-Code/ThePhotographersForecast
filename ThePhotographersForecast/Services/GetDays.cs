@@ -69,7 +69,7 @@ namespace ThePhotographersForecast.Services
                         //            SelectedDailyForecast = dayInfo[p],
                         TimeOfDayForecasts = _session.NwsData.TimeOfDayForecasts.Where(x => x.StartTime.Date == date.Date).ToArray(),
                         DailyDetailedForecast = _session.NwsData.TimeOfDayForecasts.Where(x => x.StartTime.Date == date.Date).FirstOrDefault().LongForecast,
-                        DailyScore = _session.DailyPhotoScoringSummary.Where(x => x.Date == DateOnly.FromDateTime(selectedDate)).FirstOrDefault().HumanReadableDailySummary ?? "Missing Summary!!!",
+                        //DailyScore = _session.DailyPhotoScoringSummary.Where(x => x.Date == DateOnly.FromDateTime(selectedDate)).FirstOrDefault().HumanReadableDailySummary ?? "Missing Summary!!!",
                         DailyHighStatement = hl.high,
                         DailyLowStatement = hl.low,
                         DailySkyBrush = _session.NwsData.TimeOfDayForecasts.Where(x => x.IsDay == true).Any() ? (LinearGradientBrush)Application.Current.Resources["Dusk"] : (LinearGradientBrush)Application.Current.Resources["Night"]

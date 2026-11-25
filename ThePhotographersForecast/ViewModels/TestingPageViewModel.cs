@@ -4,7 +4,7 @@ using ThePhotographersForecast.Shared;
 
 namespace ThePhotographersForecast.ViewModels
 {
-    public partial class MissMeNotViewModel : ObservableObject
+    public partial class TestingPageViewModel : ObservableObject
     {
         private ISession _session;
         public IReadOnlyList<DailyForecastSummary> Inferences { get; set; }
@@ -12,7 +12,6 @@ namespace ThePhotographersForecast.ViewModels
         //public MissMeNot(ISession session)
         //{
         //    _session = session;
-
 
         //}
 

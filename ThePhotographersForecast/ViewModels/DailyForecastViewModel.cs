@@ -7,23 +7,19 @@ namespace ThePhotographersForecast.ViewModels
 {
     public partial class DailyForecastViewModel : ObservableObject
     {
-        [ObservableProperty]
-        public partial ISession _session { get; set; }
+        private ISession _session;
+
         [ObservableProperty]
         public partial CalendarDayModel[] RunDates { get; set; }
         [ObservableProperty]
+        public partial CalendarDayModel SelectedRunDate { get; set; }
+        [ObservableProperty]
         public partial DateTime SelectedDate { get; set; }
-
-        public NwsDailyForecast[] Dailies
-        {
-            get => field;
-            set
-            {
-                field = _session.NwsData.DailyForecasts.ToArray();
-                OnPropertyChanged();
-            }
-        }
+        [ObservableProperty]
+        public partial NwsDailyForecast[] Dailies { get; set; }
         //TODO: Pull the Health and Safety data from the DailyForecastSummaries
+        [ObservableProperty]
+        public partial DailyForecast[]  GfsDailies { get; set; }
         [ObservableProperty]
         public partial NwsDailyForecast SelectedDaily { get; set; }
         [ObservableProperty]
@@ -31,11 +27,13 @@ namespace ThePhotographersForecast.ViewModels
         [ObservableProperty]
         public partial NwsHourlyForecast[] SelectedDailyHourlies { get; set; }
         [ObservableProperty]
-        public partial NwsHourlyForecast SelectedDailyHour { get; set; }
+        public partial NwsHourlyForecast SelectedDailySelectedHourly { get; set; }
         [ObservableProperty]
         public partial HourlyForecast[] SelectedGfsDailyHourlies { get; set; }
         [ObservableProperty]
-        public partial HourlyForecast SelectedGfsDailyHour { get; set; }
+        public partial HourlyForecast SelectedGfsDailySelectedHourly { get; set; }
+        [ObservableProperty]
+        public partial EventModel[] EventModels { get; set; }
         [ObservableProperty]
         public partial EventModel SelectedDailyEventModel { get; set; }
         [ObservableProperty]
@@ -53,20 +51,51 @@ namespace ThePhotographersForecast.ViewModels
 
         public void RefreshFromSession()
         {
-            if (_session?.NwsData?.DailyForecasts == null || _session.NwsData.DailyForecasts.Length == 0)
-                return;
-
+            if (_session.Dates == null || _session.WeatherForecasts == null || _session.NwsData == null || _session.EventsData == null) return;
+            //Collections
+            RunDates = _session.Dates.ToArray();
             Dailies = _session.NwsData.DailyForecasts.ToArray();
-            if (_session.Dates != null && _session.Dates.Length > 0)
-            {
-                SelectedDate = _session.Dates[0].Date;
-            }
-            SelectedDaily = Dailies[0];
-            SelectedGfsDaily = _session.WeatherForecasts?.DailyForecasts?.FirstOrDefault(d => d.Date == DateOnly.FromDateTime(SelectedDate)) ?? new DailyForecast();
-            SelectedDailyEventModel = _session.EventsData?.FirstOrDefault(d => d.Date == SelectedDate.Date) ?? new EventModel();
+            GfsDailies = _session.WeatherForecasts.DailyForecasts.ToArray();
+            EventModels = _session.EventsData.ToArray();
+
+            SelectedRunDate = RunDates.First();
+            SelectedDate = SelectedRunDate.Date;
+            
+            //Collections or Objects qualified by the SelectedDate
+            SelectedDaily = Dailies.Where(d => d.StartTime.Date == SelectedDate.Date && d.IsDaytime==true).FirstOrDefault(new NwsDailyForecast());
             SelectedDailyHourlies = SelectedDaily.HourlyWeathers?.ToArray() ?? Array.Empty<NwsHourlyForecast>();
-            SelectedDailyHour = SelectedDailyHourlies.FirstOrDefault() ?? new NwsHourlyForecast();
+            SelectedDailySelectedHourly = SelectedDailyHourlies.FirstOrDefault(new NwsHourlyForecast());
+            SelectedGfsDaily = GfsDailies.Where(x => x.Date == DateOnly.FromDateTime(SelectedDate)).FirstOrDefault(new DailyForecast());
+            SelectedGfsDailyHourlies = SelectedGfsDaily.HourlyForecasts.ToArray();
+            SelectedGfsDailySelectedHourly = SelectedGfsDailyHourlies.FirstOrDefault(new HourlyForecast());
+            SelectedDailyEventModel = EventModels.Where(x => x.Date.Date == SelectedDate.Date).FirstOrDefault(new EventModel());
+            SelectedDailyEvents = SelectedDailyEventModel.EventTimes.ToArray();
+            SelectedDailyEventTime = SelectedDailyEvents.FirstOrDefault(new EventTime());
+            SelectedDailyEventTimeForecast = SelectedDailyEventTime.Forecast ?? new NwsHourlyForecast();
         }
 
+        partial void OnSelectedRunDateChanged(CalendarDayModel value)
+        {
+            SelectedDate = value.Date;
+            MainThread.BeginInvokeOnMainThread(async () =>
+            {
+                await SelectedDateUpdateAsync();
+            });
+        }
+
+        private async Task SelectedDateUpdateAsync()
+        {
+            SelectedDaily = Dailies.Where(d => d.StartTime.Date == SelectedDate.Date && d.IsDaytime == true).FirstOrDefault(new NwsDailyForecast());
+            SelectedDailyHourlies = SelectedDaily.HourlyWeathers?.ToArray() ?? Array.Empty<NwsHourlyForecast>();
+            SelectedDailySelectedHourly = SelectedDailyHourlies.FirstOrDefault(new NwsHourlyForecast());
+            SelectedGfsDaily = GfsDailies.Where(x => x.Date == DateOnly.FromDateTime(SelectedDate)).FirstOrDefault(new DailyForecast());
+            SelectedGfsDailyHourlies = SelectedGfsDaily.HourlyForecasts.ToArray();
+            SelectedGfsDailySelectedHourly = SelectedGfsDailyHourlies.FirstOrDefault(new HourlyForecast());
+            SelectedDailyEventModel = EventModels.Where(x => x.Date.Date == SelectedDate.Date).FirstOrDefault(new EventModel());
+            SelectedDailyEvents = SelectedDailyEventModel.EventTimes.ToArray();
+            SelectedDailyEventTime = SelectedDailyEvents.FirstOrDefault(new EventTime());
+            SelectedDailyEventTimeForecast = SelectedDailyEventTime.Forecast ?? new NwsHourlyForecast();
+            return;
+        }
     }
 }

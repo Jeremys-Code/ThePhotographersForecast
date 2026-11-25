@@ -291,30 +291,34 @@
 		<PackageReference Include="SkiaSharp.Views" Version="4.156.0" />
 		<PackageReference Include="SkiaSharp.Views.Maui.Controls" Version="4.156.0" />
 		<PackageReference Include="SkiaSharp.Views.Maui.Controls.Compatibility" Version="2.88.9" />
-		<PackageReference Include="System.ObjectModel" Version="4.3.0" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<Compile Update="Components\MoonPhasesCarouselView.xaml.cs">
-	    <DependentUpon>SelectLocation.xaml</DependentUpon>
-	  </Compile>
-	  <MauiXaml Update="Components\MoonPhasesCarouselView.xaml">
+	<MauiXaml Update="Components\DailyForecastCarouselView.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+	
+	<MauiXaml Update="Views\Calendar.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <Compile Update="Views\Calendar.xaml.cs">
+	    <DependentUpon>Calendar.xaml</DependentUpon>
+	  </Compile>
+	  
 		<Compile Update="Components\DailyForecastCarouselView.xaml.cs">
 	    <DependentUpon>DailyForecastCarouselView.xaml</DependentUpon>
 	  </Compile>
-	  <MauiXaml Update="Components\DailyForecastCarouselView.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </MauiXaml>
-		<Compile Update="Views\Calendar.xaml.cs">
-	    <DependentUpon>Calendar.xaml</DependentUpon>
-	  </Compile>
-	  <MauiXaml Update="Views\Calendar.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </MauiXaml>
+	  
+		
+	  
 		<Compile Update="Components\NwsDailyHourlyView.xaml.cs">
 	    <DependentUpon>NwsDailyHourlyView.xaml</DependentUpon>
+	  </Compile>
+	  <Compile Update="Views\EventPlanner.xaml.cs">
+	    <DependentUpon>EventPlanner.xaml</DependentUpon>
+	  </Compile>
+	  <Compile Update="Views\Forecast.xaml.cs">
+	    <DependentUpon>Forecast.xaml</DependentUpon>
 	  </Compile>
 	  <MauiXaml Update="Components\NwsDailyHourlyView.xaml">
 	    <Generator>MSBuild:Compile</Generator>
@@ -322,30 +326,28 @@
 		<Compile Update="Components\RangeCalendarView.xaml.cs">
 	    <DependentUpon>RangeCalendarView.xaml</DependentUpon>
 	  </Compile>
+	  <Compile Update="Views\DataCheck.xaml.cs">
+	    <DependentUpon>DataCheck.xaml</DependentUpon>
+	  </Compile>
+	  <Compile Update="Views\ForecastDetails.xaml.cs">
+	    <DependentUpon>ForecastDetails.xaml</DependentUpon>
+	  </Compile>
 	  <MauiXaml Update="Components\RangeCalendarView.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
-		<Compile Update="Views\EventPlanner.xaml.cs">
-	    <DependentUpon>EventPlanner.xaml</DependentUpon>
-	  </Compile>
-		<Compile Update="Views\Forecast.xaml.cs">
-	    <DependentUpon>Forecast.xaml</DependentUpon>
-	  </Compile>
+		
+		
 		<MauiXaml Update="Views\EventPlanner.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 	  <MauiXaml Update="Views\Forecast.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
-		<Compile Update="Views\ForecastDetails.xaml.cs">
-	    <DependentUpon>ForecastDetails.xaml</DependentUpon>
-	  </Compile>
+		
 		<MauiXaml Update="Views\ForecastDetails.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
-		<Compile Update="Views\DataCheck.xaml.cs">
-	    <DependentUpon>DataCheck.xaml</DependentUpon>
-	  </Compile>
+		
 		<MauiXaml Update="Views\DataCheck.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
@@ -364,9 +366,7 @@
 		<Compile Update="Views\Settings.xaml.cs">
 	    <DependentUpon>Settings.xaml</DependentUpon>
 	  </Compile>
-	  <MauiXaml Update="Views\Settings.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </MauiXaml>
+	  
 	</ItemGroup>
 
 	<ItemGroup>

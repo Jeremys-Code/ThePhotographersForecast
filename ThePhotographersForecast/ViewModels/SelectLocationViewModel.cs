@@ -120,6 +120,8 @@ namespace ThePhotographersForecast.ViewModels
         [ObservableProperty]
         public partial IReadOnlyList<DailyForecastSummary> DailyPhotoScoringSummary { get; set; }
         [ObservableProperty]
+        public partial DailyForecastSummary SelectedDayScoringSummary { get; set; }
+        [ObservableProperty]
         public partial ObservableCollection<Inference> Scores { get; set; } = new ObservableCollection<Inference>();
         [ObservableProperty]
         public partial Inference SelectedScore { get; set; }
@@ -451,7 +453,7 @@ namespace ThePhotographersForecast.ViewModels
                         _session.Days = daysResult.ToObservableCollection();
                     }
                     OnCompletedChanged();//8. DayViewModels
-
+                    
                     ProgressMessage = "All data and calculations have been processed.";
                     //   _session.WeatherForecasts = new WeatherForecast(WeatherForecasts);
                     Debug.WriteLine($"_session.WeatherForecasts Count: {_session.WeatherForecasts.DailyForecasts.Length}");
@@ -466,35 +468,35 @@ namespace ThePhotographersForecast.ViewModels
                     //  _session.Dates = Dates.ToArray();
                     Debug.WriteLine($"_session.Dates Count: {_session.Dates.Length}");
 
-
+                    var SelectedDay = TimeOfDayForecasts.First();
                     OnCompletedChanged();//9. Finished Counting everything
                     if (_session.DailyPhotoScoringSummary != null)
                     {
                         DailyPhotoScoringSummary = _session.DailyPhotoScoringSummary;
-                        Scores.Clear();
+                   
 
-                        foreach (var date in DailyPhotoScoringSummary)
+                        foreach (var bestDates in DailyPhotoScoringSummary)
                         {
                             BestTimes = new ObservableCollection<(DateTime, string)>();
-                            foreach (var h in date.BestHours)
+                            foreach (var bestDate in bestDates.BestHours)
                             {
                                 var sb = new StringBuilder();
-                                sb.AppendLine($"When: {h.LocalTime:h:mm tt}");
-                                sb.AppendLine($"Drone Safety: {Math.Round(h.DroneSafetyScore)}%");
-                                sb.AppendLine($"Photo Score: {Math.Round(h.PhotoScore)}%");
-                                sb.AppendLine($"Confidence: {h.ConditionConfidence:P0}");
-                                sb.AppendLine($"Conditions: {h.Condition}");
-                                sb.AppendLine($"Forecast: {h.HumanReadableForecast}");
-                                sb.AppendLine($"Blue Hour: {Math.Round(h.BlueHourScore)}%");
-                                sb.AppendLine($"Sunrise: {Math.Round(h.SunriseScore)}%");
-                                sb.AppendLine($"Sunset: {Math.Round(h.SunsetScore)}%");
-                                sb.AppendLine($"Moon: {Math.Round(h.LunarEventScore)}%");
-                                sb.AppendLine($"Galaxy: {Math.Round(h.GalaxyScore)}%");
-                                BestTimes.Add((h.LocalTime.DateTime, sb.ToString()));
+                                sb.AppendLine($"When: {bestDate.LocalTime:h:mm tt}");
+                                sb.AppendLine($"Drone Safety: {Math.Round(bestDate.DroneSafetyScore)}%");
+                                sb.AppendLine($"Photo Score: {Math.Round(bestDate.PhotoScore)}%");
+                                sb.AppendLine($"Confidence: {bestDate.ConditionConfidence:P0}");
+                                sb.AppendLine($"Conditions: {bestDate.Condition}");
+                                sb.AppendLine($"Forecast: {bestDate.HumanReadableForecast}");
+                                sb.AppendLine($"Blue Hour: {Math.Round(bestDate.BlueHourScore)}%");
+                                sb.AppendLine($"Sunrise: {Math.Round(bestDate.SunriseScore)}%");
+                                sb.AppendLine($"Sunset: {Math.Round(bestDate.SunsetScore)}%");
+                                sb.AppendLine($"Moon: {Math.Round(bestDate.LunarEventScore)}%");
+                                sb.AppendLine($"Galaxy: {Math.Round(bestDate.GalaxyScore)}%");
+                                BestTimes.Add((bestDate.LocalTime.DateTime, sb.ToString()));
                             }
-                            SelectedBestTime = BestTimes.Where(x => x.Item1.Date == SelectedDay.Date).Select(y => y.Item2).FirstOrDefault();
+                            SelectedBestTime = BestTimes.Where(x => x.Item1.Date == SelectedDay.StartTime.Date).Select(y => y.Item2).FirstOrDefault();
 
-                            var preds = date.HourlyPredictions ?? Array.Empty<HourlyForecastPrediction>();
+                            var preds = bestDates.HourlyPredictions ?? Array.Empty<HourlyForecastPrediction>();
                             float maxBlue = preds.Count > 0 ? preds.Max(p => p.BlueHourScore) : 0f;
                             float maxSunrise = preds.Count > 0 ? preds.Max(p => p.SunriseScore) : 0f;
                             float maxSunset = preds.Count > 0 ? preds.Max(p => p.SunsetScore) : 0f;
@@ -503,9 +505,9 @@ namespace ThePhotographersForecast.ViewModels
 
                             Scores.Add(new Inference
                             {
-                                Date = date.Date,
-                                DateString = $"for {date.Date:dddd, MMMM dd, yyyy}",
-                                AvgDroneSafetyScore = $"{Math.Round(date.AverageDroneSafetyScore)}%",
+                                Date = bestDates.Date,
+                                DateString = $"for {bestDates.Date:dddd, MMMM dd, yyyy}",
+                                AvgDroneSafetyScore = $"{Math.Round(bestDates.AverageDroneSafetyScore)}%",
                                 BlueHourScore = $"{Math.Round(maxBlue)}%",
                                 SurnriseScore = $"{Math.Round(maxSunrise)}%",
                                 SunsetScore = $"{Math.Round(maxSunset)}%",
@@ -513,16 +515,16 @@ namespace ThePhotographersForecast.ViewModels
                                 GalaxyScore = $"{Math.Round(maxGalaxy)}%",
                                 BestHours = BestTimes,
                                 BestHoursText = string.Join("\n", BestTimes.Select(b => b.Item2.Trim())),
-                                DailyScore = $"{Math.Round(date.DailyPhotoScore)}%",
-                                DominantCondition = date.DominantCondition.ToString(),
-                                DailySummary = date.HumanReadableDailySummary
+                                DailyScore = $"{Math.Round(bestDates.DailyPhotoScore)}%",
+                                DominantCondition = bestDates.DominantCondition.ToString(),
+                                DailySummary = bestDates.HumanReadableDailySummary
                             });
 
                             for (int i = 0; i < _session.NwsData.DailyForecasts.Length; i++)
                             {
-                                if (date.Date == DateOnly.FromDateTime(_session.NwsData.DailyForecasts[i].StartTime) && _session.NwsData.DailyForecasts[i].IsDaytime == true)
+                                if (bestDates.Date == DateOnly.FromDateTime(_session.NwsData.DailyForecasts[i].StartTime) && _session.NwsData.DailyForecasts[i].IsDaytime == true)
                                 {
-                                    _session.NwsData.DailyForecasts[i].DailyScoring = date;
+                                    _session.NwsData.DailyForecasts[i].DailyScoring = bestDates;
                                 }
                             }
 
