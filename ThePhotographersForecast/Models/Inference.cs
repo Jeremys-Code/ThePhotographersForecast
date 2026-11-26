@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using SkiaSharp.Extended.UI.Controls;
+using System.Collections.ObjectModel;
 
 namespace ThePhotographersForecast.Models
 {
@@ -17,5 +18,6 @@ namespace ThePhotographersForecast.Models
         public string BestHoursText { get; set; } = string.Empty;
         public ObservableCollection<(DateTime, string)> BestHours { get; set; } = new ObservableCollection<(DateTime, string)>();
         public string AvgDroneSafetyScore { get; set; } = string.Empty;
+        public SKFileLottieImageSource SkDayIcon { get; set; } = new SKFileLottieImageSource { File = "unavailable.json" };
     }
 }
