@@ -1,12 +1,15 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using SQLite;
 using System.Collections.ObjectModel;
 using ThePhotographersForecast.Services;
 
 namespace ThePhotographersForecast.Models
 {
+    [Table("HourlyForecastInputs")]
     public partial class ForecastInputs : ObservableObject
     {
-
+        [PrimaryKey, AutoIncrement, Column("ForecastId")]
+        public int ForecastId { get; set; }
         public string TimeOfDay => TimeOfDayService.CalcTimeOfDay(StartTime.Hour);
         [ObservableProperty]
         public partial DateTime StartTime { get; set; }

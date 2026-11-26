@@ -362,7 +362,7 @@ public class NwsTimeOfDayForecast
     public ObservableCollection<LottieAnimation> SkLottieCollection { get; set; }
     public ObservableCollection<EventTime> Events { get; set; }
     public Color TimeOfDayTextColor => TimeOfDayService.GetTimeOfDayTextColor(StartTime.Hour);
-    public string TimeOfDayName => $@"{this.StartTime.ToString("dddd")} {this.TimeOfDay}, {this.StartTime.ToString("MMMM dd")} ({this.StartTime.ToString("h tt")} - {this.EndTime.ToString("h tt")}:";
+    public string TimeOfDayName => $@"{this.StartTime.ToString("dddd")} {this.TimeOfDay}, {this.StartTime.ToString("MMMM dd")} ({this.StartTime.ToString("h tt")} - {this.EndTime.ToString("h tt")}):";
 }
 // 1 Create a day from time of day group
 public class TimeOfDayGroup : ObservableCollection<NwsTimeOfDayForecast>

@@ -23,7 +23,7 @@ namespace ThePhotographersForecast.Services.Modules
         double Mean(Bin bin);
         double Min(Bin bin);
         string ProcessTrend(double currentValue, double futureValue);
-        string TempCategory(double temp, double dewPoint, double relativeHumidity, double wbgt);
+        string TempCategory(double temp, double dewPoint, double relativeHumidity);
         string TemperatureStatement(double t, double d, double q);
         string Trend(double previousMean, double currentMean);
     }

@@ -519,8 +519,7 @@ public partial class ForecastService : ObservableObject, IForecastService
                 TempStatement = TempCategory(
                     hours[h].Temperature?.Value ?? 0,
                     hours[h].DewPoint?.Value ?? 0,
-                    hours[h].RelativeHumidity?.Value ?? 0,
-                    supp.WetBulbGlobeTemperature?.Value ?? 0),
+                    hours[h].RelativeHumidity?.Value ?? 0),
                 WindGustStatement = $"Winds from the {hours[h].WindDirection} at {hours[h].WindSpeed?.Value ?? 0}{hours[h].WindSpeed?.UnitCode}{(hours[h].WindGust != null ? $"{hours[h].WindGust.Value} mph." : ".")}",
                 SkyCoverStatement = (supp.Skycover?.Value ?? 0) switch
                 {
@@ -538,26 +537,11 @@ public partial class ForecastService : ObservableObject, IForecastService
         return inputCollection;
     }
 
-    public string TempCategory(double temp, double dewPoint, double relativeHumidity, double wbgt)
+    public string TempCategory(double temp, double dewPoint, double relativeHumidity)
     {
         var sb = new StringBuilder();
         sb.Append($"The temperature will be {NumberGroups.TempsToString(temp)} with a dew point {NumberGroups.DewPointToString(dewPoint)}. Expect ");
-        // --- Extreme heat danger (WBGT-based) ---
-        if (wbgt >= 90)
-        {
-            sb.Append("extreme dangerous heat this hour.");
-            return sb.ToString();
-        }
-        if (wbgt >= 82)
-        {
-            sb.Append("dangerous heat this hour.");
-            return sb.ToString();
-        }
-        if (wbgt >= 78)
-        {
-            sb.Append("very hot and humid this hour.");
-            return sb.ToString();
-        }
+        
         // --- RelativeHumidity / dew point discomfort ---
         bool oppressiveHumidity = dewPoint >= 75 || relativeHumidity >= 85;
         bool veryHumid = dewPoint >= 70 || relativeHumidity >= 75;
@@ -1594,7 +1578,7 @@ public partial class ForecastService : ObservableObject, IForecastService
         if (!string.IsNullOrEmpty(weatherStmt)) sb.Append(weatherStmt + ". ");
         sb.Append(GetPrecipitationStatement(precipType, precipAmt));
         if (!string.IsNullOrEmpty(weatherDesc)) sb.Append(weatherDesc + ". ");
-        sb.Append($"{temp} {TempCategory(temp, dewpoint, relativeHumidity, wbgt)}. ");
+        sb.Append($"{temp} {TempCategory(temp, dewpoint, relativeHumidity)}. ");
         sb.Append(CalcCloudCoverage(sky, evolution.IsDay));
         sb.Append(CalcWind(wind));
         sb.Append(GustSpeed(gust));

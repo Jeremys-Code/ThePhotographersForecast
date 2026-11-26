@@ -140,7 +140,7 @@ namespace ThePhotographersForecast.Services
                         SelectedTimeOfDaySkWeatherAnimation = lotties.FirstOrDefault(),
                         HourlyWeather = timeOfDayForecast[t].Forecasts.ToArray(),
                         TimeOfDayEvents = _session.EventTimes.Where(x => timeOfDayForecast[t].StartTime <= x.WeatherHour && x.WeatherHour <= timeOfDayForecast[t].EndTime).Select(e => e).ToObservableCollection(),
-                        TimeOfDayTemperature = _forecastService.TempCategory(timeOfDayForecast[t].MaxTemp, timeOfDayForecast[t].DewPointAvg, timeOfDayForecast[t].RelativeHumidityAvg, timeOfDayForecast[t].Forecasts.Select(x => x.Supplemental.WetBulbGlobeTemperature.Value).Average()),
+                        TimeOfDayTemperature = _forecastService.TempCategory(timeOfDayForecast[t].MaxTemp, timeOfDayForecast[t].DewPointAvg, timeOfDayForecast[t].RelativeHumidityAvg),
                     };
                     periods.Add(dp);
                 }

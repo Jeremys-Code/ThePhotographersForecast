@@ -125,7 +125,7 @@ namespace ThePhotographersForecast.Services
             //Sun healthSummary and safety
             //Working outside healthSummary and safety information
 
-            var outside = _forecastService.TempCategory(((day.Temperature2mMin.Value + day.Temperature2mMax.Value) / 2), day.DewPoint2mMean.Value, day.RelativeHumidity2mMean.Value, ((day.WetBulbTemperature2mMax.Value + day.WetBulbTemperature2mMin.Value) / 2));
+            var outside = _forecastService.TempCategory(((day.Temperature2mMin.Value + day.Temperature2mMax.Value) / 2), day.DewPoint2mMean.Value, day.RelativeHumidity2mMean.Value);
             string healthSummary = String.Concat("Outside feels like ", outside);
 
 

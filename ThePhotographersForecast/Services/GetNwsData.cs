@@ -335,7 +335,7 @@ public partial class GetNwsData : ObservableObject, IGetNwsData
     {
         var detailForecast = new StringBuilder();
         detailForecast.Append($"Hello, this is the forecast for {nwsHourly.StartTime:h tt}. ");
-        detailForecast.Append($"{nwsHourly.ShortForecast} and {NumberGroups.TempCategory(nwsHourly.Temperature.Value, nwsHourly.DewPoint.Value, nwsHourly.RelativeHumidity.Value, nwsHourly.Supplemental.WetBulbGlobeTemperature.Value)} ");
+        detailForecast.Append($"{nwsHourly.ShortForecast} and {NumberGroups.TempCategory(nwsHourly.Temperature.Value, nwsHourly.DewPoint.Value, nwsHourly.RelativeHumidity.Value)} ");
         detailForecast.Append($"There is a {NumberGroups.WindsToString(nwsHourly.WindSpeed.Value)},");
         detailForecast.Append($" about {nwsHourly.WindSpeed.Value}mph, from the {nwsHourly.WindDirection}. ");
 
@@ -680,7 +680,7 @@ public partial class GetNwsData : ObservableObject, IGetNwsData
         //}
     }
 
-    private static void ExpandMetric<T>(
+    private void ExpandMetric<T>(
     NwsGridpointProperty<T>? properties,
     Dictionary<DateTime, NwsHourlySupplemental> lookup,
     Func<string, (DateTime time, int duration)> parseInterval,
@@ -707,18 +707,21 @@ public partial class GetNwsData : ObservableObject, IGetNwsData
 
             for (int dur = 0; dur < duration; dur++)
             {
-                DateTime targetTime = startTime.AddHours(dur);
-                int remainingDuration = duration - dur;
+                if (startTime.Date > _session.EndDate.Date) break;
+                    DateTime targetTime = startTime.AddHours(dur);
+                    if (targetTime.Date > _session.EndDate.Date) break;
+                    int remainingDuration = duration - dur;
 
-                if (!lookup.TryGetValue(targetTime, out var item))
-                {
-                    item = new NwsHourlySupplemental { Time = targetTime };
-                    lookup[targetTime] = item;
-                }
+                    if (!lookup.TryGetValue(targetTime, out var item))
+                    {
+                        item = new NwsHourlySupplemental { Time = targetTime };
+                        lookup[targetTime] = item;
+                    }
 
-                assign(item, actualValue, remainingDuration, properties.Uom);
-            }
-        }
+                    assign(item, actualValue, remainingDuration, properties.Uom);
+
+                
+        } }
     }
 
 

@@ -247,7 +247,7 @@
 		<!-- Custom Fonts -->
 		<MauiFont Include="Resources\Fonts\NotoSansBlack.ttf" />
 		<MauiFont Include="Resources\Fonts\NotoSansECLight.ttf" />
-		<MauiFont Include="Resources\Fonts\HennyPenny.ttf"/>
+		<MauiFont Include="Resources\Fonts\HennyPenny.ttf" />
 
 		<!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
 		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
@@ -291,6 +291,7 @@
 		<PackageReference Include="SkiaSharp.Views" Version="4.156.0" />
 		<PackageReference Include="SkiaSharp.Views.Maui.Controls" Version="4.156.0" />
 		<PackageReference Include="SkiaSharp.Views.Maui.Controls.Compatibility" Version="2.88.9" />
+		<PackageReference Include="sqlite-net-pcl" Version="1.11.285" />
 	</ItemGroup>
 
 	<ItemGroup>

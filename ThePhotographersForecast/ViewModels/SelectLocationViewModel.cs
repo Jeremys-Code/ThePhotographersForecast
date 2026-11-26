@@ -477,9 +477,15 @@ namespace ThePhotographersForecast.ViewModels
 
                         foreach (var bestDates in DailyPhotoScoringSummary)
                         {
+                            //Guard against previous day data
+                            if(bestDates.Date < DateOnly.FromDateTime(DateTime.UtcNow.AddSeconds(_session.NwsData.TimezoneOffsetSeconds)))
+                            {
+                                continue;
+                            }
                             BestTimes = new ObservableCollection<(DateTime, string)>();
                             foreach (var bestDate in bestDates.BestHours)
                             {
+                                
                                 var sb = new StringBuilder();
                                 sb.AppendLine($"When: {bestDate.LocalTime:h:mm tt}");
                                 sb.AppendLine($"Drone Safety: {Math.Round(bestDate.DroneSafetyScore)}%");
@@ -517,11 +523,13 @@ namespace ThePhotographersForecast.ViewModels
                                 BestHoursText = string.Join("\n", BestTimes.Select(b => b.Item2.Trim())),
                                 DailyScore = $"{Math.Round(bestDates.DailyPhotoScore)}%",
                                 DominantCondition = bestDates.DominantCondition.ToString(),
-                                DailySummary = bestDates.HumanReadableDailySummary
+                                DailySummary = bestDates.HumanReadableDailySummary,
+                                SkDayIcon = _session.NwsData.DailyForecasts.Where(x => bestDates.Date == DateOnly.FromDateTime(x.StartTime)).OrderBy(y => y.StartTime).FirstOrDefault().SkDailyAnimation
                             });
 
                             for (int i = 0; i < _session.NwsData.DailyForecasts.Length; i++)
                             {
+                                //Guarding against unselected future dates
                                 if (bestDates.Date == DateOnly.FromDateTime(_session.NwsData.DailyForecasts[i].StartTime) && _session.NwsData.DailyForecasts[i].IsDaytime == true)
                                 {
                                     _session.NwsData.DailyForecasts[i].DailyScoring = bestDates;

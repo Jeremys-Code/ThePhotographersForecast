@@ -96,7 +96,7 @@ namespace ThePhotographersForecast.Models.DayData
         SkHourlyAnimation = n.SkHourlyAnimation,
         HourlyForecast = n.DetailedForecast,
         Events = _session.EventTimes.Where(e => e.WeatherHour == n.StartTime).OrderBy(o => o.AstroTime).ToArray(),
-        TemperatureStatement = _forecastService.TempCategory(n.Temperature.Value, n.DewPoint.Value, n.RelativeHumidity.Value, m.WetBulbTemperature2m.Value),
+        TemperatureStatement = _forecastService.TempCategory(n.Temperature.Value, n.DewPoint.Value, n.RelativeHumidity.Value),
         SkyCoverStatement = s.Skycover != null && s.Skycover.Description != null ? s.Skycover.Description : m.CloudCover.Description,
         WindSpeedStatement = n.WindStatement != null ? n.WindStatement : m.WindSpeed10m.Description,
         BriefForecast = n.ShortForecast,

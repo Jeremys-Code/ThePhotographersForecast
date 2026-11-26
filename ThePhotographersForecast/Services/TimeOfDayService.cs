@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Text;
+using SQLite;
 
 namespace ThePhotographersForecast.Services
 {
@@ -269,7 +270,7 @@ namespace ThePhotographersForecast.Services
         public DateTime EndTime { get; set; }
 
     }
-
+    [Table("CeilingHgt")]
     public class ForecastCeilingHeight
     {
         public DateTime StartTime { get; set; }
@@ -277,131 +278,183 @@ namespace ThePhotographersForecast.Services
         public double Value { get; set; }
         public string UnitCode { get; set; }
     }
-
+    [Table("Temp")]
     public class ForecastTemperature
     {
+        [PrimaryKey, AutoIncrement, Column("TempId")]
+        public int TempId { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public double Value { get; set; }
         public string UnitCode { get; set; }
     }
+    [Table("DewPoint")]
     public class ForecastDewPoint
     {
+        [PrimaryKey, AutoIncrement, Column("DewPointId")]
+        public int DewPointId { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public double Value { get; set; }
         public string UnitCode { get; set; }
     }
+    [Table("RelHumid")]
     public class ForecastRelativeHumidity
     {
+        [PrimaryKey, AutoIncrement, Column("RelHumidId")]
+        public int RelHumidId { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public double Value { get; set; }
         public string UnitCode { get; set; }
     }
+    [Table("LowVisIndex")]
     public class ForecastLowOccuranceVisibilityIndex
     {
+        [PrimaryKey, AutoIncrement, Column("LowVisIndexId")]
+        public int TempId { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public double Value { get; set; }
         public string UnitCode { get; set; }
     }
+    [Table("ApparentTemp")]
     public class ForecastApparentTemperature
     {
+        [PrimaryKey, AutoIncrement, Column("ApparentTempId")]
+        public int TempId { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public double Value { get; set; }
         public string UnitCode { get; set; }
     }
+    [Table("Visibility")]
     public class ForecastVisibility
     {
+        [PrimaryKey, AutoIncrement, Column("VisibilityId")]
+        public int VisibilityId { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public double Value { get; set; }
         public string UnitCode { get; set; }
     }
+    [Table("MaxTemp")]
     public class ForecastMaxTemperature
     {
+        [PrimaryKey, AutoIncrement, Column("MaxTempId")]
+        public int MaxTempId { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public double Value { get; set; }
         public string UnitCode { get; set; }
     }
+    [Table("MinTemp")]
     public class ForecastMinTemperature
     {
+        [PrimaryKey, AutoIncrement, Column("MinTempId")]
+        public int MinTempId { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public double Value { get; set; }
         public string UnitCode { get; set; }
     }
-
+    [Table("Wind")]
     public class ForecastWind
     {
+        [PrimaryKey, AutoIncrement, Column("WindId")]
+        public int WindId { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public double Value { get; set; }
         public string Direction { get; set; }
         public string UnitCode { get; set; }
     }
+    [Table("TransWind")]
     public class ForecastTransportWind
     {
+        [PrimaryKey, AutoIncrement, Column("TransWindId")]
+        public int TransWindId { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public double Value { get; set; }
         public string Direction { get; set; }
         public string UnitCode { get; set; }
     }
+    [Table("Gust")]
     public class ForecastGusts
     {
+        [PrimaryKey, AutoIncrement, Column("GustId")]
+        public int GustId { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public double Value { get; set; }
         public string UnitCode { get; set; }
     }
+    [Table("SkyCover")]
     public class ForecastSkyCover
     {
+        [PrimaryKey, AutoIncrement, Column("SkyCoverId")]
+        public int SkyCoverId { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public double Value { get; set; }
         public string UnitCode { get; set; }
     }
+    [Table("MixingHgt")]
     public class ForecastMixingHeight
     {
+        [PrimaryKey, AutoIncrement, Column("MixingHgtId")]
+        public int MixingHgtId { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public double Value { get; set; }
         public string UnitCode { get; set; }
     }
+    [Table("Wbgt")]
     public class ForecastWbgt
     {
+        [PrimaryKey, AutoIncrement, Column("WbgtId")]
+        public int WbgtId { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public double Value { get; set; }
         public string UnitCode { get; set; }
     }
+    [Table("HeatRisk")]
     public class ForecastHeatRisk
     {
+        [PrimaryKey, AutoIncrement, Column("HeatRiskId")]
+        public int HeatRiskId { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public int Value { get; set; }
         public string UnitCode { get; set; }
     }
+    [Table("HeatIndex")]
     public class ForecastHeatIndex
     {
+        [PrimaryKey, AutoIncrement, Column("HeatIndexId")]
+        public int HeatIndexId { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public double Value { get; set; }
         public string UnitCode { get; set; }
     }
+    [Table("WindChill")]
     public class ForecastWindChill
     {
+        [PrimaryKey, AutoIncrement, Column("WindChillId")]
+        public int WindChillId { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public double Value { get; set; }
         public string UnitCode { get; set; }
     }
+    [Table("Precipitation")]
     public class ForecastPrecipitation
     {
+        [PrimaryKey, AutoIncrement, Column("PrecipitationId")]
+        public int PrecipitationId { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public string Type { get; set; }
@@ -409,43 +462,61 @@ namespace ThePhotographersForecast.Services
         public double Amount { get; set; }
         public string UnitCode { get; set; }
     }
+    [Table("IceAmt")]
     public class ForecastIceAccumulation
     {
+        [PrimaryKey, AutoIncrement, Column("IceAmtId")]
+        public int IceAmtId { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public double Value { get; set; }
         public string UnitCode { get; set; }
     }
+    [Table("Thunder")]
     public class ForecastThunder
     {
+        [PrimaryKey, AutoIncrement, Column("ThunderId")]
+        public int ThunderId { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public double Value { get; set; }
         public string UnitCode { get; set; }
     }
+    [Table("SnowAmt")]
     public class ForecastSnowfallAmount
     {
+        [PrimaryKey, AutoIncrement, Column("SnowAmtId")]
+        public int SnowAmtId { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public double Value { get; set; }
         public string UnitCode { get; set; }
     }
+    [Table("WeatherStmt")]
     public class ForecastWeatherStatement
     {
+        [PrimaryKey, AutoIncrement, Column("WeatherStmtId")]
+        public int WeatherStmtId { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public string Value { get; set; }
         public string UnitCode { get; set; }
     }
+    [Table("ShortForecast")]
     public class ForecastShortForecast
     {
+        [PrimaryKey, AutoIncrement, Column("ShortForecastId")]
+        public int ShortForecastId { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public string Value { get; set; }
         public string UnitCode { get; set; }
     }
+    [Table("WmoDesc")]
     public class ForecastWmoDescription
     {
+        [PrimaryKey, AutoIncrement, Column("WmoDescId")]
+        public int WmoDescId { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public string Value { get; set; }
@@ -485,26 +556,12 @@ namespace ThePhotographersForecast.Services
 
         }
 
-        public static string TempCategory(double temp, double dewPoint, double relativeHumidity, double wbgt)
+        public static string TempCategory(double temp, double dewPoint, double relativeHumidity)
         {
             var sb = new StringBuilder();
             sb.Append($"The temperature will be {NumberGroups.TempsToString(temp)} with a dew point {NumberGroups.DewPointToString(dewPoint)}. Expect ");
             // --- Extreme heat danger (WBGT-based) ---
-            if (wbgt >= 90)
-            {
-                sb.Append("extreme dangerous heat this hour.");
-                return sb.ToString();
-            }
-            if (wbgt >= 82)
-            {
-                sb.Append("dangerous heat this hour.");
-                return sb.ToString();
-            }
-            if (wbgt >= 78)
-            {
-                sb.Append("very hot and humid this hour.");
-                return sb.ToString();
-            }
+           
             // --- RelativeHumidity / dew point discomfort ---
             bool oppressiveHumidity = dewPoint >= 75 || relativeHumidity >= 85;
             bool veryHumid = dewPoint >= 70 || relativeHumidity >= 75;
