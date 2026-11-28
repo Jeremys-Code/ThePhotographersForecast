@@ -27,8 +27,9 @@ namespace ThePhotographersForecast.Services
             //Creates the EventModel for each Photo Day
             for (int e = 0; e < _session.Dates.Length; e++)
             {
-
-                var date = _session.Dates[e].Date.AddSeconds(_session.SelectedTimeZoneOffset * -1);
+                // Change date to DateOnly
+                //var date = _session.Dates[e].Date.AddSeconds(_session.SelectedTimeZoneOffset * -1);
+                var date = _session.Dates[e].DateOffset.LocalDateTime;
                 var eventList = new List<EventTime>();
                 var dailyEvents = SunCalc.GetTimes(date, latitude, longitude);
                 var moonEvents = MoonCalc.GetMoonTimes(date, latitude, longitude);

@@ -40,7 +40,7 @@ namespace ThePhotographersForecast.ViewModels
 
 
         [ObservableProperty]
-        public partial DayViewModel SelectedDay { get; set; }
+        public partial NwsDailyForecast SelectedDay { get; set; }
 
         // Index synced with CarouselView.Position to keep SelectedDay and Carousel in sync
         [ObservableProperty]
@@ -341,16 +341,15 @@ namespace ThePhotographersForecast.ViewModels
             try
             {
                 int nbrOfDays = EndDate.Date.Subtract(StartDate.Date).Days + 1;
-                var currentDate = StartDate.Date;
+                var currentDate = DateOnly.FromDateTime(StartDate.Date);
                 Dates = new CalendarDayModel[nbrOfDays];
                 for (int i = 0; i < nbrOfDays; i++)
                 {
-                    currentDate = currentDate.Date;
                     Dates[i] = new CalendarDayModel
                     {
                         Date = currentDate
                     };
-                    currentDate = currentDate.Date.AddDays(1);
+                    currentDate = currentDate.AddDays(1);
                 }
                 _session.Dates = Dates.ToArray();
 
@@ -432,7 +431,7 @@ namespace ThePhotographersForecast.ViewModels
                     {
                         for (int c = 0; c < _session.NwsData.DailyForecasts.Length; c++)
                         {
-                            var gradient = skyResults.TryGetValue(DateOnly.FromDateTime(_session.NwsData.DailyForecasts[c].StartTime), out var sky) ? sky : null;
+                            var gradient = skyResults.TryGetValue(DateOnly.FromDateTime(_session.NwsData.DailyForecasts[c].StartTime.DateTime), out var sky) ? sky : null;
                             _session.NwsData.DailyForecasts[c].SkyColor = gradient;
                         }
                     }
@@ -468,17 +467,17 @@ namespace ThePhotographersForecast.ViewModels
                     //  _session.Dates = Dates.ToArray();
                     Debug.WriteLine($"_session.Dates Count: {_session.Dates.Length}");
 
-                    var SelectedDay = TimeOfDayForecasts.First();
+                    var SelectedDay = NwsData.DailyForecasts.First();
                     OnCompletedChanged();//9. Finished Counting everything
                     if (_session.DailyPhotoScoringSummary != null)
                     {
                         DailyPhotoScoringSummary = _session.DailyPhotoScoringSummary;
-                   
+
 
                         foreach (var bestDates in DailyPhotoScoringSummary)
                         {
-                            //Guard against previous day data
-                            if(bestDates.Date < DateOnly.FromDateTime(DateTime.UtcNow.AddSeconds(_session.NwsData.TimezoneOffsetSeconds)))
+                            //Guard against previous day data and unselected future dates data
+                            if (bestDates.Date < DateOnly.FromDateTime(DateTime.UtcNow.AddSeconds(_session.NwsData.TimezoneOffsetSeconds)) || bestDates.Date > DateOnly.FromDateTime(_session.EndDate))
                             {
                                 continue;
                             }
@@ -522,15 +521,26 @@ namespace ThePhotographersForecast.ViewModels
                                 BestHours = BestTimes,
                                 BestHoursText = string.Join("\n", BestTimes.Select(b => b.Item2.Trim())),
                                 DailyScore = $"{Math.Round(bestDates.DailyPhotoScore)}%",
-                                DominantCondition = bestDates.DominantCondition.ToString(),
-                                DailySummary = bestDates.HumanReadableDailySummary,
-                                SkDayIcon = _session.NwsData.DailyForecasts.Where(x => bestDates.Date == DateOnly.FromDateTime(x.StartTime)).OrderBy(y => y.StartTime).FirstOrDefault().SkDailyAnimation
+                                DominantCondition = bestDates.DominantCondition switch
+                                {
+                                    PhotoWeatherCondition.ClearCrisp => "Clear skies with crisp light",
+                                    PhotoWeatherCondition.GoldenDramaticLight => "Prime golden-hour light and textured sky",
+                                    PhotoWeatherCondition.PartlyCloudy => "Partly cloudy with balanced contrast",
+                                    PhotoWeatherCondition.OvercastFlatLight => "Overcast sky with soft, flat diffused light",
+                                    PhotoWeatherCondition.WindyGusty => "Breezy to gusty winds; use caution for drone flight",
+                                    PhotoWeatherCondition.MistyFogRisk => "High humidity and narrow dew-point spread; mist or fog likely",
+                                    PhotoWeatherCondition.RainShowers => "Likely rain or showers; protect camera gear",
+                                    PhotoWeatherCondition.SevereStormy => "Stormy and gusty conditions; unsafe for outdoor/drone shoots",
+                                    _ => "Variable conditions"
+                                },
+                            DailySummary = bestDates.HumanReadableDailySummary,
+                                SkDayIcon = _session.NwsData.DailyForecasts.Where(x => bestDates.Date == DateOnly.FromDateTime(x.StartTime.DateTime)).OrderBy(y => y.StartTime).FirstOrDefault().SkDailyAnimation
                             });
 
                             for (int i = 0; i < _session.NwsData.DailyForecasts.Length; i++)
                             {
-                                //Guarding against unselected future dates
-                                if (bestDates.Date == DateOnly.FromDateTime(_session.NwsData.DailyForecasts[i].StartTime) && _session.NwsData.DailyForecasts[i].IsDaytime == true)
+                                
+                                if (bestDates.Date == DateOnly.FromDateTime(_session.NwsData.DailyForecasts[i].StartTime.DateTime) && _session.NwsData.DailyForecasts[i].IsDaytime == true)
                                 {
                                     _session.NwsData.DailyForecasts[i].DailyScoring = bestDates;
                                 }
@@ -559,7 +569,7 @@ namespace ThePhotographersForecast.ViewModels
             //await Shell.Current.GoToAsync("ForecastDetails");
         }
         [RelayCommand]
-        private async Task CardTap(NwsTimeOfDayForecast SelectedDay)
+        private async Task CardTap(NwsDailyForecast SelectedDay)
         {
             if (SelectedDay == null) return;
             var dailyForecasts = _session.NwsData?.DailyForecasts;
@@ -734,11 +744,11 @@ namespace ThePhotographersForecast.ViewModels
 
 
         // Called when SelectedDay is changed programmatically - update SelectedIndex so the Carousel moves
-        partial void OnSelectedDayChanged(DayViewModel oldValue, DayViewModel newValue)
+        partial void OnSelectedDayChanged(NwsDailyForecast oldValue, NwsDailyForecast newValue)
         {
-            if (Days != null && newValue != null)
+            if (NwsData.DailyForecasts != null && newValue != null)
             {
-                int idx = Days.IndexOf(newValue);
+                int idx = NwsData.DailyForecasts.IndexOf(newValue);
                 if (idx >= 0 && SelectedIndex != idx)
                 {
                     SelectedIndex = idx;
@@ -748,10 +758,10 @@ namespace ThePhotographersForecast.ViewModels
         partial void OnSelectedIndexChanged(int oldValue, int newValue)
         {
 
-            if (Days != null && newValue >= 0 && newValue < Days.Count)
+            if (NwsData.DailyForecasts != null && newValue >= 0 && newValue < NwsData.DailyForecasts.Length)
             {
-                var newSel = Days[newValue];
-                if (!EqualityComparer<DayViewModel>.Default.Equals(SelectedDay, newSel))
+                var newSel = NwsData.DailyForecasts[newValue];
+                if (!EqualityComparer<NwsDailyForecast>.Default.Equals(SelectedDay, newSel))
                 {
                     SelectedDay = newSel;
                 }

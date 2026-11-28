@@ -29,7 +29,7 @@ namespace ThePhotographersForecast.ViewModels
         private ObservableCollection<CalendarDayModel> dates;
 
         [ObservableProperty]
-        private DateTime selectedDate;
+        private DateOnly selectedDate;
 
         // Location and instruction text
         [ObservableProperty]
@@ -113,7 +113,7 @@ namespace ThePhotographersForecast.ViewModels
             StartDate = _session.StartDate;
             EndDate = _session.EndDate;
             Dates = _session.Dates.ToObservableCollection();
-            SelectedDate = Dates.FirstOrDefault()?.Date ?? DateTime.Now.Date;
+            SelectedDate = Dates.FirstOrDefault()?.Date ?? DateOnly.FromDateTime(DateTime.Now.Date);
             LocationName = _session.NwsData.SelectedLocation.DisplayName;
             ElevationStatement = _session.SelectedLocation.Elevation.ElevationStatement;
 
@@ -130,7 +130,7 @@ namespace ThePhotographersForecast.ViewModels
         /// <summary>
         /// Updates all data when a new date is selected.
         /// </summary>
-        partial void OnSelectedDateChanged(DateTime value)
+        partial void OnSelectedDateChanged(DateOnly value)
         {
             if (Days == null || Days.Length == 0) return;
             SelectedDay = Days.FirstOrDefault(d => d.Date == value);
@@ -145,10 +145,10 @@ namespace ThePhotographersForecast.ViewModels
             if (SelectedDay == null) return;
 
             var selectedDate = SelectedDay.Date;
-            var dateOnly = DateOnly.FromDateTime(selectedDate);
+            var dateOnly = selectedDate;
 
             // Astronomical Events
-            SelectedDayEventModel = _session.EventsData?.FirstOrDefault(e => e.Date.Date == selectedDate.Date) ?? new EventModel();
+            SelectedDayEventModel = _session.EventsData?.FirstOrDefault(e => DateOnly.FromDateTime(e.Date.Date) == selectedDate) ?? new EventModel();
             SelectedDayEventTimes = SelectedDayEventModel?.EventTimes ?? Array.Empty<EventTime>();
 
             // Sky Color
@@ -190,7 +190,7 @@ namespace ThePhotographersForecast.ViewModels
             //    SelectedDayMoonPhase = _session.MoonPhases?.FirstOrDefault(m => m.Date == dateOnly);
 
             // Hourly Forecasts for Weather Context
-            SelectedDayHourlyForecasts = _session.NwsData?.HourlyForecasts?.Where(h => h.StartTime.Date == selectedDate.Date).ToArray() ?? Array.Empty<NwsHourlyForecast>();
+            SelectedDayHourlyForecasts = _session.NwsData?.HourlyForecasts?.Where(h => DateOnly.FromDateTime(h.StartTime.DateTime) == selectedDate).ToArray() ?? Array.Empty<NwsHourlyForecast>();
             WeatherSuitabilityStatement = BuildWeatherSuitabilityStatement(SelectedDayHourlyForecasts);
         }
 

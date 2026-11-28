@@ -52,23 +52,23 @@ namespace ThePhotographersForecast.Services
                     //{
                     //    for (int p = 0; p < dayInfo.Length; p++)
                     //    {
-                    var selectedDate = date.Date;
-                    var hl = GetDailyHighLow(date.Date);
+                    var selectedDate = date;
+                    var hl = GetDailyHighLow(date);
                     days.Add(new DayViewModel
                     {
                         Date = selectedDate,
                         Day = selectedDate.Day,
-                        Events = _session.EventsData.Where(e => e.Date == selectedDate.Date).FirstOrDefault<EventModel>() ?? new EventModel(),
-                        IsEmpty = false,
+                        IsEmpty = false,                        Events = _session.EventsData.Where(e => DateOnly.FromDateTime(e.Date) == selectedDate).FirstOrDefault<EventModel>() ?? new EventModel(),
+
                         IsEventDay = true,
                         IsFlipped = false,
-                        IsToday = selectedDate.Date == DateTime.UtcNow.AddSeconds(_session.SelectedTimeZoneOffset).Date,
+                        IsToday = selectedDate == DateOnly.FromDateTime(DateTime.UtcNow.AddSeconds(_session.SelectedTimeZoneOffset).Date),
                         SelectedLocation = new PhotoLocation(_session.NwsData.SelectedLocation),
                         Name = _session.NwsData.TimeOfDayForecasts.FirstOrDefault().TimeOfDayName,
-                        Periods = CreatePeriods(_session.NwsData.TimeOfDayForecasts.Where(x => x.StartTime.Date == date.Date).ToArray()),
+                        Periods = CreatePeriods(_session.NwsData.TimeOfDayForecasts.Where(x => DateOnly.FromDateTime(x.StartTime.Date) == date).ToArray()),
                         //            SelectedDailyForecast = dayInfo[p],
-                        TimeOfDayForecasts = _session.NwsData.TimeOfDayForecasts.Where(x => x.StartTime.Date == date.Date).ToArray(),
-                        DailyDetailedForecast = _session.NwsData.TimeOfDayForecasts.Where(x => x.StartTime.Date == date.Date).FirstOrDefault().LongForecast,
+                        TimeOfDayForecasts = _session.NwsData.TimeOfDayForecasts.Where(x => DateOnly.FromDateTime(x.StartTime.Date) == date).ToArray(),
+                        DailyDetailedForecast = _session.NwsData.TimeOfDayForecasts.Where(x => DateOnly.FromDateTime(x.StartTime.Date) == date).FirstOrDefault().LongForecast,
                         //DailyScore = _session.DailyPhotoScoringSummary.Where(x => x.Date == DateOnly.FromDateTime(selectedDate)).FirstOrDefault().HumanReadableDailySummary ?? "Missing Summary!!!",
                         DailyHighStatement = hl.high,
                         DailyLowStatement = hl.low,
@@ -122,7 +122,7 @@ namespace ThePhotographersForecast.Services
                         {
                             LottieWeather = timeOfDayForecast[t].Forecasts[l].SkHourlyAnimation,
                             Forecast = timeOfDayForecast[t].Forecasts[l].ShortForecast,
-                            Time = timeOfDayForecast[t].Forecasts[l].StartTime,
+                            Time = timeOfDayForecast[t].Forecasts[l].StartTime.DateTime,
                             Temperature = timeOfDayForecast[t].Forecasts[l].TempAndUnit
                         };
                         lotties.Add(animation);
@@ -130,8 +130,8 @@ namespace ThePhotographersForecast.Services
                     var dp = new DayPeriod
                     {
                         TimeOfDayName = timeOfDayForecast[t].TimeOfDay,
-                        StartTime = timeOfDayForecast[t].StartTime,
-                        EndTime = timeOfDayForecast[t].EndTime,
+                        StartTime = timeOfDayForecast[t].StartTime.DateTime,
+                        EndTime = timeOfDayForecast[t].EndTime.DateTime,
                         ForecastName = timeOfDayForecast[t].TimeOfDayName,
                         TimeOfDayBackgroundBrush = timeOfDayForecast[t].TimeOfDayGradientBrush,
                         TimeOfDaySkAnimation = timeOfDayForecast[t].SKTimeOfDayAnimation,
@@ -167,10 +167,10 @@ namespace ThePhotographersForecast.Services
             }
             return summary;
         }
-        private (string high, string low) GetDailyHighLow(DateTime date)
+        private (string high, string low) GetDailyHighLow(DateOnly date)
         {
-            var highRecord = _session.NwsData.HourlyForecasts.Where(x => x.StartTime.Date == date.Date && x.Temperature.Value != null).MaxBy(y => y.Temperature.Value);
-            var lowRecord = _session.NwsData.HourlyForecasts.Where(x => x.StartTime.Date == date.Date && x.Temperature.Value != null).MinBy(z => z.Temperature.Value);
+            var highRecord = _session.NwsData.HourlyForecasts.Where(x => DateOnly.FromDateTime(x.StartTime.Date) == date && x.Temperature.Value != null).MaxBy(y => y.Temperature.Value);
+            var lowRecord = _session.NwsData.HourlyForecasts.Where(x => DateOnly.FromDateTime(x.StartTime.Date) == date && x.Temperature.Value != null).MinBy(z => z.Temperature.Value);
             string high = string.Empty;
             string low = string.Empty;
             if (highRecord == null)

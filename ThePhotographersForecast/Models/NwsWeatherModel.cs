@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using SkiaSharp.Extended.UI.Controls;
+using SQLite;
 using System.Collections.ObjectModel;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -70,9 +71,9 @@ public partial class NwsWeatherModel : ObservableObject
 }
 public class NwsDailyForecast
 {
-    public DateTime StartTime { get; set; }
+    public DateTimeOffset StartTime { get; set; }
 
-    public DateTime EndTime { get; set; }
+    public DateTimeOffset EndTime { get; set; }
 
     public int Number { get; set; }
 
@@ -161,9 +162,10 @@ public class NwsDailyForecast
 public partial class NwsHourlyForecast : ObservableObject
 {
     public int Number { get; set; }
+    
+    public DateTimeOffset StartTime { get; set; }
+    public DateTimeOffset EndTime { get; set; }
     public string Name => String.Concat(this.StartTime.ToString("dddd"), " ", Services.TimeOfDayService.CalcTimeOfDay(this.StartTime.Hour).ToString(), " @ ", this.StartTime.ToString("h tt"));
-    public DateTime StartTime { get; set; }
-    public DateTime EndTime { get; set; }
     public bool IsDaytime { get; set; }
     public TemperatureHourly Temperature { get; set; }
     public ProbabilityOfPrecipitationHourly ProbabilityOfPrecipitation { get; set; }
@@ -337,9 +339,8 @@ public class NwsTimeOfDayForecast
     public string DescForecasts { get; set; }
     public string LongForecast { get; set; }
     public bool IsDay { get; set; }
-
-    public DateTime StartTime { get; set; }
-    public DateTime EndTime { get; set; }
+    public DateTimeOffset StartTime { get; set; }
+    public DateTimeOffset EndTime { get; set; }
     public string High { get; set; }
     public string Low { get; set; }
     public double MaxTemp { get; set; }
@@ -415,7 +416,7 @@ public class TimeAndQuantity
 {
     public double Quantity { get; set; }
     public string Intensity { get; set; }
-    public DateTime Time { get; set; }
+    public DateTimeOffset Time { get; set; }
 }
 
 public class ForecastItem
@@ -425,13 +426,13 @@ public class ForecastItem
     public string Condition { get; set; }
     public double Thunder { get; set; }
     public double Precipitation { get; set; }
-    public DateTime StartTime { get; set; }
-    public DateTime EndTime { get; set; }
+    public DateTimeOffset StartTime { get; set; }
+    public DateTimeOffset EndTime { get; set; }
 }
 
 public class NwsHourlySupplemental
 {
-    public DateTime Time { get; set; }
+    public DateTimeOffset Time { get; set; }
     public string[] Weathers { get; set; }
     public string SupplementalWeatherStatement { get; set; }
     public string TimeOfDay => Services.TimeOfDayService.CalcTimeOfDay(this.Time.Hour);
@@ -598,7 +599,7 @@ public class SkyCoverValue
     public int Duration { get; set; }
     public string UnitCode => "%";
     public double Value { get; set; }
-    public DateTime Time { get; set; }
+    public DateTimeOffset Time { get; set; }
     public string Description => GetSkyCoverDescription();
     public string Trend { get; set; }
     private string GetSkyCoverDescription()
@@ -750,12 +751,18 @@ public class WeatherValue
     public WeatherStatementsValue?[] Value { get; set; }
 }
 
+[Table("WeatherStatements")]
 public partial class WeatherStatementsValue : ObservableObject
 {
+    [PrimaryKey, AutoIncrement, Column("WeatherStatementId")]
+    [JsonIgnore]
+    public int WeatherStatementId { get; set; }
+    [JsonIgnore]
+    public int ForecastId { get; set; }
     [ObservableProperty]
     public partial int Duration { get; set; }
     [ObservableProperty]
-    public partial DateTime Time { get; set; }
+    public partial DateTimeOffset Time { get; set; }
     [ObservableProperty]
     public partial string Statement { get; set; }
     [ObservableProperty]
@@ -765,11 +772,24 @@ public partial class WeatherStatementsValue : ObservableObject
     [ObservableProperty]
     public partial string Weather { get; set; }
     [ObservableProperty]
+    [Ignore]
     public partial string[] Attributes { get; set; }
+    [JsonIgnore]
+    public string AttributesText
+    {
+        get => Attributes is { Length: > 0 } ? string.Join(",", Attributes) : string.Empty;
+        set => Attributes = string.IsNullOrWhiteSpace(value)
+            ? Array.Empty<string>()
+            : value.Split(',', StringSplitOptions.RemoveEmptyEntries);
+    }
+    [Ignore]
     public string Category => GetCategories(this.Weather);
 
     private string GetCategories(string weather)
     {
+        if (string.IsNullOrEmpty(weather))
+            return string.Empty;
+
         foreach (var p in Enum.GetValues(typeof(PrecipitationType)))
         {
             if (weather.StartsWith(p.ToString(), StringComparison.OrdinalIgnoreCase))
@@ -826,7 +846,7 @@ public class Heatrisk
 public class HeatRiskValue
 {
     public int Duration { get; set; }
-    public DateTime Time { get; set; }
+    public DateTimeOffset Time { get; set; }
     public string UnitCode { get; set; }
     public int Value { get; set; }
     public string HeatRiskDescription => GetHeatRiskDescription();
@@ -889,7 +909,7 @@ public class QuantitativePrecipitationValue
             field = Math.Round((value / 25.4), 2);
         }
     }
-    public DateTime Time { get; set; }
+    public DateTimeOffset Time { get; set; }
     public string Description => $"{this.Value} {this.UnitCode}";
 }
 
@@ -1166,7 +1186,7 @@ public class ProbabilityOfThunderValue
         > 1 and <= 10 => " there is a low chance of thunderstorms.",
         _ => " No thunderstorms expected."
     };
-    public DateTime Time { get; set; }
+    public DateTimeOffset Time { get; set; }
 }
 
 public class Davisstabilityindex

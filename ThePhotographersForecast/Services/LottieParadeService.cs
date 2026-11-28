@@ -24,7 +24,7 @@ namespace ThePhotographersForecast.Services
                 var lFloat = new LottieAnimation
                 {
                     LottieWeather = h.SkHourlyAnimation,
-                    Time = h.StartTime,
+                    Time = h.StartTime.DateTime,
                     Forecast = h.ShortForecast,
                     Temperature = h.TempAndUnit,
                     SkyTransition = h.TimeOfDayBrush

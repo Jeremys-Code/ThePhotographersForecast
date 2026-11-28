@@ -59,6 +59,8 @@ namespace ThePhotographersForecast.Shared
 
         [ObservableProperty]
         public partial SkyHourData[] SkyData { get; set; }
+        [ObservableProperty]
+        public partial ObservableCollection<ForecastInputs> ForecastInputsCollection { get; set; } = new ObservableCollection<ForecastInputs>();
         private void SetProperty<Type>(ref Type backingStore, Type Value)
         {
             if (Equals(backingStore, Value))
@@ -90,18 +92,31 @@ namespace ThePhotographersForecast.Shared
             EventsData = Array.Empty<EventModel>();
             EventTimes = Array.Empty<EventTime>();
             SelectedLocation = new PhotoLocation();
-            StartDate = DateTime.UtcNow.Date;
-            EndDate = DateTime.UtcNow.AddDays(6);
+            StartDate = DateTime.Now.Date;
+            EndDate = DateTime.Now.AddDays(6);
             Dates = Array.Empty<CalendarDayModel>();
             SkyColors = new Dictionary<DateOnly, LinearGradientBrush>();
             EventsByPeriod = new Dictionary<string, ObservableCollection<EventTime>>();
             NwsData = new NwsWeatherModel();
             Days = new ObservableCollection<DayViewModel>();
             SkyData = Array.Empty<SkyHourData>();
+            ForecastInputsCollection = new ObservableCollection<ForecastInputs>();
         }
         public async Task ResetSessionAsync()
         {
-
+            WeatherForecasts = new WeatherForecast();
+            EventsData = Array.Empty<EventModel>();
+            EventTimes = Array.Empty<EventTime>();
+            SelectedLocation = new PhotoLocation();
+            StartDate = DateTime.Now.Date;
+            EndDate = DateTime.Now.AddDays(6);
+            Dates = Array.Empty<CalendarDayModel>();
+            SkyColors = new Dictionary<DateOnly, LinearGradientBrush>();
+            EventsByPeriod = new Dictionary<string, ObservableCollection<EventTime>>();
+            NwsData = new NwsWeatherModel();
+            Days = new ObservableCollection<DayViewModel>();
+            SkyData = Array.Empty<SkyHourData>();
+            ForecastInputsCollection = new ObservableCollection<ForecastInputs>();
             return;
         }
     }

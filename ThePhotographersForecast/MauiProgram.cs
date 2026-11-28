@@ -10,6 +10,7 @@ using ThePhotographersForecast.Services.Modules;
 using ThePhotographersForecast.Shared;
 using ThePhotographersForecast.ViewModels;
 using ThePhotographersForecast.Views;
+using ThePhotographersForecast.Database;
 
 
 namespace ThePhotographersForecast
@@ -149,6 +150,8 @@ namespace ThePhotographersForecast
             builder.Services.AddSingleton<TestingPage>();
             // Register the ContentViews
             builder.Services.AddSingleton<NwsDailyHourlyView>();
+            builder.Services.AddSingleton<DataAccess>();
+
 
             //#if IOS || MACCATALYST
             //        // Register the platform-specific implementation

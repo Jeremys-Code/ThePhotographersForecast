@@ -1,6 +1,7 @@
-﻿using System.Collections.ObjectModel;
+﻿using SQLite;
+using System.Collections.ObjectModel;
 using System.Text;
-using SQLite;
+using ThePhotographersForecast.Models;
 
 namespace ThePhotographersForecast.Services
 {
@@ -260,7 +261,7 @@ namespace ThePhotographersForecast.Services
         public List<ForecastRelativeHumidity> RelativeHumidity { get; set; } = new List<ForecastRelativeHumidity>();
         public List<ForecastHeatRisk> HeatRisk { get; set; } = new List<ForecastHeatRisk>();
         public List<ForecastWindChill> WindChill { get; set; } = new List<ForecastWindChill>();
-        public List<ForecastShortForecast> ShortForecast { get; set; } = new List<ForecastShortForecast>();
+        public List<ForecastShort> ShortForecast { get; set; } = new List<ForecastShort>();
         public List<ForecastWmoDescription> WeatherDescription { get; set; } = new List<ForecastWmoDescription>();
         public List<ForecastThunder> Thunder { get; set; } = new List<ForecastThunder>();
         public List<ForecastWeatherStatement> WeatherStatement { get; set; } = new List<ForecastWeatherStatement>();
@@ -270,8 +271,33 @@ namespace ThePhotographersForecast.Services
         public DateTime EndTime { get; set; }
 
     }
+    [Table("ForecastLayers")]
+    public class ForecastLayers
+    {
+        [PrimaryKey, AutoIncrement, Column("ForecastLayerId")]
+        public int ForecastLayerId { get; set; }
+        //Foreign Key to Layer
+        public int LayerId { get; set; }
+        public DateTime StartTime { get; set; }
+        public DateTime EndTime { get; set; }
+        public double Value { get; set; }
+        public string UnitCode { get; set; }
+        public int Duration { get; set; }
+        //Foreign Key ForecastInput
+        public int ForecastId { get; set; }
+
+    }
+    [Table("Layers")]
+    public class Layers
+    {
+        [PrimaryKey, AutoIncrement, Column("LayerId")]
+        public int LayerId { get; set; }
+        [Unique]
+        public string LayerName { get; set; }
+    }
+
     [Table("CeilingHgt")]
-    public class ForecastCeilingHeight
+    public class ForecastCeilingHeight : IForecastLayerValue
     {
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
@@ -279,7 +305,7 @@ namespace ThePhotographersForecast.Services
         public string UnitCode { get; set; }
     }
     [Table("Temp")]
-    public class ForecastTemperature
+    public class ForecastTemperature : IForecastLayerValue
     {
         [PrimaryKey, AutoIncrement, Column("TempId")]
         public int TempId { get; set; }
@@ -287,9 +313,10 @@ namespace ThePhotographersForecast.Services
         public DateTime EndTime { get; set; }
         public double Value { get; set; }
         public string UnitCode { get; set; }
+        public int ForecastId { get; set; }
     }
     [Table("DewPoint")]
-    public class ForecastDewPoint
+    public class ForecastDewPoint : IForecastLayerValue
     {
         [PrimaryKey, AutoIncrement, Column("DewPointId")]
         public int DewPointId { get; set; }
@@ -299,7 +326,7 @@ namespace ThePhotographersForecast.Services
         public string UnitCode { get; set; }
     }
     [Table("RelHumid")]
-    public class ForecastRelativeHumidity
+    public class ForecastRelativeHumidity : IForecastLayerValue
     {
         [PrimaryKey, AutoIncrement, Column("RelHumidId")]
         public int RelHumidId { get; set; }
@@ -309,7 +336,7 @@ namespace ThePhotographersForecast.Services
         public string UnitCode { get; set; }
     }
     [Table("LowVisIndex")]
-    public class ForecastLowOccuranceVisibilityIndex
+    public class ForecastLowOccuranceVisibilityIndex : IForecastLayerValue
     {
         [PrimaryKey, AutoIncrement, Column("LowVisIndexId")]
         public int TempId { get; set; }
@@ -319,7 +346,7 @@ namespace ThePhotographersForecast.Services
         public string UnitCode { get; set; }
     }
     [Table("ApparentTemp")]
-    public class ForecastApparentTemperature
+    public class ForecastApparentTemperature : IForecastLayerValue
     {
         [PrimaryKey, AutoIncrement, Column("ApparentTempId")]
         public int TempId { get; set; }
@@ -329,7 +356,7 @@ namespace ThePhotographersForecast.Services
         public string UnitCode { get; set; }
     }
     [Table("Visibility")]
-    public class ForecastVisibility
+    public class ForecastVisibility : IForecastLayerValue
     {
         [PrimaryKey, AutoIncrement, Column("VisibilityId")]
         public int VisibilityId { get; set; }
@@ -339,7 +366,7 @@ namespace ThePhotographersForecast.Services
         public string UnitCode { get; set; }
     }
     [Table("MaxTemp")]
-    public class ForecastMaxTemperature
+    public class ForecastMaxTemperature : IForecastLayerValue
     {
         [PrimaryKey, AutoIncrement, Column("MaxTempId")]
         public int MaxTempId { get; set; }
@@ -349,7 +376,7 @@ namespace ThePhotographersForecast.Services
         public string UnitCode { get; set; }
     }
     [Table("MinTemp")]
-    public class ForecastMinTemperature
+    public class ForecastMinTemperature : IForecastLayerValue
     {
         [PrimaryKey, AutoIncrement, Column("MinTempId")]
         public int MinTempId { get; set; }
@@ -363,6 +390,7 @@ namespace ThePhotographersForecast.Services
     {
         [PrimaryKey, AutoIncrement, Column("WindId")]
         public int WindId { get; set; }
+        public int ForecastId { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public double Value { get; set; }
@@ -374,6 +402,7 @@ namespace ThePhotographersForecast.Services
     {
         [PrimaryKey, AutoIncrement, Column("TransWindId")]
         public int TransWindId { get; set; }
+        public int ForecastId { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public double Value { get; set; }
@@ -381,7 +410,7 @@ namespace ThePhotographersForecast.Services
         public string UnitCode { get; set; }
     }
     [Table("Gust")]
-    public class ForecastGusts
+    public class ForecastGusts : IForecastLayerValue
     {
         [PrimaryKey, AutoIncrement, Column("GustId")]
         public int GustId { get; set; }
@@ -391,7 +420,7 @@ namespace ThePhotographersForecast.Services
         public string UnitCode { get; set; }
     }
     [Table("SkyCover")]
-    public class ForecastSkyCover
+    public class ForecastSkyCover : IForecastLayerValue
     {
         [PrimaryKey, AutoIncrement, Column("SkyCoverId")]
         public int SkyCoverId { get; set; }
@@ -401,7 +430,7 @@ namespace ThePhotographersForecast.Services
         public string UnitCode { get; set; }
     }
     [Table("MixingHgt")]
-    public class ForecastMixingHeight
+    public class ForecastMixingHeight : IForecastLayerValue
     {
         [PrimaryKey, AutoIncrement, Column("MixingHgtId")]
         public int MixingHgtId { get; set; }
@@ -411,7 +440,7 @@ namespace ThePhotographersForecast.Services
         public string UnitCode { get; set; }
     }
     [Table("Wbgt")]
-    public class ForecastWbgt
+    public class ForecastWbgt : IForecastLayerValue
     {
         [PrimaryKey, AutoIncrement, Column("WbgtId")]
         public int WbgtId { get; set; }
@@ -421,17 +450,18 @@ namespace ThePhotographersForecast.Services
         public string UnitCode { get; set; }
     }
     [Table("HeatRisk")]
-    public class ForecastHeatRisk
+    public class ForecastHeatRisk : IForecastLayerValue
     {
         [PrimaryKey, AutoIncrement, Column("HeatRiskId")]
         public int HeatRiskId { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public int Value { get; set; }
+        double IForecastLayerValue.Value => Value;
         public string UnitCode { get; set; }
     }
     [Table("HeatIndex")]
-    public class ForecastHeatIndex
+    public class ForecastHeatIndex : IForecastLayerValue
     {
         [PrimaryKey, AutoIncrement, Column("HeatIndexId")]
         public int HeatIndexId { get; set; }
@@ -441,7 +471,7 @@ namespace ThePhotographersForecast.Services
         public string UnitCode { get; set; }
     }
     [Table("WindChill")]
-    public class ForecastWindChill
+    public class ForecastWindChill : IForecastLayerValue
     {
         [PrimaryKey, AutoIncrement, Column("WindChillId")]
         public int WindChillId { get; set; }
@@ -455,6 +485,7 @@ namespace ThePhotographersForecast.Services
     {
         [PrimaryKey, AutoIncrement, Column("PrecipitationId")]
         public int PrecipitationId { get; set; }
+        public int ForecastId { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public string Type { get; set; }
@@ -463,7 +494,7 @@ namespace ThePhotographersForecast.Services
         public string UnitCode { get; set; }
     }
     [Table("IceAmt")]
-    public class ForecastIceAccumulation
+    public class ForecastIceAccumulation : IForecastLayerValue
     {
         [PrimaryKey, AutoIncrement, Column("IceAmtId")]
         public int IceAmtId { get; set; }
@@ -473,7 +504,7 @@ namespace ThePhotographersForecast.Services
         public string UnitCode { get; set; }
     }
     [Table("Thunder")]
-    public class ForecastThunder
+    public class ForecastThunder : IForecastLayerValue
     {
         [PrimaryKey, AutoIncrement, Column("ThunderId")]
         public int ThunderId { get; set; }
@@ -483,7 +514,7 @@ namespace ThePhotographersForecast.Services
         public string UnitCode { get; set; }
     }
     [Table("SnowAmt")]
-    public class ForecastSnowfallAmount
+    public class ForecastSnowfallAmount : IForecastLayerValue
     {
         [PrimaryKey, AutoIncrement, Column("SnowAmtId")]
         public int SnowAmtId { get; set; }
@@ -503,10 +534,11 @@ namespace ThePhotographersForecast.Services
         public string UnitCode { get; set; }
     }
     [Table("ShortForecast")]
-    public class ForecastShortForecast
+    public class ForecastShort
     {
         [PrimaryKey, AutoIncrement, Column("ShortForecastId")]
         public int ShortForecastId { get; set; }
+        public int ForecastId { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public string Value { get; set; }

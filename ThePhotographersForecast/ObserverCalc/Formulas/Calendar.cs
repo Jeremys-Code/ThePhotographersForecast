@@ -16,7 +16,7 @@
         {
             return DateTimeOffset.FromUnixTimeMilliseconds((long)((j + 0.5 - J1970) * dayMs)).UtcDateTime;
         }
-
+        //DateTime to DateOnly
         public static double ToDays(DateTime date)
         {
             return ToJulian(date) - J2000;

@@ -20,6 +20,7 @@ public partial class GetNwsData : ObservableObject, IGetNwsData
     private ISkyMetricsService _skyService;
     private IForecastService _forecastService;
     private PhotographersForecastOnnxService _onnxService;
+    public TimeZoneInfo Tz { get; set; }
     [ObservableProperty]
     public partial string DailyUrl { get; set; } = string.Empty;
     [ObservableProperty]
@@ -111,8 +112,12 @@ public partial class GetNwsData : ObservableObject, IGetNwsData
 
         };
         var timezone = TimeZoneInfo.FindSystemTimeZoneById(data.properties.timeZone);
+        Tz = timezone;
         var timezoneOffsetSeconds = (int)timezone.GetUtcOffset(DateTime.UtcNow).TotalSeconds;
-
+        for(int d = 0; d < _session.Dates.Length; d++)
+        {
+            _session.Dates[d].DateOffset = new DateTimeOffset(_session.Dates[d].Date, TimeOnly.MinValue, TimeSpan.FromSeconds(timezoneOffsetSeconds));
+        }
         Debug.WriteLine($"Lat:{selectedLocation.Latitude}");
         Debug.WriteLine($"Lon:{selectedLocation.Longitude}");
         Debug.WriteLine($"DN:{selectedLocation.DisplayName}");
@@ -132,6 +137,10 @@ public partial class GetNwsData : ObservableObject, IGetNwsData
             NwsData.HourlyForecasts = nwsHourlies.ToArray();
             var nwsHourlySupplementals = await supplementalTask;
             NwsData.HourlySupplementals = nwsHourlySupplementals.ToArray();
+            Debug.WriteLine($"First Hourly Record Time:(DateTimeOffset) {nwsHourlies.Min(x => x.StartTime)}:(LocalDateTime) {nwsHourlies.Min(x => x.StartTime.LocalDateTime)}");
+            Debug.WriteLine($"Last Hourly Record Time:(DateTimeOffset) {nwsHourlies.Max(x => x.StartTime)}:(LocalDateTime) {nwsHourlies.Max(x => x.StartTime.LocalDateTime)}");
+            Debug.WriteLine($"First Hourly Supplemental Record Time:(DateTimeOffset) {nwsHourlySupplementals.Min(x => x.Time)}:(LocalDateTime) {nwsHourlySupplementals.Min(x => x.Time.LocalDateTime)}");
+            Debug.WriteLine($"Last Hourly Supplemental Record Time:(DateTimeOffset) {nwsHourlySupplementals.Max(x => x.Time)}:(LocalDateTime) {nwsHourlySupplementals.Max(x => x.Time.LocalDateTime)}");
 
             //var nwsDailies = dailyTask.Result;
             //var nwsHourlies = hourlyTask.Result;
@@ -227,8 +236,8 @@ public partial class GetNwsData : ObservableObject, IGetNwsData
 
                     Number = periods[i].number,
                     Name = periods[i].name,
-                    StartTime = periods[i].startTime,
-                    EndTime = periods[i].endTime,
+                    StartTime = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(periods[i].startTime, Tz.Id),
+                    EndTime = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(periods[i].endTime, Tz.Id),
                     IsDaytime = periods[i].isDaytime,
                     Temperature = periods[i].temperature.value,
                     DailyIcon = icon,
@@ -282,8 +291,8 @@ public partial class GetNwsData : ObservableObject, IGetNwsData
                 nwsHourlies[d] = new NwsHourlyForecast
                 {
                     Number = pd[d].number,
-                    StartTime = pd[d].startTime,
-                    EndTime = pd[d].endTime,
+                    StartTime = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(pd[d].startTime, Tz.Id),
+                    EndTime = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(pd[d].endTime, Tz.Id),
                     IsDaytime = pd[d].isDaytime,
                     Temperature = new NwsHourlyForecast.TemperatureHourly { Value = pd[d].temperature.value },
                     ProbabilityOfPrecipitation = new NwsHourlyForecast.ProbabilityOfPrecipitationHourly { Value = pd[d].probabilityOfPrecipitation.value, UnitCode = "%" },
@@ -407,7 +416,7 @@ public partial class GetNwsData : ObservableObject, IGetNwsData
                 ? (float)supp.ProbabilityOfPrecipitation.Value
                 : (sky?.PrecipitationProbability?.Value ?? 0f);
 
-            float solarElevDeg = (float)(SunCalc.GetPosition(supp.Time, lat, lon).Altitude * (180.0 / Math.PI));
+            float solarElevDeg = (float)(SunCalc.GetPosition(supp.Time.LocalDateTime, lat, lon).Altitude * (180.0 / Math.PI));
             float ceilingM = supp.CeilingHeight != null
                 ? (float)Math.Round(supp.CeilingHeight.Value / 3.2808, 8)
                 : 10000f;
@@ -419,8 +428,8 @@ public partial class GetNwsData : ObservableObject, IGetNwsData
             float wind120Kmh = sky?.WindSpeed120m?.Value ?? (windSpeedKmh * 1.25f);
             float precipMm = sky?.Precipitation?.Value ?? 0f;
 
-            float moonElevDeg = (float)(MoonCalc.GetMoonPosition(supp.Time, lat, lon).Altitude * (180.0 / Math.PI));
-            float moonIllum = (float)MoonCalc.GetMoonIllumination(supp.Time).Fraction;
+            float moonElevDeg = (float)(MoonCalc.GetMoonPosition(supp.Time.LocalDateTime, lat, lon).Altitude * (180.0 / Math.PI));
+            float moonIllum = (float)MoonCalc.GetMoonIllumination(supp.Time.LocalDateTime).Fraction;
 
             var hourly = new HourlyNwsInput(
                 (DateTimeOffset)supp.Time,
@@ -481,9 +490,9 @@ public partial class GetNwsData : ObservableObject, IGetNwsData
 
     private async Task<NwsHourlySupplemental[]> ParseSupplementalDataAsync(GridDetailData.Rootobject suppData)
     {
-        var lookup = new Dictionary<DateTime, NwsHourlySupplemental>();
+        var lookup = new Dictionary<DateTimeOffset, NwsHourlySupplemental>();
 
-        NwsHourlySupplemental GetOrCreate(DateTime time)
+        NwsHourlySupplemental GetOrCreate(DateTimeOffset time)
         {
             if (!lookup.TryGetValue(time, out var item))
             {
@@ -518,7 +527,7 @@ public partial class GetNwsData : ObservableObject, IGetNwsData
 
                 for (int dur = 0; dur < duration; dur++)
                 {
-                    DateTime targetTime = startTime.AddHours(dur);
+                    DateTimeOffset targetTime = startTime.AddHours(dur);
                     int remainingDuration = duration - dur;
 
                     var statements = new List<string>();
@@ -682,8 +691,8 @@ public partial class GetNwsData : ObservableObject, IGetNwsData
 
     private void ExpandMetric<T>(
     NwsGridpointProperty<T>? properties,
-    Dictionary<DateTime, NwsHourlySupplemental> lookup,
-    Func<string, (DateTime time, int duration)> parseInterval,
+    Dictionary<DateTimeOffset, NwsHourlySupplemental> lookup,
+    Func<string, (DateTimeOffset time, int duration)> parseInterval,
     Action<NwsHourlySupplemental, T, int, string?> assign,
     Func<T, bool>? predicate = null) where T : struct
     {
@@ -708,7 +717,7 @@ public partial class GetNwsData : ObservableObject, IGetNwsData
             for (int dur = 0; dur < duration; dur++)
             {
                 if (startTime.Date > _session.EndDate.Date) break;
-                    DateTime targetTime = startTime.AddHours(dur);
+                    DateTimeOffset targetTime = startTime.AddHours(dur);
                     if (targetTime.Date > _session.EndDate.Date) break;
                     int remainingDuration = duration - dur;
 
@@ -1435,14 +1444,16 @@ public partial class GetNwsData : ObservableObject, IGetNwsData
         return weatherDescription;
     }
 
-    public (DateTime time, int duration) ParseNwsInterval(string interval)
+    public (DateTimeOffset time, int duration) ParseNwsInterval(string interval)
     {
         // Example: "2024-05-06T12:00:00+00:00/PT1H" or "2024-05-06T00:00:00+00:00/P1D"
         if (string.IsNullOrWhiteSpace(interval))
-            return (DateTime.MinValue, 0);
+            return (DateTimeOffset.MinValue, 0);
 
         var parts = interval.Split('/');
-        var time = DateTimeOffset.TryParse(parts[0], out var dto) ? dto.LocalDateTime : DateTime.MinValue;
+        var time = DateTimeOffset.TryParse(parts[0], out var dto)
+            ? TimeZoneInfo.ConvertTimeBySystemTimeZoneId(dto, Tz.Id)
+            : DateTimeOffset.MinValue;
         int duration = 0;
 
         if (parts.Length > 1 && !string.IsNullOrWhiteSpace(parts[1]))

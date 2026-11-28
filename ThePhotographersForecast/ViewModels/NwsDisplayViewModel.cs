@@ -15,7 +15,7 @@ namespace ThePhotographersForecast.ViewModels
         [ObservableProperty]
         public partial NwsWeatherModel Data { get; set; }
         [ObservableProperty]
-        public partial DateTime SelectedDate { get; set; }
+        public partial DateOnly SelectedDate { get; set; }
         [ObservableProperty]
         public partial NwsDailyForecast[] AllDailies { get; set; }
 
@@ -45,7 +45,7 @@ namespace ThePhotographersForecast.ViewModels
         private void SelectedDailyForecastChanged(CalendarDayModel calendarDate)
         {
             SelectedDate = calendarDate.Date;
-            SelectedDaily = AllDailies.Where(d => d.StartTime.Date == SelectedDate.Date).First();
+            SelectedDaily = AllDailies.Where(d => DateOnly.FromDateTime(d.StartTime.DateTime) == SelectedDate).First();
             SelectedDailyHourlies = [.. SelectedDaily.HourlyWeathers];
         }
     }

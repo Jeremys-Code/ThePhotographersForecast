@@ -191,7 +191,7 @@ public partial class SelectLocation : ContentPage
 
     private async Task GoToDetailsTapped(object sender, TappedEventArgs e)
     {
-        var index = _vm.Days.IndexOf(_vm.SelectedDay);
+        var index = _vm.TimeOfDayForecasts.IndexOf(_vm.SelectedDay);
         await Shell.Current.GoToAsync(nameof(ForecastDetails));
     }
 }

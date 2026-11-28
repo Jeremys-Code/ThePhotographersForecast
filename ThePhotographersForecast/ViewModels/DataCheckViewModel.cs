@@ -46,7 +46,7 @@ namespace ThePhotographersForecast.ViewModels
         public partial CalendarDayModel? SelectedDay { get; set; }
 
         [ObservableProperty]
-        public partial DateTime SelectedDate { get; set; }
+        public partial DateOnly SelectedDate { get; set; }
 
         [ObservableProperty]
         public partial EventModel[] EventModels { get; set; } = Array.Empty<EventModel>();
@@ -118,9 +118,9 @@ namespace ThePhotographersForecast.ViewModels
                 State = _session.NwsData?.SelectedLocation?.State ?? _session.SelectedLocation?.State ?? string.Empty,
             };
 
-            var matching = Dates.FirstOrDefault(d => d.Date.Date == SelectedDate.Date) ?? Dates.FirstOrDefault();
+            var matching = Dates.FirstOrDefault(d => d.Date == SelectedDate) ?? Dates.FirstOrDefault();
             SelectedDay = matching;
-            SelectedDate = matching?.Date ?? DateTime.Today;
+            SelectedDate = matching?.Date ?? DateOnly.FromDateTime(DateTime.Today);
 
             _ = UpdateForDate(SelectedDate);
         }
@@ -137,25 +137,25 @@ namespace ThePhotographersForecast.ViewModels
         partial void OnSelectedDayChanged(CalendarDayModel? value)
         {
             if (value == null) return;
-            if (SelectedDate.Date != value.Date.Date)
+            if (SelectedDate != value.Date)
             {
                 SelectedDate = value.Date;
                 _ = UpdateForDate(SelectedDate);
             }
         }
 
-        private void UpdateDateCardHighlights(DateTime activeDate)
+        private void UpdateDateCardHighlights(DateOnly activeDate)
         {
             foreach (var d in Dates)
             {
-                bool isSelected = d.Date.Date == activeDate.Date;
+                bool isSelected = d.Date == activeDate;
                 d.BackgroundColor = isSelected ? Color.FromArgb("#38BDF8") : Colors.White;
                 d.TextColor = isSelected ? Color.FromArgb("#081F43") : Colors.Black;
                 d.BorderColor = isSelected ? Color.FromArgb("#BAE6FD") : Color.FromArgb("#D0D7DE");
             }
         }
 
-        private Task UpdateForDate(DateTime date)
+        private Task UpdateForDate(DateOnly date)
         {
             SelectedDate = date;
             UpdateDateCardHighlights(date);
@@ -169,9 +169,9 @@ namespace ThePhotographersForecast.ViewModels
                 : $"{locDisplay}  •  {date:dddd, MMMM d, yyyy}";
 
             // 1. NWS Daily & Hourlies for selected date
-            SelectedNwsDaily = NwsDailies.FirstOrDefault(x => x.StartTime.Date == date.Date) ?? new NwsDailyForecast();
+            SelectedNwsDaily = NwsDailies.FirstOrDefault(x => DateOnly.FromDateTime(x.StartTime.DateTime) == date) ?? new NwsDailyForecast();
             SelectedNwsDailyHourlies = SelectedNwsDaily.HourlyWeathers?.ToArray()
-                ?? _session.NwsData?.HourlyForecasts?.Where(h => h.StartTime.Date == date.Date).ToArray()
+                ?? _session.NwsData?.HourlyForecasts?.Where(h => DateOnly.FromDateTime(h.StartTime.DateTime) == date).ToArray()
                 ?? Array.Empty<NwsHourlyForecast>();
             SelectedNwsDailySelectedHourly = SelectedNwsDailyHourlies.FirstOrDefault() ?? new NwsHourlyForecast();
 
@@ -182,10 +182,10 @@ namespace ThePhotographersForecast.ViewModels
                     : "No NWS daily forecast available for this date.");
 
             // 2. Open-Meteo Daily & Hourlies for selected date
-            var targetDateOnly = DateOnly.FromDateTime(date);
+            var targetDateOnly = date;
             SelectedMeteoDaily = MeteoDailies.FirstOrDefault(x => x.Date == targetDateOnly) ?? new DailyForecast();
             SelectedMeteoDailyHourlies = SelectedMeteoDaily.HourlyForecasts?.ToArray()
-                ?? _session.WeatherForecasts?.HourlyForecasts?.Where(h => h.HourlyTime.Date == date.Date).ToArray()
+                ?? _session.WeatherForecasts?.HourlyForecasts?.Where(h => DateOnly.FromDateTime(h.HourlyTime.LocalDateTime) == date).ToArray()
                 ?? Array.Empty<HourlyForecast>();
             SelectedMeteoDailySelectedHourly = SelectedMeteoDailyHourlies.FirstOrDefault() ?? new HourlyForecast();
 
@@ -196,7 +196,7 @@ namespace ThePhotographersForecast.ViewModels
                     : "No Open-Meteo daily forecast available for this date.");
 
             // 3. Events for selected date
-            SelectedEventModel = EventModels.FirstOrDefault(e => e.Date.Date == date.Date) ?? new EventModel();
+            SelectedEventModel = EventModels.FirstOrDefault(e => DateOnly.FromDateTime(e.Date) == date) ?? new EventModel();
             SelectedEventModelEventTimes = SelectedEventModel.EventTimes?.OrderBy(e => e.AstroTime).ToArray() ?? Array.Empty<EventTime>();
             SelectedEventModelSelectedEventTime = SelectedEventModelEventTimes.FirstOrDefault();
 

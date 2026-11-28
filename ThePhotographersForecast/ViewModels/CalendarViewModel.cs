@@ -177,7 +177,7 @@ namespace ThePhotographersForecast.ViewModels
             // Build a lookup of any existing day information from the weather service by date
             var weatherLookup = (Days ?? new ObservableCollection<DayViewModel>())
                 .Where(d => d != null)
-                .ToDictionary(d => d.Date.Date, d => d);
+                .ToDictionary(d => d.Date, d => d);
 
             Days.Clear();
             if (Days.Any(f => f.Day == 1) || Days.First().Date.Month != Days.Last().Date.Month)
@@ -192,20 +192,20 @@ namespace ThePhotographersForecast.ViewModels
                 // Add each day of the month, prefilling from weatherLookup when available
                 for (int day = 1; day <= daysInMonth; day++)
                 {
-                    var dayDate = new DateTime(CurrentDate.Year, CurrentDate.Month, day);
+                    var dayDate = new DateOnly(CurrentDate.Year, CurrentDate.Month, day);
 
-                    weatherLookup.TryGetValue(dayDate.Date, out var existing);
+                    weatherLookup.TryGetValue(dayDate, out var existing);
 
                     DayViewModel vm = existing != null ? existing : new DayViewModel();
 
                     vm.Day = day;
                     vm.Date = dayDate;
-                    vm.IsToday = dayDate.Date == DateTime.Today;
+                    vm.IsToday = dayDate == DateOnly.FromDateTime(DateTime.Today);
                     //vm.IsEventDay = existing != null && existing.EventModel != null && existing.EventModel.EventTimes.Any();
 
                     // Event window: any existing event within +/- 3 days
                     vm.IsEventWindowDay = false;
-                    if (!vm.IsEventDay && weatherLookup.Keys.Any(k => k != dayDate.Date && Math.Abs((k - dayDate.Date).TotalDays) <= 3))
+                    if (!vm.IsEventDay && weatherLookup.Keys.Any(k => k != dayDate && Math.Abs((k.DayNumber - dayDate.DayNumber)) <= 3))
                     {
                         vm.IsEventWindowDay = true;
                     }

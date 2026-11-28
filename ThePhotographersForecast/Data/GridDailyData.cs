@@ -39,8 +39,8 @@ public class GridDailyData
     {
         public int number { get; set; }
         public string name { get; set; }
-        public DateTime startTime { get; set; }
-        public DateTime endTime { get; set; }
+        public DateTimeOffset startTime { get; set; }
+        public DateTimeOffset endTime { get; set; }
         public bool isDaytime { get; set; }
         public Temperature temperature { get; set; }
         public object temperatureTrend { get; set; }

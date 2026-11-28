@@ -28,6 +28,7 @@ namespace ThePhotographersForecast.Shared
         IReadOnlyList<DailyForecastSummary> DailyPhotoScoringSummary { get; set; }
         IReadOnlyList<DailyForecastSummary> ScoreSummaries { get; set; }
         SkyHourData[] SkyData { get; set; }
+        ObservableCollection<ForecastInputs> ForecastInputsCollection { get; set; }
 
         Task ResetSessionAsync();
     }

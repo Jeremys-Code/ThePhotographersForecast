@@ -195,7 +195,7 @@ namespace ThePhotographersForecast.ViewModels
                     if (daySum.BestHours != null)
                     {
                         foreach (var bh in daySum.BestHours)
-                            bestPhotoTimes.Add(TruncateToHour(bh.Timestamp.LocalDateTime));
+                            bestPhotoTimes.Add(TruncateToHour(bh.Timestamp.UtcDateTime));
                     }
 
                     if (daySum.HourlyPredictions != null && daySum.HourlyPredictions.Count > 0)
@@ -205,7 +205,7 @@ namespace ThePhotographersForecast.ViewModels
                             .Take(3)
                             .Where(p => p.DroneFlightScore >= 70f))
                         {
-                            bestDroneTimes.Add(TruncateToHour(dh.Timestamp.LocalDateTime));
+                            bestDroneTimes.Add(TruncateToHour(dh.Timestamp.UtcDateTime));
                         }
                     }
                 }
@@ -213,7 +213,7 @@ namespace ThePhotographersForecast.ViewModels
 
             foreach (var hour in hours)
             {
-                var hourKey = TruncateToHour(hour.StartTime);
+                var hourKey = TruncateToHour(hour.StartTime.UtcDateTime);
                 bool isBestPhoto = bestPhotoTimes.Contains(hourKey);
                 bool isBestDrone = bestDroneTimes.Contains(hourKey);
 
@@ -226,7 +226,7 @@ namespace ThePhotographersForecast.ViewModels
                     _ => string.Empty
                 };
 
-                var pred = allPreds.FirstOrDefault(p => TruncateToHour(p.Timestamp.LocalDateTime) == hourKey);
+                var pred = allPreds.FirstOrDefault(p => TruncateToHour(p.Timestamp.UtcDateTime) == hourKey);
                 if (pred != null)
                 {
                     var reasons = new List<string>();

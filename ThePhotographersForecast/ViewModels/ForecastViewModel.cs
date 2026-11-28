@@ -28,7 +28,7 @@ public partial class ForecastViewModel : ObservableObject
     public partial CalendarDayModel? SelectedCalendarDay { get; set; }
 
     [ObservableProperty]
-    public partial DateTime SelectedDate { get; set; }
+    public partial DateOnly SelectedDate { get; set; }
 
     [ObservableProperty]
     public partial string DailySummaryTitle { get; set; } = string.Empty;
@@ -152,9 +152,9 @@ public partial class ForecastViewModel : ObservableObject
 
         Dates = _session.Dates?.ToArray() ?? Array.Empty<CalendarDayModel>();
 
-        var matching = Dates.FirstOrDefault(d => d.Date.Date == SelectedDate.Date) ?? Dates.FirstOrDefault();
+        var matching = Dates.FirstOrDefault(d => d.Date == SelectedDate) ?? Dates.FirstOrDefault();
         SelectedCalendarDay = matching;
-        SelectedDate = matching?.Date ?? DateTime.Today;
+        SelectedDate = matching?.Date ?? DateOnly.FromDateTime(DateTime.Today);
 
         _ = UpdateForDate(SelectedDate);
         UpdateLocationTime();
@@ -215,16 +215,16 @@ public partial class ForecastViewModel : ObservableObject
         await Browser.Default.OpenAsync("https://www.wpc.ncep.noaa.gov/heatrisk/");
     }
 
-    private async Task UpdateForDate(DateTime date)
+    private async Task UpdateForDate(DateOnly date)
     {
         SelectedDate = date;
         DailySummaryTitle = $"Daily Summary for {SelectedDate:dddd, MMMM d, yyyy}";
 
-        var forecast = _session.WeatherForecasts?.DailyForecasts?.FirstOrDefault(x => x.Date == DateOnly.FromDateTime(date))
-                       ?? new DailyForecast { Date = DateOnly.FromDateTime(date) };
+        var forecast = _session.WeatherForecasts?.DailyForecasts?.FirstOrDefault(x => x.Date == date)
+                       ?? new DailyForecast { Date = date };
         SelectedDaily = forecast;
 
-        SelectedDay = _session.Days?.FirstOrDefault(d => d.Date.Date == date.Date) ?? new DayViewModel();
+        SelectedDay = _session.Days?.FirstOrDefault(d => d.Date == date) ?? new DayViewModel();
         SelectedDayEventsByPeriod = SelectedDay.Periods ?? new ObservableCollection<DayPeriod>();
 
         // Daily High and Low
@@ -296,8 +296,8 @@ public partial class ForecastViewModel : ObservableObject
         }
 
         // Update photo and drone score summaries on periods from _session.ScoreSummaries
-        var dailyScore = _session.ScoreSummaries?.FirstOrDefault(s => s.Date == DateOnly.FromDateTime(date))
-                         ?? _session.DailyPhotoScoringSummary?.FirstOrDefault(s => s.Date == DateOnly.FromDateTime(date));
+        var dailyScore = _session.ScoreSummaries?.FirstOrDefault(s => s.Date == date)
+                         ?? _session.DailyPhotoScoringSummary?.FirstOrDefault(s => s.Date == date);
 
         if (dailyScore != null)
         {

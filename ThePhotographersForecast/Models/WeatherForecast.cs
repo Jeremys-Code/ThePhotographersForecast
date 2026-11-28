@@ -31,8 +31,8 @@ namespace ThePhotographersForecast.Models
     public class HourlyForecast
     {
         public string Name => String.Concat(this.HourlyTime.ToString("dddd"), " ", Services.TimeOfDayService.CalcTimeOfDay(this.HourlyTime.Hour), " @ ", this.HourlyTime.ToString("h tt"));
-        public DateTime HourlyTime { get; set; }
-        public DateTime Date => this.HourlyTime;
+        public DateTimeOffset HourlyTime { get; set; }
+        public DateOnly Date => DateOnly.FromDateTime(this.HourlyTime.LocalDateTime);
         public string TimeOfDay => String.Concat(Services.TimeOfDayService.CalcTimeOfDay(this.HourlyTime.Hour));
         public DoubleUnitValue Temperature2m { get; set; }
         public DoubleUnitValue DewPoint2m { get; set; }
@@ -144,7 +144,7 @@ namespace ThePhotographersForecast.Models
     }
     public class ForecastSummaries
     {
-        public DateTime Time { get; set; }
+        public DateTimeOffset Time { get; set; }
         public bool IsDaily { get; set; }
         public string WeatherSummary { get; set; } = string.Empty;
         public string HealthSafetySummary { get; set; } = string.Empty;

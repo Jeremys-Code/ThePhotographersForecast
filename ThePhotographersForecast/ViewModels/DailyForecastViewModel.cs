@@ -14,7 +14,7 @@ namespace ThePhotographersForecast.ViewModels
         [ObservableProperty]
         public partial CalendarDayModel SelectedRunDate { get; set; }
         [ObservableProperty]
-        public partial DateTime SelectedDate { get; set; }
+        public partial DateOnly SelectedDate { get; set; }
         [ObservableProperty]
         public partial NwsDailyForecast[] Dailies { get; set; }
         //TODO: Pull the Health and Safety data from the DailyForecastSummaries
@@ -62,13 +62,13 @@ namespace ThePhotographersForecast.ViewModels
             SelectedDate = SelectedRunDate.Date;
             
             //Collections or Objects qualified by the SelectedDate
-            SelectedDaily = Dailies.Where(d => d.StartTime.Date == SelectedDate.Date && d.IsDaytime==true).FirstOrDefault(new NwsDailyForecast());
+            SelectedDaily = Dailies.Where(d => DateOnly.FromDateTime(d.StartTime.DateTime) == SelectedDate && d.IsDaytime==true).FirstOrDefault(new NwsDailyForecast());
             SelectedDailyHourlies = SelectedDaily.HourlyWeathers?.ToArray() ?? Array.Empty<NwsHourlyForecast>();
             SelectedDailySelectedHourly = SelectedDailyHourlies.FirstOrDefault(new NwsHourlyForecast());
-            SelectedGfsDaily = GfsDailies.Where(x => x.Date == DateOnly.FromDateTime(SelectedDate)).FirstOrDefault(new DailyForecast());
+            SelectedGfsDaily = GfsDailies.Where(x => SelectedDate == x.Date).FirstOrDefault(new DailyForecast());
             SelectedGfsDailyHourlies = SelectedGfsDaily.HourlyForecasts.ToArray();
             SelectedGfsDailySelectedHourly = SelectedGfsDailyHourlies.FirstOrDefault(new HourlyForecast());
-            SelectedDailyEventModel = EventModels.Where(x => x.Date.Date == SelectedDate.Date).FirstOrDefault(new EventModel());
+            SelectedDailyEventModel = EventModels.Where(x => DateOnly.FromDateTime(x.Date) == SelectedDate).FirstOrDefault(new EventModel());
             SelectedDailyEvents = SelectedDailyEventModel.EventTimes.ToArray();
             SelectedDailyEventTime = SelectedDailyEvents.FirstOrDefault(new EventTime());
             SelectedDailyEventTimeForecast = SelectedDailyEventTime.Forecast ?? new NwsHourlyForecast();
@@ -85,13 +85,13 @@ namespace ThePhotographersForecast.ViewModels
 
         private async Task SelectedDateUpdateAsync()
         {
-            SelectedDaily = Dailies.Where(d => d.StartTime.Date == SelectedDate.Date && d.IsDaytime == true).FirstOrDefault(new NwsDailyForecast());
+            SelectedDaily = Dailies.Where(d => DateOnly.FromDateTime(d.StartTime.DateTime) == SelectedDate && d.IsDaytime == true).FirstOrDefault(new NwsDailyForecast());
             SelectedDailyHourlies = SelectedDaily.HourlyWeathers?.ToArray() ?? Array.Empty<NwsHourlyForecast>();
             SelectedDailySelectedHourly = SelectedDailyHourlies.FirstOrDefault(new NwsHourlyForecast());
-            SelectedGfsDaily = GfsDailies.Where(x => x.Date == DateOnly.FromDateTime(SelectedDate)).FirstOrDefault(new DailyForecast());
+            SelectedGfsDaily = GfsDailies.Where(x => x.Date == SelectedDate).FirstOrDefault(new DailyForecast());
             SelectedGfsDailyHourlies = SelectedGfsDaily.HourlyForecasts.ToArray();
             SelectedGfsDailySelectedHourly = SelectedGfsDailyHourlies.FirstOrDefault(new HourlyForecast());
-            SelectedDailyEventModel = EventModels.Where(x => x.Date.Date == SelectedDate.Date).FirstOrDefault(new EventModel());
+            SelectedDailyEventModel = EventModels.Where(x => DateOnly.FromDateTime(x.Date.ToLocalTime()) == SelectedDate).FirstOrDefault(new EventModel());
             SelectedDailyEvents = SelectedDailyEventModel.EventTimes.ToArray();
             SelectedDailyEventTime = SelectedDailyEvents.FirstOrDefault(new EventTime());
             SelectedDailyEventTimeForecast = SelectedDailyEventTime.Forecast ?? new NwsHourlyForecast();

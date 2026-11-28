@@ -4,10 +4,14 @@ namespace ThePhotographersForecast.Components
 {
     public partial class CalendarDayModel : ObservableObject
     {
-        public DateTime Date { get; set; }
-        public string DayText { get; set; } = string.Empty;
+        public DateOnly Date { get; set; }
+        public string DayText => CreateDateString();
         public bool IsSelectable { get; set; }
-
+        public DateTimeOffset DateOffset { get; set; }
+        private string CreateDateString()
+        {
+            return this.Date.ToString("ddd, MMM dd, yyyy");
+        }
         [ObservableProperty]
         public partial Color BackgroundColor { get; set; } = Color.FromArgb("#BEFCA6");
 

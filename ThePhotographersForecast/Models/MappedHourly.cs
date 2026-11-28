@@ -6,8 +6,8 @@ public class MappedHourly
 {
     //Naming format: Sunday Morning @ 11AM
     public string Name => String.Concat(this.StartTime.ToString("dddd"), " ", Services.TimeOfDayService.CalcTimeOfDay(this.StartTime.Hour).ToString(), " @ ", this.StartTime.ToString("h tt"));
-    public DateTime StartTime { get; set; }
-    public DateTime EndTime { get; set; }
+    public DateTimeOffset StartTime { get; set; }
+    public DateTimeOffset EndTime { get; set; }
 
     public bool IsDay { get; set; }
     public string TimeOfDay => Services.TimeOfDayService.CalcTimeOfDay(this.StartTime.Hour).ToString();

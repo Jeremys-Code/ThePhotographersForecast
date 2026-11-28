@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Text;
 using ThePhotographersForecast.Components;
+using ThePhotographersForecast.Database;
 using ThePhotographersForecast.Models;
 using ThePhotographersForecast.Shared;
 
@@ -24,6 +25,7 @@ public partial class ForecastService : ObservableObject, IForecastService
     [ObservableProperty]
     public partial int TCount { get; set; }
     private ISession _session;
+    private DataAccess _data;
 
     [ObservableProperty]
     public partial NwsHourlyForecast[] NwsHourlies { get; set; }
@@ -50,10 +52,11 @@ public partial class ForecastService : ObservableObject, IForecastService
     //public static string GustsStatement { get; set; }
     //public static string PrecipitationStatement { get; set; }
     //public static string StormsStatement { get; set; }
-    public ForecastService(ISession session)
+    public ForecastService(ISession session, DataAccess data)
     {
 
         _session = session;
+        _data = data;
 
     }
     // Temp
@@ -124,7 +127,7 @@ public partial class ForecastService : ObservableObject, IForecastService
                     var weatherAnimations = hours.Select(x => new LottieAnimation
                     {
                         Temperature = x.TempAndUnit,
-                        Time = x.StartTime,
+                        Time = x.StartTime.DateTime,
                         Forecast = x.ShortForecast,
                         LottieWeather = x.SkHourlyAnimation
                     }).ToObservableCollection<LottieAnimation>();
@@ -216,13 +219,13 @@ public partial class ForecastService : ObservableObject, IForecastService
             timeOfDayForecast.MinWindDirection = inputs.MinBy(x => x.Wind.Value).Wind.Direction;
             timeOfDayForecast.QuantitativePrecipitation = inputs.Sum(x => x.Precipitation.Amount);
             timeOfDayForecast.RelativeHumidityAvg = inputs.Average(x => x.RelativeHumidity.Value);
-            var forecasts = inputs.Select(x => x.WmoForecast.ToLowerInvariant()).Distinct();
+            var forecasts = inputs.Select(x => (x.ShortForecast?.Value ?? string.Empty).ToLowerInvariant()).Distinct();
             openSb.AppendLine($@"{nws.First().StartTime.ToString("MMMM d")} ({nws.First().StartTime.ToString("h tt")} - {nws.Last().EndTime.ToString("h tt")}):");
             timeOfDayForecast.DescForecasts = forecasts.Count() == 1 ? $"{forecasts.First()}" : $"{String.Join(", then ", forecasts.SkipLast(1))} and then {forecasts.LastOrDefault()}.";
 
             Debug.WriteLine($"{timeOfDayForecast.TimeOfDayName} have been processed.");
 
-            var forecastGroup = inputs.GroupBy(x => x.WmoForecast);
+            var forecastGroup = inputs.GroupBy(x => x.ShortForecast?.Value);
             forecastSb.AppendLine("Forecast:");
             foreach (var item in forecastGroup)
             {
@@ -364,86 +367,91 @@ public partial class ForecastService : ObservableObject, IForecastService
 
             var forecast = new ForecastInputs
             {
-                StartTime = hours[h].StartTime,
-                EndTime = hours[h].EndTime,
-                WmoForecast = hours[h].ShortForecast,
+                StartTime = hours[h].StartTime.DateTime,
+                EndTime = hours[h].EndTime.DateTime,
+                ShortForecast = new ForecastShort
+                {
+                    StartTime = hours[h].StartTime.DateTime,
+                    EndTime = hours[h].EndTime.DateTime,
+                    Value = hours[h].ShortForecast
+                },
                 //Temperature
                 Temp = supp.Temperature != null ? new ForecastTemperature
                 {
-                    StartTime = hours[h].StartTime,
-                    EndTime = hours[h].EndTime,
+                    StartTime = hours[h].StartTime.DateTime,
+                    EndTime = hours[h].EndTime.DateTime,
                     Value = supp.Temperature.Value,
                     UnitCode = supp.Temperature.UnitCode
                 } : new ForecastTemperature(),
                 Dewpoint = supp.DewPoint != null ? new ForecastDewPoint
                 {
-                    StartTime = hours[h].StartTime,
-                    EndTime = hours[h].EndTime,
+                    StartTime = hours[h].StartTime.DateTime,
+                    EndTime = hours[h].EndTime.DateTime,
                     UnitCode = supp.DewPoint.UnitCode,
                     Value = supp.DewPoint.Value
                 } : new ForecastDewPoint(),
                 RelativeHumidity = supp.RelativeHumidity != null ? new ForecastRelativeHumidity
                 {
-                    StartTime = hours[h].StartTime,
-                    EndTime = hours[h].EndTime,
+                    StartTime = hours[h].StartTime.DateTime,
+                    EndTime = hours[h].EndTime.DateTime,
                     UnitCode = supp.RelativeHumidity.UnitCode,
                     Value = supp.RelativeHumidity.Value
                 } : new ForecastRelativeHumidity(),
                 ApparentTemperature = supp.ApparentTemperature != null ? new ForecastApparentTemperature
                 {
-                    StartTime = hours[h].StartTime,
-                    EndTime = hours[h].EndTime,
+                    StartTime = hours[h].StartTime.DateTime,
+                    EndTime = hours[h].EndTime.DateTime,
                     Value = supp.ApparentTemperature.Value,
                     UnitCode = supp.ApparentTemperature.UnitCode
                 } : new ForecastApparentTemperature(),
                 WindChill = supp.WindChill != null ? new ForecastWindChill
                 {
-                    StartTime = hours[h].StartTime,
-                    EndTime = hours[h].EndTime,
+                    StartTime = hours[h].StartTime.DateTime,
+                    EndTime = hours[h].EndTime.DateTime,
                     Value = supp.WindChill.Value,
                     UnitCode = supp.WindChill.UnitCode
                 } : new ForecastWindChill(),
                 HeatIndex = supp.HeatIndex != null ? new ForecastHeatIndex
                 {
-                    StartTime = hours[h].StartTime,
-                    EndTime = hours[h].EndTime,
+                    StartTime = hours[h].StartTime.DateTime,
+                    EndTime = hours[h].EndTime.DateTime,
                     Value = supp.HeatIndex.Value,
                     UnitCode = supp.HeatIndex.UnitCode
                 } : new ForecastHeatIndex(),
                 HeatRisk = supp.HeatRisk != null ? new ForecastHeatRisk
                 {
-                    StartTime = hours[h].StartTime,
-                    EndTime = hours[h].EndTime,
+                    StartTime = hours[h].StartTime.DateTime,
+                    EndTime = hours[h].EndTime.DateTime,
                     Value = supp.HeatRisk.Value,
                     UnitCode = supp.HeatRisk.UnitCode
                 } : new ForecastHeatRisk(),
                 WetBulbGlobeTemp = supp.WetBulbGlobeTemperature != null ? new ForecastWbgt
                 {
-                    StartTime = hours[h].StartTime,
-                    EndTime = hours[h].EndTime,
+                    StartTime = hours[h].StartTime.DateTime,
+                    EndTime = hours[h].EndTime.DateTime,
                     Value = supp.WetBulbGlobeTemperature.Value,
                     UnitCode = supp.WetBulbGlobeTemperature.UnitCode
                 } : new ForecastWbgt(),
                 //Wind
                 Wind = supp.WindSpeed != null ? new ForecastWind
                 {
-                    StartTime = hours[h].StartTime,
-                    EndTime = hours[h].EndTime,
+                    StartTime = hours[h].StartTime.DateTime,
+                    EndTime = hours[h].EndTime.DateTime,
                     Value = supp.WindSpeed.Value,
                     Direction = supp.WindDirection?.Description ?? hours[h].WindDirection ?? string.Empty,
                     UnitCode = hours[h].WindSpeed?.UnitCode ?? supp.WindSpeed.UnitCode
                 } : new ForecastWind(),
                 WindGusts = supp.WindGust != null ? new ForecastGusts
                 {
-                    StartTime = hours[h].StartTime,
-                    EndTime = hours[h].EndTime,
+                    StartTime = hours[h].StartTime.DateTime,
+                    EndTime = hours[h].EndTime.DateTime,
                     Value = supp.WindGust.Value,
                     UnitCode = supp.WindGust.UnitCode
                 } : new ForecastGusts(),
                 TransportWind = supp.TransportWindSpeed != null ? new ForecastTransportWind
                 {
-                    StartTime = hours[h].StartTime,
-                    EndTime = hours[h].EndTime,
+                    StartTime = hours[h].StartTime.DateTime,
+                    EndTime = hours[h].EndTime.DateTime,
                     Value = supp.TransportWindSpeed.Value,
                     Direction = supp.TransportWindDirection != null ? $@"({supp.TransportWindDirection.Value}) {supp.TransportWindDirection.Direction}" : string.Empty,
                     UnitCode = supp.TransportWindSpeed.UnitCode
@@ -453,66 +461,66 @@ public partial class ForecastService : ObservableObject, IForecastService
                 StormWeatherStatement = stormBuilder.ToString(),
                 Precipitation = supp.QuantitativePrecipitation != null && hours[h].ProbabilityOfPrecipitation != null ? new ForecastPrecipitation
                 {
-                    StartTime = hours[h].StartTime,
-                    EndTime = hours[h].EndTime,
+                    StartTime = hours[h].StartTime.DateTime,
+                    EndTime = hours[h].EndTime.DateTime,
                     Value = hours[h].ProbabilityOfPrecipitation.Value,
                     Amount = supp.QuantitativePrecipitation.Value,
                     UnitCode = supp.QuantitativePrecipitation.UnitCode
                 } : new ForecastPrecipitation(),
                 IceAccumulation = supp.IceAccumulation != null ? new ForecastIceAccumulation
                 {
-                    StartTime = hours[h].StartTime,
-                    EndTime = hours[h].EndTime,
+                    StartTime = hours[h].StartTime.DateTime,
+                    EndTime = hours[h].EndTime.DateTime,
                     Value = supp.IceAccumulation.Value,
                     UnitCode = supp.IceAccumulation.UnitCode
                 } : new ForecastIceAccumulation(),
                 SnowFallAmount = supp.SnowfallAmount != null ? new ForecastSnowfallAmount
                 {
-                    StartTime = hours[h].StartTime,
-                    EndTime = hours[h].EndTime,
+                    StartTime = hours[h].StartTime.DateTime,
+                    EndTime = hours[h].EndTime.DateTime,
                     Value = supp.SnowfallAmount.Value,
                     UnitCode = supp.SnowfallAmount.UnitCode
                 } : new ForecastSnowfallAmount(),
                 Thunder = supp.ProbabilityOfThunder != null ? new ForecastThunder
                 {
-                    StartTime = hours[h].StartTime,
-                    EndTime = hours[h].EndTime,
+                    StartTime = hours[h].StartTime.DateTime,
+                    EndTime = hours[h].EndTime.DateTime,
                     Value = supp.ProbabilityOfThunder.Value,
                     UnitCode = supp.ProbabilityOfThunder.Description
                 } : new ForecastThunder(),
                 //Clouds
                 SkyCover = supp.Skycover != null ? new ForecastSkyCover
                 {
-                    StartTime = hours[h].StartTime,
-                    EndTime = hours[h].EndTime,
+                    StartTime = hours[h].StartTime.DateTime,
+                    EndTime = hours[h].EndTime.DateTime,
                     Value = supp.Skycover.Value,
                     UnitCode = supp.Skycover.UnitCode
                 } : new ForecastSkyCover(),
                 Lovri = supp.LowVisibilityOccurrenceRiskIndex != null ? new ForecastLowOccuranceVisibilityIndex
                 {
-                    StartTime = hours[h].StartTime,
-                    EndTime = hours[h].EndTime,
+                    StartTime = hours[h].StartTime.DateTime,
+                    EndTime = hours[h].EndTime.DateTime,
                     Value = supp.LowVisibilityOccurrenceRiskIndex.Value,
                     UnitCode = supp.LowVisibilityOccurrenceRiskIndex.UnitCode
                 } : new ForecastLowOccuranceVisibilityIndex(),
                 Visibility = supp.Visibility != null ? new ForecastVisibility
                 {
-                    StartTime = hours[h].StartTime,
-                    EndTime = hours[h].EndTime,
+                    StartTime = hours[h].StartTime.DateTime,
+                    EndTime = hours[h].EndTime.DateTime,
                     Value = supp.Visibility.Value,
                     UnitCode = supp.Visibility.UnitCode
                 } : new ForecastVisibility(),
                 CeilingHeight = supp.CeilingHeight != null ? new ForecastCeilingHeight
                 {
-                    StartTime = hours[h].StartTime,
-                    EndTime = hours[h].EndTime,
+                    StartTime = hours[h].StartTime.DateTime,
+                    EndTime = hours[h].EndTime.DateTime,
                     Value = supp.CeilingHeight.Value,
                     UnitCode = supp.CeilingHeight.UnitCode
                 } : new ForecastCeilingHeight(),
                 MixingHeight = supp.MixingHeight != null ? new ForecastMixingHeight
                 {
-                    StartTime = hours[h].StartTime,
-                    EndTime = hours[h].EndTime,
+                    StartTime = hours[h].StartTime.DateTime,
+                    EndTime = hours[h].EndTime.DateTime,
                     Value = supp.MixingHeight.Value,
                     UnitCode = supp.MixingHeight.UnitCode
                 } : new ForecastMixingHeight(),
@@ -534,6 +542,8 @@ public partial class ForecastService : ObservableObject, IForecastService
 
             inputCollection.Add(forecast);
         }
+        _session.ForecastInputsCollection = new ObservableCollection<ForecastInputs>(inputCollection);
+        _data.LoadForecastInputs();
         return inputCollection;
     }
 
@@ -660,12 +670,12 @@ public partial class ForecastService : ObservableObject, IForecastService
     //var minTemp = inputs.MinBy(x => x.Temp);
 
 
-    //starterCollection.Add((starttime, endtime, line));
-    //tempCollection.Add((starttime, endtime, ProcessTrend(temp, futureTemp, starttime, endtime), temp));
-    //windCollection.Add((starttime, endtime, ProcessTrend(windSpeed, futureWindSpeed, starttime, endtime), windSpeed, direction));
-    //gustsCollection.Add((starttime, endtime, ProcessTrend(gust, futureGust, starttime, endtime), gust));
-    //skyCoverCollection.Add((starttime, endtime, ProcessTrend(skyCover, futureSkyCover, starttime, endtime), skyCover));
-    //tStormCollection.Add((starttime, endtime, ProcessTrend(tStorm, futureTStorm, starttime, endtime), tStorm));
+    //starterCollection.Add((StartTime.LocalDateTime, EndTime.LocalDateTime, line));
+    //tempCollection.Add((StartTime.LocalDateTime, EndTime.LocalDateTime, ProcessTrend(temp, futureTemp, StartTime.LocalDateTime, endtime), temp));
+    //windCollection.Add((StartTime.LocalDateTime, EndTime.LocalDateTime, ProcessTrend(windSpeed, futureWindSpeed, StartTime.LocalDateTime, endtime), windSpeed, direction));
+    //gustsCollection.Add((StartTime.LocalDateTime, EndTime.LocalDateTime, ProcessTrend(gust, futureGust, StartTime.LocalDateTime, endtime), gust));
+    //skyCoverCollection.Add((StartTime.LocalDateTime, EndTime.LocalDateTime, ProcessTrend(skyCover, futureSkyCover, StartTime.LocalDateTime, endtime), skyCover));
+    //tStormCollection.Add((StartTime.LocalDateTime, EndTime.LocalDateTime, ProcessTrend(tStorm, futureTStorm, StartTime.LocalDateTime, endtime), tStorm));
 
 
     //Starter
@@ -743,7 +753,7 @@ public partial class ForecastService : ObservableObject, IForecastService
     //    var max = hourlies.MaxBy(x => x.EndTime);
     //    var startTempStatement = TemperatureStatement(min.Temperature.Value, min.DewPoint.Value);
     //    var endTempStatement = TemperatureStatement(max.Temperature.Value, max.DewPoint.Value);
-    //string tempTrend = ProcessTrend(min.Temperature.Value, max.Temperature.Value, min.StartTime, max.EndTime);
+    //string tempTrend = ProcessTrend(min.Temperature.Value, max.Temperature.Value, min.StartTime.DateTime, max.EndTime);
 
 
 
@@ -751,7 +761,7 @@ public partial class ForecastService : ObservableObject, IForecastService
     //        //Temperature and trend
     //        for(int t = 0; t < hourlies.Length-1; t++)
     //        {
-    //            string tempTrend = ProcessTrend(hourlies[t].Temperature.Value, hourlies[t+1].Temperature.Value, hourlies[t].StartTime, hourlies[t+1].EndTime);
+    //            string tempTrend = ProcessTrend(hourlies[t].Temperature.Value, hourlies[t+1].Temperature.Value, hourlies[t].StartTime.DateTime, hourlies[t+1].EndTime);
     //            if (hourlies[t].Temperature.Value != hourlies[t + 1].Temperature.Value)
     //            {
     //                weatherTimeLine.Append($"At {hourlies[t].StartTime:h tt} {hourlies[t].Temperature.Value} and {tempTrend}.");
@@ -762,7 +772,7 @@ public partial class ForecastService : ObservableObject, IForecastService
     //        {
     //            var storms = hourlies.SelectMany(x => x.Supplemental.Weather).ToList();
     //            var maxTempStatement = TemperatureStatement(max.Temperature.Value, max.Temperature.Value);
-    //            var change = ProcessTrend(min.Temperature.Value, max.Temperature.Value, min.StartTime, max.EndTime);
+    //            var change = ProcessTrend(min.Temperature.Value, max.Temperature.Value, min.StartTime.DateTime, max.EndTime);
 
     //            weatherTimeLine.Append($"");
     //        }
@@ -1386,25 +1396,25 @@ public partial class ForecastService : ObservableObject, IForecastService
                 //            string precipicationType = GetPrecipitationType(nws);
                 var evo = new ValueEvolution
                 {
-                    Time = nws.StartTime,
-                    EndTime = nws.EndTime,
+                    Time = nws.StartTime.DateTime,
+                    EndTime = nws.EndTime.DateTime,
                     IsDay = nws.IsDaytime,
-                    Temperature = new List<ForecastTemperature> { new ForecastTemperature { StartTime = nws.StartTime, Value = nws.Temperature.Value, UnitCode = nws.Temperature.UnitCode } },
-                    ApparentTemperature = new List<ForecastApparentTemperature> { new ForecastApparentTemperature { StartTime = nws.StartTime, Value = nws.Supplemental?.ApparentTemperature?.Value ?? 0, UnitCode = nws.Supplemental.ApparentTemperature?.UnitCode ?? string.Empty } },
-                    Precipitation = new List<ForecastPrecipitation> { new ForecastPrecipitation { StartTime = nws.StartTime, Type = nws.Supplemental?.Weather?[0]?.Category ?? "none", Value = nws.Supplemental?.ProbabilityOfPrecipitation?.Value ?? 0.0D, Amount = nws.Supplemental?.QuantitativePrecipitation?.Value ?? 0.0D } },
-                    Wind = new List<ForecastWind> { new ForecastWind { StartTime = nws.StartTime, Value = nws.WindSpeed.Value, Direction = nws.WindDirection } },
-                    Gusts = new List<ForecastGusts> { new ForecastGusts { StartTime = nws.StartTime, Value = nws.WindGust != null ? nws.WindGust.Value : 0.0D } },
-                    SkyCover = new List<ForecastSkyCover> { new ForecastSkyCover { StartTime = nws.StartTime, Value = nws.Supplemental?.Skycover?.Value ?? 0.0D } },
-                    MixingHeight = new List<ForecastMixingHeight> { new ForecastMixingHeight { StartTime = nws.StartTime, Value = nws.Supplemental?.MixingHeight?.Value ?? 0.0D } },
-                    Wbgt = new List<ForecastWbgt> { new ForecastWbgt { StartTime = nws.StartTime, Value = nws.Supplemental?.WetBulbGlobeTemperature?.Value ?? 0.0D } },
-                    HeatRisk = new List<ForecastHeatRisk> { new ForecastHeatRisk { StartTime = nws.StartTime, Value = nws.Supplemental?.HeatRisk?.Value ?? 0 } },
-                    WindChill = new List<ForecastWindChill> { new ForecastWindChill { StartTime = nws.StartTime, Value = nws.Supplemental?.WindChill?.Value ?? 0.0D } },
-                    ShortForecast = new List<ForecastShortForecast> { new ForecastShortForecast { StartTime = nws.StartTime, Value = nws.ShortForecast } },
-                    WeatherDescription = new List<ForecastWmoDescription> { new ForecastWmoDescription { StartTime = nws.StartTime, Value = nws.DetailedForecast } },
-                    Thunder = new List<ForecastThunder> { new ForecastThunder { StartTime = nws.StartTime, Value = nws.Supplemental?.ProbabilityOfThunder.Value ?? 0.0D } },
-                    WeatherStatement = new List<ForecastWeatherStatement> { new ForecastWeatherStatement { StartTime = nws.StartTime, Value = stormBuilder.ToString() ?? "" } },
-                    IceAccumulation = new List<ForecastIceAccumulation> { new ForecastIceAccumulation { StartTime = nws.StartTime, Value = nws.Supplemental?.IceAccumulation.Value ?? 0.0D } },
-                    SnowfallAmount = new List<ForecastSnowfallAmount> { new ForecastSnowfallAmount { StartTime = nws.StartTime, Value = nws.Supplemental?.SnowfallAmount.Value ?? 0.0D } }
+                    Temperature = new List<ForecastTemperature> { new ForecastTemperature { StartTime = nws.StartTime.DateTime, Value = nws.Temperature.Value, UnitCode = nws.Temperature.UnitCode } },
+                    ApparentTemperature = new List<ForecastApparentTemperature> { new ForecastApparentTemperature { StartTime = nws.StartTime.DateTime, Value = nws.Supplemental?.ApparentTemperature?.Value ?? 0, UnitCode = nws.Supplemental.ApparentTemperature?.UnitCode ?? string.Empty } },
+                    Precipitation = new List<ForecastPrecipitation> { new ForecastPrecipitation { StartTime = nws.StartTime.DateTime, Type = nws.Supplemental?.Weather?[0]?.Category ?? "none", Value = nws.Supplemental?.ProbabilityOfPrecipitation?.Value ?? 0.0D, Amount = nws.Supplemental?.QuantitativePrecipitation?.Value ?? 0.0D } },
+                    Wind = new List<ForecastWind> { new ForecastWind { StartTime = nws.StartTime.DateTime, Value = nws.WindSpeed.Value, Direction = nws.WindDirection } },
+                    Gusts = new List<ForecastGusts> { new ForecastGusts { StartTime = nws.StartTime.DateTime, Value = nws.WindGust != null ? nws.WindGust.Value : 0.0D } },
+                    SkyCover = new List<ForecastSkyCover> { new ForecastSkyCover { StartTime = nws.StartTime.DateTime, Value = nws.Supplemental?.Skycover?.Value ?? 0.0D } },
+                    MixingHeight = new List<ForecastMixingHeight> { new ForecastMixingHeight { StartTime = nws.StartTime.DateTime, Value = nws.Supplemental?.MixingHeight?.Value ?? 0.0D } },
+                    Wbgt = new List<ForecastWbgt> { new ForecastWbgt { StartTime = nws.StartTime.DateTime, Value = nws.Supplemental?.WetBulbGlobeTemperature?.Value ?? 0.0D } },
+                    HeatRisk = new List<ForecastHeatRisk> { new ForecastHeatRisk { StartTime = nws.StartTime.DateTime, Value = nws.Supplemental?.HeatRisk?.Value ?? 0 } },
+                    WindChill = new List<ForecastWindChill> { new ForecastWindChill { StartTime = nws.StartTime.DateTime, Value = nws.Supplemental?.WindChill?.Value ?? 0.0D } },
+                    ShortForecast = new List<ForecastShort> { new ForecastShort { StartTime = nws.StartTime.DateTime, Value = nws.ShortForecast } },
+                    WeatherDescription = new List<ForecastWmoDescription> { new ForecastWmoDescription { StartTime = nws.StartTime.DateTime, Value = nws.DetailedForecast } },
+                    Thunder = new List<ForecastThunder> { new ForecastThunder { StartTime = nws.StartTime.DateTime, Value = nws.Supplemental?.ProbabilityOfThunder.Value ?? 0.0D } },
+                    WeatherStatement = new List<ForecastWeatherStatement> { new ForecastWeatherStatement { StartTime = nws.StartTime.DateTime, Value = stormBuilder.ToString() ?? "" } },
+                    IceAccumulation = new List<ForecastIceAccumulation> { new ForecastIceAccumulation { StartTime = nws.StartTime.DateTime, Value = nws.Supplemental?.IceAccumulation.Value ?? 0.0D } },
+                    SnowfallAmount = new List<ForecastSnowfallAmount> { new ForecastSnowfallAmount { StartTime = nws.StartTime.DateTime, Value = nws.Supplemental?.SnowfallAmount.Value ?? 0.0D } }
                 };
 
 

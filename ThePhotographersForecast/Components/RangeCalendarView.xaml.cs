@@ -167,8 +167,8 @@ namespace ThePhotographersForecast.Components
 
                 days.Add(new CalendarDayModel
                 {
-                    Date = curr,
-                    DayText = isSelectable ? curr.Day.ToString() : string.Empty,
+                    Date = DateOnly.FromDateTime(curr),
+                    //DayText = isSelectable ? curr.Day.ToString() : string.Empty,
                     IsSelectable = isSelectable
                 });
             }
@@ -182,28 +182,28 @@ namespace ThePhotographersForecast.Components
             if (model == null || !model.IsSelectable)
                 return;
 
-            DateTime tappedDate = model.Date;
+            DateOnly tappedDate = model.Date;
 
             if (!_isSelectingRange)
             {
                 // First tap: starts selection with single day
-                StartDate = tappedDate;
-                EndDate = tappedDate;
+                StartDate = tappedDate.ToDateTime(TimeOnly.MinValue);
+                EndDate = tappedDate.ToDateTime(TimeOnly.MinValue);
                 _isSelectingRange = true;
             }
             else
             {
                 // Second tap
-                if (tappedDate >= StartDate.Date)
+                if (tappedDate.ToDateTime(TimeOnly.MinValue) >= StartDate.Date)
                 {
-                    EndDate = tappedDate;
+                    EndDate = tappedDate.ToDateTime(TimeOnly.MinValue);
                     _isSelectingRange = false; // Completed range
                 }
                 else
                 {
                     // Tapped before StartDate, reset start to this date
-                    StartDate = tappedDate;
-                    EndDate = tappedDate;
+                    StartDate = tappedDate.ToDateTime(TimeOnly.MinValue);
+                    EndDate = tappedDate.ToDateTime(TimeOnly.MinValue);
                     _isSelectingRange = true;
                 }
             }
@@ -215,8 +215,8 @@ namespace ThePhotographersForecast.Components
         {
             if (CalendarDays == null) return;
 
-            var start = StartDate.Date;
-            var end = EndDate.Date;
+            DateOnly start = DateOnly.FromDateTime(StartDate);
+            DateOnly end = DateOnly.FromDateTime(EndDate);
             if (end < start) end = start;
 
             foreach (var day in CalendarDays)
@@ -230,7 +230,7 @@ namespace ThePhotographersForecast.Components
                     continue;
                 }
 
-                DateTime d = day.Date;
+                DateOnly d = day.Date;
 
                 if (d == start || d == end)
                 {

@@ -10,7 +10,7 @@ public partial class DayViewModel : ObservableObject
     [ObservableProperty]
     public partial PhotoLocation SelectedLocation { get; set; }
     [ObservableProperty]
-    public partial DateTime Date { get; set; }
+    public partial DateOnly Date { get; set; }
     [ObservableProperty]
     public partial string Name { get; set; }
     [ObservableProperty]
